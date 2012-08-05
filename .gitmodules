@@ -1,0 +1,3 @@
+[submodule "salsasm"]
+	path = salsasm
+	url = ./salsasm
