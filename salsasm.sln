@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "salsasm", "salsasm\salsasm.vcxproj", "{92A93D55-0341-4172-81C9-337273021907}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gtest", "gtest-1.6.0\msvc\gtest.vcxproj", "{C8F6C172-56F2-4E76-B5FA-C3B423B31BE7}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "test\test.vcxproj", "{E7D27BBC-CC49-4506-837C-6C15717EDB60}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,16 +27,16 @@ Global
 		{92A93D55-0341-4172-81C9-337273021907}.Release|Win32.Build.0 = Release|Win32
 		{92A93D55-0341-4172-81C9-337273021907}.Release|x64.ActiveCfg = Release|x64
 		{92A93D55-0341-4172-81C9-337273021907}.Release|x64.Build.0 = Release|x64
-		{C8F6C172-56F2-4E76-B5FA-C3B423B31BE7}.Debug|Mixed Platforms.ActiveCfg = Template|Win32
-		{C8F6C172-56F2-4E76-B5FA-C3B423B31BE7}.Debug|Mixed Platforms.Build.0 = Template|Win32
-		{C8F6C172-56F2-4E76-B5FA-C3B423B31BE7}.Debug|Win32.ActiveCfg = Template|Win32
-		{C8F6C172-56F2-4E76-B5FA-C3B423B31BE7}.Debug|Win32.Build.0 = Template|Win32
-		{C8F6C172-56F2-4E76-B5FA-C3B423B31BE7}.Debug|x64.ActiveCfg = Template|Win32
-		{C8F6C172-56F2-4E76-B5FA-C3B423B31BE7}.Release|Mixed Platforms.ActiveCfg = Template|Win32
-		{C8F6C172-56F2-4E76-B5FA-C3B423B31BE7}.Release|Mixed Platforms.Build.0 = Template|Win32
-		{C8F6C172-56F2-4E76-B5FA-C3B423B31BE7}.Release|Win32.ActiveCfg = Template|Win32
-		{C8F6C172-56F2-4E76-B5FA-C3B423B31BE7}.Release|Win32.Build.0 = Template|Win32
-		{C8F6C172-56F2-4E76-B5FA-C3B423B31BE7}.Release|x64.ActiveCfg = Template|Win32
+		{E7D27BBC-CC49-4506-837C-6C15717EDB60}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{E7D27BBC-CC49-4506-837C-6C15717EDB60}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{E7D27BBC-CC49-4506-837C-6C15717EDB60}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E7D27BBC-CC49-4506-837C-6C15717EDB60}.Debug|Win32.Build.0 = Debug|Win32
+		{E7D27BBC-CC49-4506-837C-6C15717EDB60}.Debug|x64.ActiveCfg = Debug|x64
+		{E7D27BBC-CC49-4506-837C-6C15717EDB60}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{E7D27BBC-CC49-4506-837C-6C15717EDB60}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{E7D27BBC-CC49-4506-837C-6C15717EDB60}.Release|Win32.ActiveCfg = Release|Win32
+		{E7D27BBC-CC49-4506-837C-6C15717EDB60}.Release|Win32.Build.0 = Release|Win32
+		{E7D27BBC-CC49-4506-837C-6C15717EDB60}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
