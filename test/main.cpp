@@ -147,7 +147,7 @@ TEST_F(AsmTest, Disassemble16)
 			result = Disassemble16(AsmTest::Fetch, this, &instr);
 			ASSERT_TRUE(result);
 
-			if (instr.flags & X86_INSUFFICIENT_LENGTH)
+			if (instr.flags & X86_FLAG_INSUFFICIENT_LENGTH)
 			{
 				// FIXME: This means we reached the end of the page but
 				// there is an instruction across the boundary, need to handle this case
