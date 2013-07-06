@@ -19,6 +19,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
+#ifdef WIN32
+#include <conio.h>
+#endif /* WIN32 */
+
 #include "src/gtest-all.cc"
 #include "salsasm.h"
 
@@ -46,8 +50,8 @@ protected:
 	{
 		// Code here will be called immediately after the constructor (right
 		// before each test).
-		memset(opcodeBytes, 0, sizeof(opcodeBytes));
-		opcodeLen = 0;
+		memset(m_opcodeBytes, 0, sizeof(m_opcodeBytes));
+		m_opcodeLen = 0;
 	}
 
 	virtual void TearDown()
@@ -65,45 +69,52 @@ protected:
 	static bool Fetch(void* ctxt, size_t len, uint8_t* result);
 
 	// Represent the bytes for the current disassembly test
-	uint8_t opcodeBytes[4096];
-	size_t opcodeLen;
-	size_t opcodeIndex;
+	uint8_t m_opcodeBytes[4096];
+	size_t m_opcodeLen;
+	size_t m_opcodeIndex;
 };
 
 
 size_t AsmTest::GetOpcodeLength() const
 {
-	return opcodeLen;
+	return m_opcodeLen;
 }
 
 
 size_t AsmTest::GetOpcodeBytes(uint8_t* const opcode, const size_t len)
 {
-	const size_t bytesToCopy = len > opcodeLen ? opcodeLen : len;
-	memcpy(opcode, &opcodeBytes[opcodeIndex], bytesToCopy);
-	opcodeIndex += bytesToCopy;
-	opcodeLen -= len;
+	const size_t bytesToCopy = len > m_opcodeLen ? m_opcodeLen : len;
+	memcpy(opcode, &m_opcodeBytes[m_opcodeIndex], bytesToCopy);
+	m_opcodeIndex += bytesToCopy;
+	m_opcodeLen -= len;
 	return bytesToCopy;
 }
 
 
 void AsmTest::SetOpcodeBytes(const uint8_t* const opcode, const size_t len)
 {
-	if (len > sizeof(opcodeBytes))
+	if (len > sizeof(m_opcodeBytes))
 	{
 		fprintf(stderr, "Tried to add too much opcode data!");
 		return;
 	}
-	memcpy(opcodeBytes, opcode, len);
-	opcodeLen = len;
-	opcodeIndex = 0;
+	memcpy(m_opcodeBytes, opcode, len);
+	m_opcodeLen = len;
+	m_opcodeIndex = 0;
 }
 
 
 int main(int argc, char **argv)
 {
 	::testing::InitGoogleTest(&argc, argv);
-	return RUN_ALL_TESTS();
+	int result = RUN_ALL_TESTS();
+
+#ifdef WIN32
+	printf("Press any key to continue...\n");
+	while (!_kbhit());
+#endif /* WIN32 */
+
+	return result;
 }
 
 
@@ -127,7 +138,7 @@ bool AsmTest::Fetch(void* ctxt, size_t len, uint8_t* result)
 
 TEST_F(AsmTest, Disassemble16)
 {
-	FILE* file = fopen("BIOS-bochs-latest.bin", "rb");
+	FILE* file = fopen("BIOS-bochs-latest", "rb");
 	ASSERT_TRUE(file != NULL);
 
 	while (!feof(file))
