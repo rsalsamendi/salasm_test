@@ -135,6 +135,73 @@ bool AsmTest::Fetch(void* ctxt, size_t len, uint8_t* result)
 	return true;
 }
 
+#define TEST_ARITHMETIC_RM(operation, addrSize, operandSize, dest, src, component0, comonent1) \
+{ \
+	X86Instruction instr; \
+	bool result = Disassemble ## addrSize ##(AsmTest::Fetch, this, &instr); \
+	ASSERT_TRUE(result); \
+	ASSERT_TRUE(instr.op == operation); \
+	ASSERT_TRUE(instr.operandCount == 2); \
+	ASSERT_TRUE(instr.operands[0].size == operandSize); \
+	ASSERT_TRUE(instr.operands[0].operandType == dest); \
+	ASSERT_TRUE(instr.operands[0].segment == X86_DS); \
+	ASSERT_TRUE(instr.operands[0].components[0] == component0); \
+	ASSERT_TRUE(instr.operands[0].components[1] == component1); \
+	ASSERT_TRUE(instr.operands[1].operandType == src); \
+	ASSERT_TRUE(instr.operands[1].size == operandSize); \
+}
+
+#define TEST_ARITHMETIC_MR(operation, addrSize, operandSize, dest, src, component0, component1) \
+{ \
+	X86Instruction instr; \
+	bool result = Disassemble ## addrSize ##(AsmTest::Fetch, this, &instr); \
+	ASSERT_TRUE(result); \
+	ASSERT_TRUE(instr.op == operation); \
+	ASSERT_TRUE(instr.operandCount == 2); \
+	ASSERT_TRUE(instr.operands[0].size == operandSize); \
+	ASSERT_TRUE(instr.operands[0].operandType == dest); \
+	ASSERT_TRUE(instr.operands[1].segment == X86_DS); \
+	ASSERT_TRUE(instr.operands[1].components[0] == component0); \
+	ASSERT_TRUE(instr.operands[1].components[1] == component1); \
+	ASSERT_TRUE(instr.operands[1].operandType == src); \
+	ASSERT_TRUE(instr.operands[1].size == operandSize); \
+}
+
+#define TEST_ARITHMETIC_RR(operation, addrSize, operandSize, dest, src) \
+{ \
+	X86Instruction instr; \
+	bool result = Disassemble ## addrSize ##(AsmTest::Fetch, this, &instr); \
+	ASSERT_TRUE(result); \
+	ASSERT_TRUE(instr.op == operation); \
+	ASSERT_TRUE(instr.operandCount == 2); \
+	ASSERT_TRUE(instr.operands[0].size == operandSize); \
+	ASSERT_TRUE(instr.operands[0].operandType == dest); \
+	ASSERT_TRUE(instr.operands[1].operandType == src); \
+	ASSERT_TRUE(instr.operands[1].size == operandSize); \
+}
+
+
+TEST_F(AsmTest, DisassemblePrimaryAdd)
+{
+	X86Instruction instr;
+	size_t opcodeLen;
+	bool result;
+
+	static const uint8_t addByteMemDest[] = {0, 0, 0};
+	opcodeLen = sizeof(addByteMemDest);
+	SetOpcodeBytes(addByteMemDest, opcodeLen);
+
+	TEST_ARITHMETIC_MR(X86_ADD, 16, 1, X86_MEM, X86_AL, X86_AX, X86_NONE);
+	TEST_ARITHMETIC_MR(X86_ADD, 32, 1, X86_MEM, X86_AL, X86_EAX, X86_NONE);
+
+	static const uint8_t addByteRegDest[] = {0, 0xc0, 0};
+	opcodeLen = sizeof(addByteRegDest);
+	SetOpcodeBytes(addByteRegDest, opcodeLen);
+
+	TEST_ARITHMETIC_RR(X86_ADD, 16, 1, X86_AL, X86_AL);
+	TEST_ARITHMETIC_RR(X86_ADD, 32, 1, X86_AL, X86_AL);
+}
+
 
 TEST_F(AsmTest, Disassemble16)
 {
@@ -147,7 +214,7 @@ TEST_F(AsmTest, Disassemble16)
 		bool result;
 		uint8_t bytes[4096];
 		size_t len;
-		
+
 		// Read data from the file and add it to the test helper class
 		len = fread(bytes, 1, 4096, file);
 		SetOpcodeBytes(bytes, len);
