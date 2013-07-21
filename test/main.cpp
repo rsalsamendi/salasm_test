@@ -183,9 +183,7 @@ bool AsmTest::Fetch(void* ctxt, size_t len, uint8_t* result)
 
 TEST_F(AsmTest, DisassemblePrimaryAdd)
 {
-	X86Instruction instr;
 	size_t opcodeLen;
-	bool result;
 
 	static const uint8_t addByteMemDest[] = {0, 0, 0};
 	opcodeLen = sizeof(addByteMemDest);
