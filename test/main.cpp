@@ -135,9 +135,11 @@ bool AsmTest::Fetch(void* ctxt, size_t len, uint8_t* result)
 	return true;
 }
 
-#define TEST_ARITHMETIC_RM(operation, addrSize, operandSize, dest, src, component0, comonent1) \
+#define TEST_ARITHMETIC_RM(operation, bytes, addrSize, operandSize, dest, src, component0, comonent1) \
 { \
 	X86Instruction instr; \
+	const size_t opcodeLen = sizeof(bytes); \
+	SetOpcodeBytes(bytes, opcodeLen); \
 	bool result = Disassemble ## addrSize ##(AsmTest::Fetch, this, &instr); \
 	ASSERT_TRUE(result); \
 	ASSERT_TRUE(instr.op == operation); \
@@ -151,9 +153,11 @@ bool AsmTest::Fetch(void* ctxt, size_t len, uint8_t* result)
 	ASSERT_TRUE(instr.operands[1].size == operandSize); \
 }
 
-#define TEST_ARITHMETIC_MR(operation, addrSize, operandSize, dest, src, component0, component1) \
+#define TEST_ARITHMETIC_MR(operation, bytes, addrSize, operandSize, dest, src, component0, component1) \
 { \
 	X86Instruction instr; \
+	const size_t opcodeLen = sizeof(bytes); \
+	SetOpcodeBytes(bytes, opcodeLen); \
 	bool result = Disassemble ## addrSize ##(AsmTest::Fetch, this, &instr); \
 	ASSERT_TRUE(result); \
 	ASSERT_TRUE(instr.op == operation); \
@@ -167,9 +171,11 @@ bool AsmTest::Fetch(void* ctxt, size_t len, uint8_t* result)
 	ASSERT_TRUE(instr.operands[1].size == operandSize); \
 }
 
-#define TEST_ARITHMETIC_RR(operation, addrSize, operandSize, dest, src) \
+#define TEST_ARITHMETIC_RR(operation, bytes, addrSize, operandSize, dest, src) \
 { \
 	X86Instruction instr; \
+	const size_t opcodeLen = sizeof(bytes); \
+	SetOpcodeBytes(bytes, opcodeLen); \
 	bool result = Disassemble ## addrSize ##(AsmTest::Fetch, this, &instr); \
 	ASSERT_TRUE(result); \
 	ASSERT_TRUE(instr.op == operation); \
@@ -183,21 +189,13 @@ bool AsmTest::Fetch(void* ctxt, size_t len, uint8_t* result)
 
 TEST_F(AsmTest, DisassemblePrimaryAdd)
 {
-	size_t opcodeLen;
-
 	static const uint8_t addByteMemDest[] = {0, 0, 0};
-	opcodeLen = sizeof(addByteMemDest);
-	SetOpcodeBytes(addByteMemDest, opcodeLen);
-
-	TEST_ARITHMETIC_MR(X86_ADD, 16, 1, X86_MEM, X86_AL, X86_AX, X86_NONE);
-	TEST_ARITHMETIC_MR(X86_ADD, 32, 1, X86_MEM, X86_AL, X86_EAX, X86_NONE);
+	TEST_ARITHMETIC_MR(X86_ADD, addByteMemDest, 16, 1, X86_MEM, X86_AL, X86_AX, X86_NONE);
+	TEST_ARITHMETIC_MR(X86_ADD, addByteMemDest, 32, 1, X86_MEM, X86_AL, X86_EAX, X86_NONE);
 
 	static const uint8_t addByteRegDest[] = {0, 0xc0, 0};
-	opcodeLen = sizeof(addByteRegDest);
-	SetOpcodeBytes(addByteRegDest, opcodeLen);
-
-	TEST_ARITHMETIC_RR(X86_ADD, 16, 1, X86_AL, X86_AL);
-	TEST_ARITHMETIC_RR(X86_ADD, 32, 1, X86_AL, X86_AL);
+	TEST_ARITHMETIC_RR(X86_ADD, addByteRegDest, 16, 1, X86_AL, X86_AL);
+	TEST_ARITHMETIC_RR(X86_ADD, addByteRegDest, 32, 1, X86_AL, X86_AL);
 }
 
 
