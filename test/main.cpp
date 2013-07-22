@@ -121,7 +121,6 @@ int main(int argc, char **argv)
 bool AsmTest::Fetch(void* ctxt, size_t len, uint8_t* result)
 {
 	AsmTest* asmTest = (AsmTest*)ctxt;
-	uint8_t opcode[15];
 	size_t opcodeLen;
 
 	// Ensure there are enough bytes available
@@ -130,7 +129,7 @@ bool AsmTest::Fetch(void* ctxt, size_t len, uint8_t* result)
 		return false;
 
 	// Fetch the opcode
-	asmTest->GetOpcodeBytes(opcode, sizeof(opcode));
+	asmTest->GetOpcodeBytes(result, len);
 
 	return true;
 }
@@ -146,7 +145,7 @@ bool AsmTest::Fetch(void* ctxt, size_t len, uint8_t* result)
 	ASSERT_TRUE(instr.operandCount == 2); \
 	ASSERT_TRUE(instr.operands[0].size == operandSize); \
 	ASSERT_TRUE(instr.operands[0].operandType == dest); \
-	ASSERT_TRUE(instr.operands[0].segment == X86_DS); \
+	ASSERT_TRUE(instr.operands[1].segment == X86_DS); \
 	ASSERT_TRUE(instr.operands[0].components[0] == component0); \
 	ASSERT_TRUE(instr.operands[0].components[1] == component1); \
 	ASSERT_TRUE(instr.operands[1].operandType == src); \
@@ -164,7 +163,7 @@ bool AsmTest::Fetch(void* ctxt, size_t len, uint8_t* result)
 	ASSERT_TRUE(instr.operandCount == 2); \
 	ASSERT_TRUE(instr.operands[0].size == operandSize); \
 	ASSERT_TRUE(instr.operands[0].operandType == dest); \
-	ASSERT_TRUE(instr.operands[1].segment == X86_DS); \
+	ASSERT_TRUE(instr.operands[0].segment == X86_DS); \
 	ASSERT_TRUE(instr.operands[1].components[0] == component0); \
 	ASSERT_TRUE(instr.operands[1].components[1] == component1); \
 	ASSERT_TRUE(instr.operands[1].operandType == src); \
@@ -190,8 +189,8 @@ bool AsmTest::Fetch(void* ctxt, size_t len, uint8_t* result)
 TEST_F(AsmTest, DisassemblePrimaryAdd)
 {
 	static const uint8_t addByteMemDest[] = {0, 0, 0};
-	TEST_ARITHMETIC_MR(X86_ADD, addByteMemDest, 16, 1, X86_MEM, X86_AL, X86_AX, X86_NONE);
-	TEST_ARITHMETIC_MR(X86_ADD, addByteMemDest, 32, 1, X86_MEM, X86_AL, X86_EAX, X86_NONE);
+	TEST_ARITHMETIC_MR(X86_ADD, addByteMemDest, 16, 1, X86_MEM, X86_AL, X86_BX, X86_SI);
+	TEST_ARITHMETIC_MR(X86_ADD, addByteMemDest, 32, 1, X86_MEM, X86_AL, X86_EBX, X86_ESI);
 
 	static const uint8_t addByteRegDest[] = {0, 0xc0, 0};
 	TEST_ARITHMETIC_RR(X86_ADD, addByteRegDest, 16, 1, X86_AL, X86_AL);
