@@ -146,8 +146,8 @@ bool AsmTest::Fetch(void* ctxt, size_t len, uint8_t* result)
 	ASSERT_TRUE(instr.operands[0].size == operandSize); \
 	ASSERT_TRUE(instr.operands[0].operandType == dest); \
 	ASSERT_TRUE(instr.operands[1].segment == X86_DS); \
-	ASSERT_TRUE(instr.operands[0].components[0] == component0); \
-	ASSERT_TRUE(instr.operands[0].components[1] == component1); \
+	ASSERT_TRUE(instr.operands[1].components[0] == component0); \
+	ASSERT_TRUE(instr.operands[1].components[1] == component1); \
 	ASSERT_TRUE(instr.operands[1].operandType == src); \
 	ASSERT_TRUE(instr.operands[1].size == operandSize); \
 }
@@ -164,8 +164,8 @@ bool AsmTest::Fetch(void* ctxt, size_t len, uint8_t* result)
 	ASSERT_TRUE(instr.operands[0].size == operandSize); \
 	ASSERT_TRUE(instr.operands[0].operandType == dest); \
 	ASSERT_TRUE(instr.operands[0].segment == X86_DS); \
-	ASSERT_TRUE(instr.operands[1].components[0] == component0); \
-	ASSERT_TRUE(instr.operands[1].components[1] == component1); \
+	ASSERT_TRUE(instr.operands[0].components[0] == component0); \
+	ASSERT_TRUE(instr.operands[0].components[1] == component1); \
 	ASSERT_TRUE(instr.operands[1].operandType == src); \
 	ASSERT_TRUE(instr.operands[1].size == operandSize); \
 }
@@ -190,7 +190,7 @@ TEST_F(AsmTest, DisassemblePrimaryAdd)
 {
 	static const uint8_t addByteMemDest[] = {0, 0, 0};
 	TEST_ARITHMETIC_MR(X86_ADD, addByteMemDest, 16, 1, X86_MEM, X86_AL, X86_BX, X86_SI);
-	TEST_ARITHMETIC_MR(X86_ADD, addByteMemDest, 32, 1, X86_MEM, X86_AL, X86_EBX, X86_ESI);
+	TEST_ARITHMETIC_MR(X86_ADD, addByteMemDest, 32, 1, X86_MEM, X86_AL, X86_EAX, X86_NONE);
 
 	static const uint8_t addByteRegDest[] = {0, 0xc0, 0};
 	TEST_ARITHMETIC_RR(X86_ADD, addByteRegDest, 16, 1, X86_AL, X86_AL);
