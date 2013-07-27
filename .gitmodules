@@ -1,3 +1,3 @@
 [submodule "salsasm"]
-	path = salsasm
-	url = ./salsasm
+	path = libsalsasm
+	url = git@github.com:rsalsamendi/libsalsasm
