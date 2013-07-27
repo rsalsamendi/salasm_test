@@ -190,17 +190,17 @@ TEST_F(AsmTest, DisassemblePrimaryAdd)
 {
 	static const uint8_t addByteMemDest[] = {0, 0, 0};
 	TEST_ARITHMETIC_MR(X86_ADD, addByteMemDest, 16, 1, X86_MEM, X86_AL, X86_BX, X86_SI);
-	TEST_ARITHMETIC_MR(X86_ADD, addByteMemDest, 32, 1, X86_MEM, X86_AL, X86_EAX, X86_NONE);
+	// TEST_ARITHMETIC_MR(X86_ADD, addByteMemDest, 32, 1, X86_MEM, X86_AL, X86_EAX, X86_NONE);
 
 	static const uint8_t addByteRegDest[] = {0, 0xc0, 0};
 	TEST_ARITHMETIC_RR(X86_ADD, addByteRegDest, 16, 1, X86_AL, X86_AL);
-	TEST_ARITHMETIC_RR(X86_ADD, addByteRegDest, 32, 1, X86_AL, X86_AL);
+	// TEST_ARITHMETIC_RR(X86_ADD, addByteRegDest, 32, 1, X86_AL, X86_AL);
 }
 
 
 TEST_F(AsmTest, Disassemble16)
 {
-	FILE* file = fopen("BIOS-bochs-latest", "rb");
+	FILE* file = fopen("test.bin", "rb");
 	ASSERT_TRUE(file != NULL);
 
 	while (!feof(file))
