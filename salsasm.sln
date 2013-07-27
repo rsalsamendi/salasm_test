@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "salsasm", "salsasm\salsasm.vcxproj", "{92A93D55-0341-4172-81C9-337273021907}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "salsasm", "libsalsasm\libsalsasm.vcxproj", "{92A93D55-0341-4172-81C9-337273021907}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "test\test.vcxproj", "{E7D27BBC-CC49-4506-837C-6C15717EDB60}"
 EndProject
