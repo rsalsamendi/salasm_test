@@ -26,6 +26,8 @@
 #include "src/gtest-all.cc"
 #include "salsasm.h"
 
+static const char* g_fileName = NULL;
+
 // The fixture for testing class Foo.
 class AsmTest : public ::testing::Test
 {
@@ -64,7 +66,6 @@ protected:
 	size_t GetOpcodeLength() const;
 	size_t GetOpcodeBytes(uint8_t* const opcode, const size_t len);
 	void SetOpcodeBytes(const uint8_t* const opcode, const size_t len);
-
 
 	static bool Fetch(void* ctxt, size_t len, uint8_t* result);
 
@@ -107,10 +108,20 @@ void AsmTest::SetOpcodeBytes(const uint8_t* const opcode, const size_t len)
 int main(int argc, char **argv)
 {
 	::testing::InitGoogleTest(&argc, argv);
-	int result = RUN_ALL_TESTS();
+	int result;
+
+	if (argc < 2)
+	{
+		fprintf(stderr, "Need a binary file to disassemble.\n");
+		return 0;
+	}
+
+	g_fileName = argv[1];
+
+	result = RUN_ALL_TESTS();
 
 #ifdef WIN32
-	printf("Press any key to continue...\n");
+	fprintf(stderr, "Press any key to continue...\n");
 	while (!_kbhit());
 #endif /* WIN32 */
 
@@ -200,7 +211,7 @@ TEST_F(AsmTest, DisassemblePrimaryAdd)
 
 TEST_F(AsmTest, Disassemble16)
 {
-	FILE* file = fopen("test.bin", "rb");
+	FILE* file = fopen(g_fileName, "rb");
 	ASSERT_TRUE(file != NULL);
 
 	while (!feof(file))
