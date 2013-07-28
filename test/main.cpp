@@ -185,7 +185,7 @@ int AsmTest::FetchForUd86(struct ud* u)
 }
 
 
-#define TEST_ARITHMETIC_RM(operation, bytes, addrSize, operandSize, dest, src, component0, comonent1) \
+#define TEST_ARITHMETIC_RM(operation, bytes, addrSize, operandSize, dest, component0, comonent1) \
 { \
 	X86Instruction instr; \
 	const size_t opcodeLen = sizeof(bytes); \
@@ -199,11 +199,11 @@ int AsmTest::FetchForUd86(struct ud* u)
 	ASSERT_TRUE(instr.operands[1].segment == X86_DS); \
 	ASSERT_TRUE(instr.operands[1].components[0] == component0); \
 	ASSERT_TRUE(instr.operands[1].components[1] == component1); \
-	ASSERT_TRUE(instr.operands[1].operandType == src); \
+	ASSERT_TRUE(instr.operands[1].operandType == X86_MEM); \
 	ASSERT_TRUE(instr.operands[1].size == operandSize); \
 }
 
-#define TEST_ARITHMETIC_MR(operation, bytes, addrSize, operandSize, dest, src, component0, component1) \
+#define TEST_ARITHMETIC_MR(operation, bytes, addrSize, operandSize, src, component0, component1) \
 { \
 	X86Instruction instr; \
 	const size_t opcodeLen = sizeof(bytes); \
@@ -213,7 +213,7 @@ int AsmTest::FetchForUd86(struct ud* u)
 	ASSERT_TRUE(instr.op == operation); \
 	ASSERT_TRUE(instr.operandCount == 2); \
 	ASSERT_TRUE(instr.operands[0].size == operandSize); \
-	ASSERT_TRUE(instr.operands[0].operandType == dest); \
+	ASSERT_TRUE(instr.operands[0].operandType == X86_MEM); \
 	ASSERT_TRUE(instr.operands[0].segment == X86_DS); \
 	ASSERT_TRUE(instr.operands[0].components[0] == component0); \
 	ASSERT_TRUE(instr.operands[0].components[1] == component1); \
@@ -236,16 +236,53 @@ int AsmTest::FetchForUd86(struct ud* u)
 	ASSERT_TRUE(instr.operands[1].size == operandSize); \
 }
 
+#define TEST_ARITHMETIC_RI(operation, bytes, addrSize, operandSize, dest, imm) \
+{ \
+	X86Instruction instr; \
+	const size_t opcodeLen = sizeof(bytes); \
+	SetOpcodeBytes(&m_data, bytes, opcodeLen); \
+	bool result = Disassemble ## addrSize ##(AsmTest::Fetch, this, &instr); \
+	ASSERT_TRUE(result); \
+	ASSERT_TRUE(instr.op == operation); \
+	ASSERT_TRUE(instr.operandCount == 2); \
+	ASSERT_TRUE(instr.operands[0].size == operandSize); \
+	ASSERT_TRUE(instr.operands[0].operandType == dest); \
+	ASSERT_TRUE(instr.operands[0].segment == X86_NONE); \
+	ASSERT_TRUE(instr.operands[1].operandType == X86_IMMEDIATE); \
+	ASSERT_TRUE(instr.operands[1].immediate == imm); \
+	ASSERT_TRUE(instr.operands[1].size == operandSize); \
+	ASSERT_TRUE(instr.operands[1].segment == X86_NONE); \
+}
+
 
 TEST_F(AsmTest, DisassemblePrimaryAdd)
 {
 	static const uint8_t addByteMemDest[] = {0, 0, 0};
-	TEST_ARITHMETIC_MR(X86_ADD, addByteMemDest, 16, 1, X86_MEM, X86_AL, X86_BX, X86_SI);
-	// TEST_ARITHMETIC_MR(X86_ADD, addByteMemDest, 32, 1, X86_MEM, X86_AL, X86_EAX, X86_NONE);
+	TEST_ARITHMETIC_MR(X86_ADD, addByteMemDest, 16, 1, X86_AL, X86_BX, X86_SI);
+	// TEST_ARITHMETIC_MR(X86_ADD, addByteMemDest, 32, 1, X86_AL, X86_EAX, X86_NONE);
 
 	static const uint8_t addByteRegDest[] = {0, 0xc0, 0};
 	TEST_ARITHMETIC_RR(X86_ADD, addByteRegDest, 16, 1, X86_AL, X86_AL);
 	// TEST_ARITHMETIC_RR(X86_ADD, addByteRegDest, 32, 1, X86_AL, X86_AL);
+}
+
+TEST_F(AsmTest, DisassemblePastBugs)
+{
+	static const uint8_t addByteImm[] = {4, 1};
+	TEST_ARITHMETIC_RI(X86_ADD, addByteImm, 16, 1, X86_AL, 1);
+
+	static const uint8_t orByteMemDest[] = {8, 0};
+	TEST_ARITHMETIC_MR(X86_OR, orByteMemDest, 16, 1, X86_AL, X86_BX, X86_SI);
+
+	static const uint8_t das = 0x2f;
+	{
+		X86Instruction instr;
+		SetOpcodeBytes(&m_data, &das, 1);
+		bool result = Disassemble16(AsmTest::Fetch, this, &instr);
+		ASSERT_TRUE(result);
+		ASSERT_TRUE(instr.op == X86_DAS);
+		ASSERT_TRUE(instr.length == 1);
+	}
 }
 
 
@@ -279,16 +316,19 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_ADX:
 	case X86_AMX:
 	case X86_AND:
+		return (op2 == UD_Iand);
 	case X86_ANDNPD:
 	case X86_ANDNPS:
 	case X86_ANDPD:
 	case X86_ANDPS:
 	case X86_ARPL:
+		return (op2 == UD_Iarpl);
 	case X86_BLENDPD:
 	case X86_BLENDPS:
 	case X86_BLENDVPD:
 	case X86_BLENDVPS:
 	case X86_BOUND:
+		return (op2 == UD_Ibound);
 	case X86_BSF:
 	case X86_BSR:
 	case X86_BSWAP:
@@ -338,6 +378,7 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_CMOVZ:
 	case X86_CMOVE:
 	case X86_CMP:
+		return (op2 == UD_Icmp);
 	case X86_CMPPD:
 	case X86_CMPPS:
 	case X86_CMPS:
@@ -379,8 +420,11 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_CDQ:
 	case X86_CQO:
 	case X86_DAA:
+		return (op2 == UD_Idaa);
 	case X86_DAS:
+		return (op2 == UD_Idas);
 	case X86_DEC:
+		return (op2 == UD_Idec);
 	case X86_DIV:
 	case X86_DIVPD:
 	case X86_DIVPS:
@@ -508,8 +552,10 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_HSUBPS:
 	case X86_IDIV:
 	case X86_IMUL:
+		return (op2 == UD_Iimul);
 	case X86_IN:
 	case X86_INC:
+		return (op2 == UD_Iinc);
 	case X86_INS:
 	case X86_INSB:
 	case X86_INSW:
@@ -583,10 +629,13 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_LODSD:
 	case X86_LODSQ:
 	case X86_LOOP:
+		return (op2 == UD_Iloop);
 	case X86_LOOPNZ:
 	case X86_LOOPNE:
+		return (op2 == UD_Iloopne);
 	case X86_LOOPZ:
 	case X86_LOOPE:
+		return (op2 == UD_Iloope);
 	case X86_LSL:
 	case X86_LSS:
 	case X86_LTR:
@@ -603,6 +652,7 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_MINSS:
 	case X86_MONITOR:
 	case X86_MOV:
+		return (op2 == UD_Imov);
 	case X86_MOVAPD:
 	case X86_MOVAPS:
 	case X86_MOVBE:
@@ -650,6 +700,7 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_NOP:
 	case X86_NOT:
 	case X86_OR:
+		return (op2 == UD_Ior);
 	case X86_ORPD:
 	case X86_ORPS:
 	case X86_OUT:
@@ -742,8 +793,11 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_PMULLW:
 	case X86_PMULUDQ:
 	case X86_POP:
+		return (op2 == UD_Ipop);
 	case X86_POPA:
+		return (op2 == UD_Ipopa);
 	case X86_POPAD:
+		return (op2 == UD_Ipopad);
 	case X86_POPCNT:
 	case X86_POPF:
 	case X86_POPFQ:
@@ -790,9 +844,13 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_PUNPCKLQDQ:
 	case X86_PUNPCKLWD:
 	case X86_PUSH:
+		return (op2 == UD_Ipush);
 	case X86_PUSHA:
+		return (op2 == UD_Ipusha);
 	case X86_PUSHAD:
+		return (op2 == UD_Ipushad);
 	case X86_PUSHF:
+		// return (op2 == UD_Ipushf);
 	case X86_PUSHFQ:
 	case X86_PUSHFD:
 	case X86_PXOR:
@@ -821,6 +879,7 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_SETALC:
 	case X86_SAR:
 	case X86_SBB:
+		return (op2 == UD_Isbb);
 	case X86_SCAS:
 	case X86_SCASB:
 	case X86_SCASW:
@@ -880,6 +939,7 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_STOSQ:
 	case X86_STR:
 	case X86_SUB:
+		return (op2 == UD_Isub);
 	case X86_SUBPD:
 	case X86_SUBPS:
 	case X86_SUBSD:
@@ -889,6 +949,7 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_SYSENTER:
 	case X86_SYSRET:
 	case X86_TEST:
+		return (op2 == UD_Itest);
 	case X86_UCOMISD:
 	case X86_UCOMISS:
 	case X86_UD:
@@ -1171,6 +1232,7 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_XLAT:
 	case X86_XLATB:
 	case X86_XOR:
+		return (op2 == UD_Ixor);
 	case X86_XORPD:
 	case X86_XORPS:
 	case X86_XRSTOR:
@@ -1186,7 +1248,6 @@ TEST_F(AsmTest, Disassemble16)
 {
 	FILE* file;
 	X86Instruction instr;
-	bool result;
 	uint8_t* bytes;
 	size_t len;
 	ud_t ud_obj;
@@ -1217,6 +1278,7 @@ TEST_F(AsmTest, Disassemble16)
 	while (len)
 	{
 		unsigned int bytes;
+		bool result;
 
 		result = Disassemble16(AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
@@ -1238,7 +1300,8 @@ TEST_F(AsmTest, Disassemble16)
 		ASSERT_TRUE(bytes == instr.length);
 
 		// Verify that the instructions match mnemonics
-		ASSERT_TRUE(CompareOperation(instr.op, ud_obj.mnemonic));
+		result = CompareOperation(instr.op, ud_obj.mnemonic);
+		ASSERT_TRUE(result);
 
 		len -= instr.length;
 	}
