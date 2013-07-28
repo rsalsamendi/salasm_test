@@ -105,6 +105,9 @@ size_t AsmTest::GetOpcodeBytes(OpcodeData* data, uint8_t* const opcode, const si
 	memcpy(opcode, &data->opcodeBytes[data->opcodeIndex], bytesToCopy);
 	data->opcodeIndex += bytesToCopy;
 	data->opcodeLen -= len;
+	for (size_t i = 0; i < len; i++)
+		fprintf(stderr, "%.2x ", opcode[i]);
+	fprintf(stderr, "\n");
 	return bytesToCopy;
 }
 
@@ -178,7 +181,7 @@ int AsmTest::FetchForUd86(struct ud* u)
 	// Fetch the opcode
 	asmTest->GetOpcodeBytes(&asmTest->m_ud86Data, &result, 1);
 
-	return 1;
+	return result;
 }
 
 
