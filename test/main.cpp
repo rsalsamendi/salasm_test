@@ -293,6 +293,46 @@ TEST_F(AsmTest, DisassemblePastBugs)
 		ASSERT_TRUE(instr.op == X86_JO);
 		ASSERT_TRUE(instr.length == 2);
 	}
+
+	static const uint8_t xchgRbxRax = 0x92;
+	{
+		X86Instruction instr;
+		SetOpcodeBytes(&m_data, &xchgRbxRax, sizeof(xchgRbxRax));
+		bool result = Disassemble16(AsmTest::Fetch, this, &instr);
+		ASSERT_TRUE(result);
+		ASSERT_TRUE(instr.op == X86_XCHG);
+		ASSERT_TRUE(instr.length == 1);
+	}
+
+	static const uint8_t movAxOffset[3] = {0xa2, 1, 0};
+	{
+		X86Instruction instr;
+		SetOpcodeBytes(&m_data, movAxOffset, sizeof(movAxOffset));
+		bool result = Disassemble16(AsmTest::Fetch, this, &instr);
+		ASSERT_TRUE(result);
+		ASSERT_TRUE(instr.op == X86_MOV);
+		ASSERT_TRUE(instr.length == 3);
+	}
+
+	static const uint8_t movsb = 0xa4;
+	{
+		X86Instruction instr;
+		SetOpcodeBytes(&m_data, &movsb, sizeof(movsb));
+		bool result = Disassemble16(AsmTest::Fetch, this, &instr);
+		ASSERT_TRUE(result);
+		ASSERT_TRUE(instr.op == X86_MOVSB);
+		ASSERT_TRUE(instr.length == 1);
+	}
+
+	static const uint8_t movsw = 0xa5;
+	{
+		X86Instruction instr;
+		SetOpcodeBytes(&m_data, &movsw, sizeof(movsw));
+		bool result = Disassemble16(AsmTest::Fetch, this, &instr);
+		ASSERT_TRUE(result);
+		ASSERT_TRUE(instr.op == X86_MOVSW);
+		ASSERT_TRUE(instr.length == 1);
+	}
 }
 
 
@@ -430,10 +470,15 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_CMPPD:
 	case X86_CMPPS:
 	case X86_CMPS:
+		return false;
 	case X86_CMPSB:
+		return (op2 == UD_Icmpsb);
 	case X86_CMPSW:
+		return (op2 == UD_Icmpsw);
 	case X86_CMPSD:
+		return (op2 == UD_Icmpsd);
 	case X86_CMPSQ:
+		return (op2 == UD_Icmpsq);
 	case X86_CMPSS:
 	case X86_CMPXCHG:
 	case X86_CMPXCHG8B:
@@ -663,18 +708,22 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_JNO:
 		return (op2 == UD_Ijno);
 	case X86_JPO:
-	case X86_JNP:
-	case X86_JNS:
 		return false;
+	case X86_JNP:
+		return (op2 == UD_Ijnp);
+	case X86_JNS:
+		return (op2 == UD_Ijns);
 	case X86_JNZ:
 	case X86_JNE: // Fall through
 		return (op2 == UD_Ijnz);
 	case X86_JO:
 		return (op2 == UD_Ijo);
 	case X86_JP:
+		return (op2 == UD_Ijp);
 	case X86_JPE:
-	case X86_JS:
 		return false;
+	case X86_JS:
+		return (op2 == UD_Ijs);
 	case X86_JZ:
 	case X86_JE: // Fall through
 		return (op2 == UD_Ijz);
@@ -750,10 +799,15 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_MOVNTQ:
 	case X86_MOVQ2DQ:
 	case X86_MOVS:
+		return false;
 	case X86_MOVSB:
+		return (op2 == UD_Imovsb);
 	case X86_MOVSW:
+		return (op2 == UD_Imovsw);
 	case X86_MOVSQ:
+		return (op2 == UD_Imovsq);
 	case X86_MOVSD:
+		return (op2 == UD_Imovsd);
 	case X86_MOVSHDUP:
 	case X86_MOVSS:
 	case X86_MOVSX:
@@ -1307,8 +1361,11 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_VMSAVE:
 	case X86_WBINVD:
 	case X86_WRMSR:
+		return false;
 	case X86_XADD:
+		return (op2 == UD_Ixadd);
 	case X86_XCHG:
+		return (op2 == UD_Ixchg);
 	case X86_XGETBV:
 	case X86_XLAT:
 	case X86_XLATB:
