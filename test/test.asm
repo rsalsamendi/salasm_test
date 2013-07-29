@@ -190,14 +190,38 @@ bound di, [1]
 TEST_ARITHMETIC_MODRM16 arpl
 
 ; Row 7
-TEST_ARITHMETIC_ONE_OPERAND jo, 0xff
-TEST_ARITHMETIC_ONE_OPERAND jno, 0xff
-TEST_ARITHMETIC_ONE_OPERAND jb, 0xff
-TEST_ARITHMETIC_ONE_OPERAND jnb, 0xff
-TEST_ARITHMETIC_ONE_OPERAND jz, 0xff
-TEST_ARITHMETIC_ONE_OPERAND jnz, 0xff
-TEST_ARITHMETIC_ONE_OPERAND jbe, 0xff
-TEST_ARITHMETIC_ONE_OPERAND jnbe, 0xff
+; Can't get yasm to emit the one byte form of these jmps, so do it here
+; jo
+db 0x70, 1
+db 0x70, 0xff
+
+; jno
+db 0x71, 1
+db 0x71, 0xff
+
+; jb
+db 0x72, 1
+db 0x72, 0xff
+
+; jnb
+db 0x73, 1
+db 0x73, 0xff
+
+; jz
+db 0x74, 1
+db 0x74, 0xff
+
+; jnz
+db 0x75, 1
+db 0x75, 0xff
+
+; jbe
+db 0x76, 1
+db 0x76, 0xff
+
+; jnbe
+db 0x77, 1
+db 0x77, 0xff
 
 ; Row 8
 
