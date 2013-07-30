@@ -105,9 +105,6 @@ size_t AsmTest::GetOpcodeBytes(OpcodeData* data, uint8_t* const opcode, const si
 	memcpy(opcode, &data->opcodeBytes[data->opcodeIndex], bytesToCopy);
 	data->opcodeIndex += bytesToCopy;
 	data->opcodeLen -= len;
-	for (size_t i = 0; i < len; i++)
-		fprintf(stderr, "%.2x ", opcode[i]);
-	fprintf(stderr, "\n");
 	return bytesToCopy;
 }
 
@@ -190,7 +187,7 @@ int AsmTest::FetchForUd86(struct ud* u)
 	X86Instruction instr; \
 	const size_t opcodeLen = sizeof(bytes); \
 	SetOpcodeBytes(&m_data, bytes, opcodeLen); \
-	bool result = Disassemble ## addrSize ##(AsmTest::Fetch, this, &instr); \
+	bool result = Disassemble ## addrSize ##(0, AsmTest::Fetch, this, &instr); \
 	ASSERT_TRUE(result); \
 	ASSERT_TRUE(instr.op == operation); \
 	ASSERT_TRUE(instr.operandCount == 2); \
@@ -208,7 +205,7 @@ int AsmTest::FetchForUd86(struct ud* u)
 	X86Instruction instr; \
 	const size_t opcodeLen = sizeof(bytes); \
 	SetOpcodeBytes(&m_data, bytes, opcodeLen); \
-	bool result = Disassemble ## addrSize ##(AsmTest::Fetch, this, &instr); \
+	bool result = Disassemble ## addrSize ##(0, AsmTest::Fetch, this, &instr); \
 	ASSERT_TRUE(result); \
 	ASSERT_TRUE(instr.op == operation); \
 	ASSERT_TRUE(instr.operandCount == 2); \
@@ -226,7 +223,7 @@ int AsmTest::FetchForUd86(struct ud* u)
 	X86Instruction instr; \
 	const size_t opcodeLen = sizeof(bytes); \
 	SetOpcodeBytes(&m_data, bytes, opcodeLen); \
-	bool result = Disassemble ## addrSize ##(AsmTest::Fetch, this, &instr); \
+	bool result = Disassemble ## addrSize ##(0, AsmTest::Fetch, this, &instr); \
 	ASSERT_TRUE(result); \
 	ASSERT_TRUE(instr.op == operation); \
 	ASSERT_TRUE(instr.operandCount == 2); \
@@ -241,7 +238,7 @@ int AsmTest::FetchForUd86(struct ud* u)
 	X86Instruction instr; \
 	const size_t opcodeLen = sizeof(bytes); \
 	SetOpcodeBytes(&m_data, bytes, opcodeLen); \
-	bool result = Disassemble ## addrSize ##(AsmTest::Fetch, this, &instr); \
+	bool result = Disassemble ## addrSize ##(0, AsmTest::Fetch, this, &instr); \
 	ASSERT_TRUE(result); \
 	ASSERT_TRUE(instr.op == operation); \
 	ASSERT_TRUE(instr.operandCount == 2); \
@@ -278,7 +275,7 @@ TEST_F(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(&m_data, &das, 1);
-		bool result = Disassemble16(AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_DAS);
 		ASSERT_TRUE(instr.length == 1);
@@ -288,7 +285,7 @@ TEST_F(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(&m_data, jmpByteImm, sizeof(jmpByteImm));
-		bool result = Disassemble16(AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_JO);
 		ASSERT_TRUE(instr.length == 2);
@@ -298,7 +295,7 @@ TEST_F(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(&m_data, &xchgRbxRax, sizeof(xchgRbxRax));
-		bool result = Disassemble16(AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_XCHG);
 		ASSERT_TRUE(instr.length == 1);
@@ -308,7 +305,7 @@ TEST_F(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(&m_data, movAxOffset, sizeof(movAxOffset));
-		bool result = Disassemble16(AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_MOV);
 		ASSERT_TRUE(instr.length == 3);
@@ -318,7 +315,7 @@ TEST_F(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(&m_data, &movsb, sizeof(movsb));
-		bool result = Disassemble16(AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_MOVSB);
 		ASSERT_TRUE(instr.length == 1);
@@ -328,11 +325,77 @@ TEST_F(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(&m_data, &movsw, sizeof(movsw));
-		bool result = Disassemble16(AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_MOVSW);
 		ASSERT_TRUE(instr.length == 1);
 	}
+
+	static const uint8_t pushCs = 0x0e;
+	{
+		X86Instruction instr;
+		SetOpcodeBytes(&m_data, &pushCs, sizeof(pushCs));
+		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		ASSERT_TRUE(result);
+		ASSERT_TRUE(instr.op == X86_PUSH);
+		ASSERT_TRUE(instr.length == 1);
+		ASSERT_TRUE(instr.operands[0].operandType == X86_CS);
+	}
+
+	static const uint8_t decAx = 0x48;
+	{
+		X86Instruction instr;
+		SetOpcodeBytes(&m_data, &decAx, sizeof(decAx));
+		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		ASSERT_TRUE(result);
+		ASSERT_TRUE(instr.op == X86_DEC);
+		ASSERT_TRUE(instr.length == 1);
+		ASSERT_TRUE(instr.operands[0].operandType == X86_AX);
+	}
+
+	static const uint8_t group1Add[] = {0x81, 0xc1, 0xff, 0xff};
+	{
+		X86Instruction instr;
+		SetOpcodeBytes(&m_data, group1Add, sizeof(group1Add));
+		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		ASSERT_TRUE(result);
+		ASSERT_TRUE(instr.op == X86_ADD);
+		ASSERT_TRUE(instr.length == 4);
+		ASSERT_TRUE(instr.operands[0].operandType == X86_CX);
+		ASSERT_TRUE(instr.operands[0].size == 2);
+		ASSERT_TRUE(instr.operands[1].operandType == X86_IMMEDIATE);
+		ASSERT_TRUE(instr.operands[1].immediate == 0xffffffffffffffff);
+	}
+
+	static const uint8_t xchgAxCx = 0x91;
+	{
+		X86Instruction instr;
+		SetOpcodeBytes(&m_data, &xchgAxCx, sizeof(xchgAxCx));
+		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		ASSERT_TRUE(result);
+		ASSERT_TRUE(instr.op == X86_XCHG);
+		ASSERT_TRUE(instr.length == 1);
+		ASSERT_TRUE(instr.operands[0].operandType == X86_CX);
+		ASSERT_TRUE(instr.operands[0].size == 2);
+		ASSERT_TRUE(instr.operands[1].operandType == X86_AX);
+		ASSERT_TRUE(instr.operands[1].size == 2);
+	}
+
+	static const uint8_t movModRm[2] = {0x88, 0x00};
+	{
+		X86Instruction instr;
+		SetOpcodeBytes(&m_data, movModRm, sizeof(movModRm));
+		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		ASSERT_TRUE(result);
+		ASSERT_TRUE(instr.op == X86_MOV);
+		ASSERT_TRUE(instr.length == 2);
+		ASSERT_TRUE(instr.operands[0].operandType == X86_MEM);
+		ASSERT_TRUE(instr.operands[0].size == 1);
+		ASSERT_TRUE(instr.operands[1].operandType == X86_AL);
+		ASSERT_TRUE(instr.operands[1].size == 1);
+	}
+
+	static const uint8_t ffa4[2] = {0xff, 0xa4};
 }
 
 
@@ -1383,12 +1446,182 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 }
 
 
+static bool CompareRegisters(X86OperandType operand1, enum ud_type operand2)
+{
+	switch (operand1)
+	{
+	case X86_AL:
+		return (operand2 == UD_R_AL);
+	case X86_AH:
+		return (operand2 == UD_R_AH);
+	case X86_AX:
+		return (operand2 == UD_R_AX);
+	case X86_EAX:
+		return (operand2 == UD_R_EAX);
+	case X86_RAX:
+		return (operand2 == UD_R_RAX);
+	case X86_CL:
+		return (operand2 == UD_R_CL);
+	case X86_CH:
+		return (operand2 == UD_R_CH);
+	case X86_CX:
+		return (operand2 == UD_R_CX);
+	case X86_ECX:
+		return (operand2 == UD_R_ECX);
+	case X86_RCX:
+		return (operand2 == UD_R_RCX);
+	case X86_DL:
+		return (operand2 == UD_R_DL);
+	case X86_DH:
+		return (operand2 == UD_R_DH);
+	case X86_DX:
+		return (operand2 == UD_R_DX);
+	case X86_EDX:
+		return (operand2 == UD_R_EDX);
+	case X86_RDX:
+		return (operand2 == UD_R_RDX);
+	case X86_BL:
+		return (operand2 == UD_R_BL);
+	case X86_BH:
+		return (operand2 == UD_R_BH);
+	case X86_BX:
+		return (operand2 == UD_R_BX);
+	case X86_EBX:
+		return (operand2 == UD_R_EBX);
+	case X86_RBX:
+		return (operand2 == UD_R_RBX);
+	case X86_SI:
+		return (operand2 == UD_R_SI);
+	case X86_ESI:
+		return (operand2 == UD_R_ESI);
+	case X86_RSI:
+		return (operand2 == UD_R_RSI);
+	case X86_DI:
+		return (operand2 == UD_R_DI);
+	case X86_EDI:
+		return (operand2 == UD_R_EDI);
+	case X86_RDI:
+		return (operand2 == UD_R_RDI);
+	case X86_SP:
+		return (operand2 == UD_R_SP);
+	case X86_ESP:
+		return (operand2 == UD_R_ESP);
+	case X86_RSP:
+		return (operand2 == UD_R_RSP);
+	case X86_BP:
+		return (operand2 == UD_R_BP);
+	case X86_EBP:
+		return (operand2 == UD_R_EBP);
+	case X86_RBP:
+		return (operand2 == UD_R_RBP);
+	case X86_R8B:
+		return (operand2 == UD_R_R8B);
+	case X86_R8W:
+		return (operand2 == UD_R_R8W);
+	case X86_R8D:
+		return (operand2 == UD_R_R8D);
+	case X86_R8:
+		return (operand2 == UD_R_R8);
+	case X86_R9B:
+		return (operand2 == UD_R_R9B);
+	case X86_R9W:
+		return (operand2 == UD_R_R9W);
+	case X86_R9D:
+		return (operand2 == UD_R_R9D);
+	case X86_R9:
+		return (operand2 == UD_R_R9);
+	case X86_R10B:
+		return (operand2 == UD_R_R10B);
+	case X86_R10W:
+		return (operand2 == UD_R_R10W);
+	case X86_R10D:
+		return (operand2 == UD_R_R10D);
+	case X86_R10:
+		return (operand2 == UD_R_R10);
+	case X86_R11B:
+		return (operand2 == UD_R_R11B);
+	case X86_R11W:
+		return (operand2 == UD_R_R11W);
+	case X86_R11D:
+		return (operand2 == UD_R_R11D);
+	case X86_R11:
+		return (operand2 == UD_R_R11);
+	case X86_R12B:
+		return (operand2 == UD_R_R12B);
+	case X86_R12W:
+		return (operand2 == UD_R_R12W);
+	case X86_R12D:
+		return (operand2 == UD_R_R12D);
+	case X86_R12:
+		return (operand2 == UD_R_R12);
+	case X86_R13B:
+		return (operand2 == UD_R_R13B);
+	case X86_R13W:
+		return (operand2 == UD_R_R13W);
+	case X86_R13D:
+		return (operand2 == UD_R_R13D);
+	case X86_R13:
+		return (operand2 == UD_R_R13);
+	case X86_R14B:
+		return (operand2 == UD_R_R14B);
+	case X86_R14W:
+		return (operand2 == UD_R_R14W);
+	case X86_R14D:
+		return (operand2 == UD_R_R14D);
+	case X86_R14:
+		return (operand2 == UD_R_R14);
+	case X86_R15B:
+		return (operand2 == UD_R_R15B);
+	case X86_R15W:
+		return (operand2 == UD_R_R15W);
+	case X86_R15D:
+		return (operand2 == UD_R_R15D);
+	case X86_R15:
+		return (operand2 == UD_R_R15);
+	case X86_ES:
+		return (operand2 == UD_R_ES);
+	case X86_SS:
+		return (operand2 == UD_R_SS);
+	case X86_CS:
+		return (operand2 == UD_R_CS);
+	case X86_DS:
+		return (operand2 == UD_R_DS);
+	case X86_FS:
+		return (operand2 == UD_R_FS);
+	case X86_GS:
+		return (operand2 == UD_R_GS);
+	default:
+		return false;
+	}
+}
+
+
+bool SkipOperandsCheck(X86Operation op)
+{
+	switch (op)
+	{
+	case X86_MOVSB:
+	case X86_MOVSW:
+	case X86_MOVSD:
+	case X86_MOVSQ:
+	case X86_CMPSB:
+	case X86_CMPSW:
+	case X86_CMPSD:
+	case X86_CMPSQ:
+		return true;
+	default:
+		return false;
+	}
+}
+
+
 TEST_F(AsmTest, Disassemble16)
 {
 	FILE* file;
 	X86Instruction instr;
 	uint8_t* bytes;
 	size_t len;
+	size_t fileLen;
 	ud_t ud_obj;
 
 	file = fopen(g_fileName, "rb");
@@ -1396,14 +1629,14 @@ TEST_F(AsmTest, Disassemble16)
 
 	// Get the length of the file
 	fseek(file, 0, SEEK_END);
-	len = ftell(file);
+	fileLen = ftell(file);
 	fseek(file, 0, SEEK_SET);
 
 	// Allocate space and read the whole thing
-	bytes = (uint8_t*)malloc(len);
-	ASSERT_TRUE(fread(bytes, len, 1, file) != len);
-	SetOpcodeBytes(&m_data, bytes, len);
-	SetOpcodeBytes(&m_ud86Data, bytes, len);
+	bytes = (uint8_t*)malloc(fileLen);
+	ASSERT_TRUE(fread(bytes, fileLen, 1, file) != fileLen);
+	SetOpcodeBytes(&m_data, bytes, fileLen);
+	SetOpcodeBytes(&m_ud86Data, bytes, fileLen);
 
 	// Notify ud86 that we're in 16bit mode
 	ud_set_mode(&ud_obj, 16);
@@ -1414,12 +1647,13 @@ TEST_F(AsmTest, Disassemble16)
 	ud_set_input_hook(&ud_obj, AsmTest::FetchForUd86);
 
 	// Disassemble the data
+	len = fileLen;
 	while (len)
 	{
 		unsigned int bytes;
 		bool result;
 
-		result = Disassemble16(AsmTest::Fetch, this, &instr);
+		result = Disassemble16((uint16_t)(fileLen - len), AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 
 		if (instr.flags & X86_FLAG_INSUFFICIENT_LENGTH)
@@ -1443,5 +1677,31 @@ TEST_F(AsmTest, Disassemble16)
 		ASSERT_TRUE(result);
 
 		len -= instr.length;
+
+		// We treat operands differently...
+		if (SkipOperandsCheck(instr.op))
+			continue;
+
+		for (size_t i = 0; i < instr.operandCount; i++)
+		{
+			// Ensure counts match.
+			const struct ud_operand* const operand = ud_insn_opr(&ud_obj, (unsigned int)i);
+			ASSERT_TRUE(operand != NULL);
+
+			switch (instr.operands[i].operandType)
+			{
+			case X86_IMMEDIATE:
+				ASSERT_TRUE (operand->type == UD_OP_IMM);
+				// ASSERT_TRUE(operand->lval.sqword == instr.operands[i].immediate);
+				break;
+			case X86_MEM:
+				ASSERT_TRUE (operand->type == UD_OP_MEM);
+				break;
+			default:
+				// A register of some sort.
+				bool match = CompareRegisters(instr.operands[i].operandType, operand->base);
+				ASSERT_TRUE(match);
+			}
+		}
 	}
 }
