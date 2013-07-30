@@ -1450,6 +1450,8 @@ static bool CompareRegisters(X86OperandType operand1, enum ud_type operand2)
 {
 	switch (operand1)
 	{
+	case X86_NONE:
+		return (operand2 == UD_NONE);
 	case X86_AL:
 		return (operand2 == UD_R_AL);
 	case X86_AH:
@@ -1615,6 +1617,30 @@ bool SkipOperandsCheck(X86Operation op)
 }
 
 
+bool SkipOperandsSizeCheck(X86Operation op)
+{
+	return (op == X86_BOUND);
+}
+
+
+bool CompareImmediates(const X86Operand* const operand, const struct ud_operand* const operand2)
+{
+	switch (operand2->size)
+	{
+	case 8:
+		return (operand2->lval.sbyte == (int8_t)operand->immediate);
+	case 16:
+		return (operand2->lval.sword == (int16_t)operand->immediate);
+	case 32:
+		return (operand2->lval.sdword == (int32_t)operand->immediate);
+	case 64:
+		return (operand2->lval.sqword == operand->immediate);
+	default:
+		return false;
+	}
+}
+
+
 TEST_F(AsmTest, Disassemble16)
 {
 	FILE* file;
@@ -1685,17 +1711,28 @@ TEST_F(AsmTest, Disassemble16)
 		for (size_t i = 0; i < instr.operandCount; i++)
 		{
 			// Ensure counts match.
+			bool result;
 			const struct ud_operand* const operand = ud_insn_opr(&ud_obj, (unsigned int)i);
 			ASSERT_TRUE(operand != NULL);
+
+			if (SkipOperandsSizeCheck(instr.op))
+				continue;
+			ASSERT_TRUE(instr.operands[i].size == (operand->size >> 3));
 
 			switch (instr.operands[i].operandType)
 			{
 			case X86_IMMEDIATE:
 				ASSERT_TRUE (operand->type == UD_OP_IMM);
-				// ASSERT_TRUE(operand->lval.sqword == instr.operands[i].immediate);
+				result = CompareImmediates(&instr.operands[i], operand);
+				ASSERT_TRUE(result);
 				break;
 			case X86_MEM:
 				ASSERT_TRUE (operand->type == UD_OP_MEM);
+				ASSERT_TRUE(CompareRegisters(instr.operands[i].components[0], operand->base));
+				ASSERT_TRUE(CompareRegisters(instr.operands[i].components[1], operand->index));
+				ASSERT_TRUE(instr.operands[i].scale == operand->scale);
+				result = CompareImmediates(&instr.operands[i], operand);
+				ASSERT_TRUE(result);
 				break;
 			default:
 				// A register of some sort.
