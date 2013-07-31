@@ -483,6 +483,16 @@ TEST_F(AsmTest, DisassemblePastBugs)
 		ASSERT_TRUE(instr.operands[1].components[0] == X86_BX);
 		ASSERT_TRUE(instr.operands[1].components[1] == X86_SI);
 	}
+
+	static const uint8_t popf = 0x9d;
+	{
+		X86Instruction instr;
+		SetOpcodeBytes(&m_data, &popf, sizeof(popf));
+		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		ASSERT_TRUE(result);
+		ASSERT_TRUE(instr.op == X86_POPF);
+		ASSERT_TRUE(instr.length == 1);
+	}
 }
 
 
@@ -659,9 +669,13 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_CVTTPS2PI:
 	case X86_CVTTSD2SI:
 	case X86_CVTTSS2SI:
+		return false;
 	case X86_CWD:
+		return (op2 == UD_Icwd);
 	case X86_CDQ:
+		return (op2 == UD_Icdq);
 	case X86_CQO:
+		return false;
 	case X86_DAA:
 		return (op2 == UD_Idaa);
 	case X86_DAS:
@@ -775,8 +789,10 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_FUCOMIP:
 	case X86_FUCOMP:
 	case X86_FUCOMPP:
-	case X86_FWAIT:
+		return false;
 	case X86_WAIT:
+	case X86_FWAIT:
+		return (op2 == UD_Iwait);
 	case X86_FXAM:
 	case X86_FXCH:
 	case X86_FXCH4:
@@ -882,6 +898,7 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_JE: // Fall through
 		return (op2 == UD_Ijz);
 	case X86_LAHF:
+		return (op2 == UD_Ilahf);
 	case X86_LAR:
 	case X86_LDDQU:
 	case X86_LDMXCSR:
@@ -1090,9 +1107,13 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_POPAD:
 		return (op2 == UD_Ipopad);
 	case X86_POPCNT:
+		return (op2 == UD_Ipopcnt);
 	case X86_POPF:
+		return (op2 == UD_Ipopfw);
 	case X86_POPFQ:
+		return (op2 == UD_Ipopfq);
 	case X86_POPFD:
+		return (op2 == UD_Ipopfd);
 	case X86_POR:
 	case X86_PREFETCHNTA:
 	case X86_PREFETCHT0:
@@ -1142,9 +1163,11 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_PUSHAD:
 		return (op2 == UD_Ipushad);
 	case X86_PUSHF:
-		// return (op2 == UD_Ipushf);
+		return (op2 == UD_Ipushfw);
 	case X86_PUSHFQ:
+		return (op2 == UD_Ipushfq);
 	case X86_PUSHFD:
+		return (op2 == UD_Ipushfd);
 	case X86_PXOR:
 	case X86_RCL:
 	case X86_RCPPS:
@@ -1164,7 +1187,9 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_RSM:
 	case X86_RSQRTPS:
 	case X86_RSQRTSS:
+		return false;
 	case X86_SAHF:
+		return (op2 == UD_Isahf);
 	case X86_SAL:
 	case X86_SHL:
 	case X86_SALC:
@@ -1753,7 +1778,7 @@ bool CompareImmediates(const X86Operand* const operand, const struct ud_operand*
 	case 64:
 		return (operand2->lval.sqword == operand->immediate);
 	default:
-		// Evil instrs like lea have zero len but still an imm component
+		// Evil instrs like lea have zero operand size but still an imm component
 		if (operand->immediate == SIGN_EXTEND64(operand2->lval.uqword, operand->size))
 			return true;
 		return false;

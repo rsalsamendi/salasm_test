@@ -471,10 +471,19 @@ xchg bp, ax
 xchg si, ax
 xchg di, ax
 
+cbw
+cwd
+call [0xffff]
+fwait
+pusf
+popf
+sahf
+lahf
+
+; Row 0xa
 TEST_ARITHMETIC_MODRM8 mov
 TEST_ARITHMETIC_MODRM16 mov
 
-; Row 0xa
 mov al, byte [1]
 mov al, byte [0xffff]
 
