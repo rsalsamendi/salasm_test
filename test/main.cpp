@@ -395,7 +395,94 @@ TEST_F(AsmTest, DisassemblePastBugs)
 		ASSERT_TRUE(instr.operands[1].size == 1);
 	}
 
-	static const uint8_t ffa4[2] = {0xff, 0xa4};
+	static const uint8_t pushImmByte[2] = {0x6a, 0x00};
+	{
+		X86Instruction instr;
+		SetOpcodeBytes(&m_data, pushImmByte, sizeof(pushImmByte));
+		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		ASSERT_TRUE(result);
+		ASSERT_TRUE(instr.op == X86_PUSH);
+		ASSERT_TRUE(instr.length == 2);
+		ASSERT_TRUE(instr.operands[0].operandType == X86_IMMEDIATE);
+		ASSERT_TRUE(instr.operands[0].immediate == 0);
+		ASSERT_TRUE(instr.operands[0].size == 1);
+	}
+
+	static const uint8_t imul16[] = {0x6b, 0xd9, 0xff};
+	{
+		X86Instruction instr;
+		SetOpcodeBytes(&m_data, imul16, sizeof(imul16));
+		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		ASSERT_TRUE(result);
+		ASSERT_TRUE(instr.op == X86_IMUL);
+		ASSERT_TRUE(instr.length == 3);
+		ASSERT_TRUE(instr.operands[0].operandType == X86_BX);
+		ASSERT_TRUE(instr.operands[0].immediate == 0);
+		ASSERT_TRUE(instr.operands[0].size == 2);
+		ASSERT_TRUE(instr.operands[1].operandType == X86_CX);
+		ASSERT_TRUE(instr.operands[1].immediate == 0);
+		ASSERT_TRUE(instr.operands[1].size == 2);
+		ASSERT_TRUE(instr.operands[2].operandType == X86_IMMEDIATE);
+		ASSERT_TRUE(instr.operands[2].immediate == SIGN_EXTEND64(0xff, 1));
+		ASSERT_TRUE(instr.operands[2].size == 1);
+	}
+
+	static const uint8_t testImmByte[] = {0xa8, 0x01};
+	{
+		X86Instruction instr;
+		SetOpcodeBytes(&m_data, testImmByte, sizeof(testImmByte));
+		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		ASSERT_TRUE(result);
+		ASSERT_TRUE(instr.op == X86_TEST);
+		ASSERT_TRUE(instr.length == 2);
+		ASSERT_TRUE(instr.operands[0].operandType == X86_AL);
+		ASSERT_TRUE(instr.operands[0].size == 1);
+	}
+
+	static const uint8_t movImmByte[] = {0xb8, 0x01, 0x01};
+	{
+		X86Instruction instr;
+		SetOpcodeBytes(&m_data, movImmByte, sizeof(movImmByte));
+		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		ASSERT_TRUE(result);
+		ASSERT_TRUE(instr.op == X86_MOV);
+		ASSERT_TRUE(instr.length == 3);
+		ASSERT_TRUE(instr.operands[0].operandType == X86_AX);
+		ASSERT_TRUE(instr.operands[0].size == 2);
+		X86OperandType src = (X86OperandType)(X86_AX + ((movImmByte[0] & 7) >> 3));
+		ASSERT_TRUE(instr.operands[0].operandType == src);
+		ASSERT_TRUE(instr.operands[0].size == 2);
+	}
+
+	static const uint8_t movSeg[] = {0x8e, 0x28};
+	{
+		X86Instruction instr;
+		SetOpcodeBytes(&m_data, movSeg, sizeof(movSeg));
+		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		ASSERT_TRUE(result);
+		ASSERT_TRUE(instr.op == X86_MOV);
+		ASSERT_TRUE(instr.length == 2);
+		ASSERT_TRUE(instr.operands[0].operandType == X86_GS);
+		ASSERT_TRUE(instr.operands[0].size == 2);
+		ASSERT_TRUE(instr.operands[1].operandType == X86_MEM);
+		ASSERT_TRUE(instr.operands[1].size == 2);
+	}
+
+	static const uint8_t lea[] = {0x8d, 0x00};
+	{
+		X86Instruction instr;
+		SetOpcodeBytes(&m_data, lea, sizeof(lea));
+		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		ASSERT_TRUE(result);
+		ASSERT_TRUE(instr.op == X86_LEA);
+		ASSERT_TRUE(instr.length == 2);
+		ASSERT_TRUE(instr.operands[0].operandType == X86_AX);
+		ASSERT_TRUE(instr.operands[0].size == 2);
+		ASSERT_TRUE(instr.operands[1].operandType == X86_MEM);
+		ASSERT_TRUE(instr.operands[1].size == 2);
+		ASSERT_TRUE(instr.operands[1].components[0] == X86_BX);
+		ASSERT_TRUE(instr.operands[1].components[1] == X86_SI);
+	}
 }
 
 
@@ -713,9 +800,13 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_INC:
 		return (op2 == UD_Iinc);
 	case X86_INS:
+		return false;
 	case X86_INSB:
+		return (op2 == UD_Iinsb);
 	case X86_INSW:
+		return (op2 == UD_Iinsw);
 	case X86_INSD:
+		return (op2 == UD_Iinsd);
 	case X86_INSERTPS:
 	case X86_INT:
 	case X86_INT1:
@@ -795,7 +886,9 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_LDDQU:
 	case X86_LDMXCSR:
 	case X86_LDS:
+		return false;
 	case X86_LEA:
+		return (op2 == UD_Ilea);
 	case X86_LEAVE:
 	case X86_LES:
 	case X86_LFENCE:
@@ -898,9 +991,13 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_ORPS:
 	case X86_OUT:
 	case X86_OUTS:
+		return false;
 	case X86_OUTSB:
+		return (op2 == UD_Ioutsb);
 	case X86_OUTSW:
+		return (op2 == UD_Ioutsw);
 	case X86_OUTSD:
+		return (op2 == UD_Ioutsd);
 	case X86_PABSB:
 	case X86_PABSD:
 	case X86_PABSW:
@@ -1610,6 +1707,12 @@ bool SkipOperandsCheck(X86Operation op)
 	case X86_CMPSW:
 	case X86_CMPSD:
 	case X86_CMPSQ:
+	case X86_INSB:
+	case X86_INSW:
+	case X86_INSD:
+	case X86_OUTSB:
+	case X86_OUTSW:
+	case X86_OUTSD:
 		return true;
 	default:
 		return false;
@@ -1617,9 +1720,23 @@ bool SkipOperandsCheck(X86Operation op)
 }
 
 
-bool SkipOperandsSizeCheck(X86Operation op)
+bool SkipOperandsSizeCheck(const X86Instruction* const instr, size_t operand)
 {
-	return (op == X86_BOUND);
+	if (instr->op == X86_BOUND)
+		return true;
+	if ((instr->op == X86_LEA) && (operand == 1))
+		return true;
+	switch (instr->operands[operand].operandType)
+	{
+	case X86_SS:
+	case X86_CS:
+	case X86_ES:
+	case X86_DS:
+	case X86_FS:
+	case X86_GS:
+		return true;
+	}
+	return false;
 }
 
 
@@ -1636,6 +1753,9 @@ bool CompareImmediates(const X86Operand* const operand, const struct ud_operand*
 	case 64:
 		return (operand2->lval.sqword == operand->immediate);
 	default:
+		// Evil instrs like lea have zero len but still an imm component
+		if (operand->immediate == SIGN_EXTEND64(operand2->lval.uqword, operand->size))
+			return true;
 		return false;
 	}
 }
@@ -1715,9 +1835,8 @@ TEST_F(AsmTest, Disassemble16)
 			const struct ud_operand* const operand = ud_insn_opr(&ud_obj, (unsigned int)i);
 			ASSERT_TRUE(operand != NULL);
 
-			if (SkipOperandsSizeCheck(instr.op))
-				continue;
-			ASSERT_TRUE(instr.operands[i].size == (operand->size >> 3));
+			if (!SkipOperandsSizeCheck(&instr, i))
+				ASSERT_TRUE(instr.operands[i].size == (operand->size >> 3));
 
 			switch (instr.operands[i].operandType)
 			{

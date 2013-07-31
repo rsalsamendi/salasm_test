@@ -124,42 +124,42 @@
 %macro TEST_ARITHMETIC_RM16_REV 2
 	; Test ModRM Mod==0
 	%1 %2, word [BX + SI]
-; 	%1 %2, word [BX + DI]
-; 	%1 %2, word [BP + SI]
-; 	%1 %2, word [SI]
-; 	%1 %2, word [DI]
-; 	%1 %2, word [0xffff]
-; 	%1 %2, word [0x0001]
-; 	%1 %2, word [BX]
-; 
-; 	; Test ModRM Mod==1
-; 	%1 %2, word [BX + SI + 1]
-; 	%1 %2, word [BX + SI + 0xff]
-; 	%1 %2, word [SI + 1]
-; 	%1 %2, word [SI + 0xff]
-; 	%1 %2, word [DI + 1]
-; 	%1 %2, word [DI + 0xff]
-; 	%1 %2, word [BP + 1]
-; 	%1 %2, word [BP + 0xff]
-; 	%1 %2, word [BX + 1]
-; 	%1 %2, word [BX + 0xff]
-; 
-; 	; Test ModRM Mod==2
-; 	%1 %2, word [BX + SI + 0xffff]
-; 	%1 %2, word [SI + 0xffff]
-; 	%1 %2, word [DI + 0xffff]
-; 	%1 %2, word [BP + 0xffff]
-; 	%1 %2, word [BX + 0xffff]
-; 
-; 	; Test ModRM Mod==3
-; 	%1 %2, AX
-; 	%1 %2, CX
-; 	%1 %2, DX
-; 	%1 %2, BX
-; 	%1 %2, SP
-; 	%1 %2, BP
-; 	%1 %2, SI
-; 	%1 %2, DI
+	%1 %2, word [BX + DI]
+	%1 %2, word [BP + SI]
+	%1 %2, word [SI]
+	%1 %2, word [DI]
+	%1 %2, word [0xffff]
+	%1 %2, word [0x0001]
+	%1 %2, word [BX]
+
+	; Test ModRM Mod==1
+	%1 %2, word [BX + SI + 1]
+	%1 %2, word [BX + SI + 0xff]
+	%1 %2, word [SI + 1]
+	%1 %2, word [SI + 0xff]
+	%1 %2, word [DI + 1]
+	%1 %2, word [DI + 0xff]
+	%1 %2, word [BP + 1]
+	%1 %2, word [BP + 0xff]
+	%1 %2, word [BX + 1]
+	%1 %2, word [BX + 0xff]
+
+	; Test ModRM Mod==2
+	%1 %2, word [BX + SI + 0xffff]
+	%1 %2, word [SI + 0xffff]
+	%1 %2, word [DI + 0xffff]
+	%1 %2, word [BP + 0xffff]
+	%1 %2, word [BX + 0xffff]
+
+	; Test ModRM Mod==3
+	%1 %2, AX
+	%1 %2, CX
+	%1 %2, DX
+	%1 %2, BX
+	%1 %2, SP
+	%1 %2, BP
+	%1 %2, SI
+	%1 %2, DI
 %endmacro ; TEST_ARITHMETIC_RM16
 
 %macro TEST_ARITHMETIC_MODRM8 1
@@ -295,6 +295,27 @@ bound di, [1]
 
 TEST_ARITHMETIC_MODRM16 arpl
 
+push 0
+push 1
+push 0xff
+push 0xffff
+
+; TODO: Write a better test
+imul bx, cx, -1
+
+push 0
+push 1
+push 0xff
+
+; TODO: Write a better test
+imul dx, ax, 0xff
+
+; TODO: rep!
+insb
+insw
+outsb
+outsw
+
 ; Row 7
 ; Can't get yasm to emit the one byte form of these jmps, so do it here
 ; jo
@@ -377,12 +398,78 @@ TEST_GROUP1_16 sub
 TEST_GROUP1_16 xor
 TEST_GROUP1_16 cmp
 
-TEST_ARITHMETIC_MODRM8 test
-TEST_ARITHMETIC_MODRM16 test
-
-nop
-TEST_ARITHMETIC_MODRM8 xchg
+TEST_ARITHMETIC16 test
+TEST_ARITHMETIC_MODRM8_REV xchg
 TEST_ARITHMETIC_MODRM16 xchg
+TEST_ARITHMETIC16 mov
+
+; TODO: test mov Mw/Rv, Sw
+
+TEST_ARITHMETIC_RM16_REV mov, es
+TEST_ARITHMETIC_RM16_REV mov, ds
+TEST_ARITHMETIC_RM16_REV mov, cs
+TEST_ARITHMETIC_RM16_REV mov, ss
+TEST_ARITHMETIC_RM16_REV mov, fs
+TEST_ARITHMETIC_RM16_REV mov, gs
+
+; TODO: lea will be invalid for gpr
+; Test ModRM Mod==0
+%macro TEST_LEA16 1
+lea %1, word [BX + SI]
+lea %1, word [BX + DI]
+lea %1, word [BP + SI]
+lea %1, word [SI]
+lea %1, word [DI]
+lea %1, word [0xffff]
+lea %1, word [0x0001]
+lea %1, word [BX]
+
+; Test ModRM Mod==1
+lea %1, word [BX + SI + 1]
+lea %1, word [BX + SI + 0xff]
+lea %1, word [SI + 1]
+lea %1, word [SI + 0xff]
+lea %1, word [DI + 1]
+lea %1, word [DI + 0xff]
+lea %1, word [BP + 1]
+lea %1, word [BP + 0xff]
+lea %1, word [BX + 1]
+lea %1, word [BX + 0xff]
+
+; Test ModRM Mod==2
+lea %1, word [BX + SI + 0xffff]
+lea %1, word [SI + 0xffff]
+lea %1, word [DI + 0xffff]
+lea %1, word [BP + 0xffff]
+lea %1, word [BX + 0xffff]
+%endmacro ; TEST_LEA16
+
+TEST_LEA16 ax
+TEST_LEA16 cx
+TEST_LEA16 dx
+TEST_LEA16 bx
+TEST_LEA16 sp
+TEST_LEA16 bp
+TEST_LEA16 si
+TEST_LEA16 di
+
+TEST_ARITHMETIC_RM16 mov, es
+TEST_ARITHMETIC_RM16 mov, ds
+TEST_ARITHMETIC_RM16 mov, cs
+TEST_ARITHMETIC_RM16 mov, ss
+TEST_ARITHMETIC_RM16 mov, fs
+TEST_ARITHMETIC_RM16 mov, gs
+
+; Row 9
+; one byte form
+nop
+xchg cx, ax
+xchg dx, ax
+xchg bx, ax
+xchg sp, ax
+xchg bp, ax
+xchg si, ax
+xchg di, ax
 
 TEST_ARITHMETIC_MODRM8 mov
 TEST_ARITHMETIC_MODRM16 mov
