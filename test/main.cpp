@@ -493,6 +493,50 @@ TEST_F(AsmTest, DisassemblePastBugs)
 		ASSERT_TRUE(instr.op == X86_POPF);
 		ASSERT_TRUE(instr.length == 1);
 	}
+
+	static const uint8_t stosw = 0xab;
+	{
+		X86Instruction instr;
+		SetOpcodeBytes(&m_data, &stosw, sizeof(stosw));
+		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		ASSERT_TRUE(result);
+		ASSERT_TRUE(instr.op == X86_STOSW);
+		ASSERT_TRUE(instr.length == 1);
+	}
+
+	static const uint8_t lodsb = 0xac;
+	{
+		X86Instruction instr;
+		SetOpcodeBytes(&m_data, &lodsb, sizeof(lodsb));
+		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		ASSERT_TRUE(result);
+		ASSERT_TRUE(instr.op == X86_LODSB);
+		ASSERT_TRUE(instr.length == 1);
+	}
+
+	static const uint8_t rolCl[] = {0xd2, 0xc0};
+	{
+		X86Instruction instr;
+		SetOpcodeBytes(&m_data, rolCl, sizeof(rolCl));
+		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		ASSERT_TRUE(result);
+		ASSERT_TRUE(instr.op == X86_ROL);
+		ASSERT_TRUE(instr.length == 2);
+		ASSERT_TRUE(instr.operands[1].operandType == X86_CL);
+		ASSERT_TRUE(instr.operands[1].size == 1);
+	}
+
+	static const uint8_t inByte[] = {0xe4, 0xff};
+	{
+		X86Instruction instr;
+		SetOpcodeBytes(&m_data, inByte, sizeof(inByte));
+		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		ASSERT_TRUE(result);
+		ASSERT_TRUE(instr.op == X86_IN);
+		ASSERT_TRUE(instr.length == 2);
+		ASSERT_TRUE(instr.operands[1].size == 1);
+		ASSERT_TRUE(instr.operands[1].operandType == X86_IMMEDIATE);
+	}
 }
 
 
@@ -683,6 +727,7 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_DEC:
 		return (op2 == UD_Idec);
 	case X86_DIV:
+		return (op2 == UD_Idiv);
 	case X86_DIVPD:
 	case X86_DIVPS:
 	case X86_DIVSD:
@@ -690,7 +735,9 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_DPPD:
 	case X86_DPPS:
 	case X86_EMMS:
+		return false;
 	case X86_ENTER:
+		return (op2 == UD_Ienter);
 	case X86_EXTRACTPS:
 	case X86_F2XM1:
 	case X86_FABS:
@@ -809,10 +856,13 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_HLT:
 	case X86_HSUBPD:
 	case X86_HSUBPS:
+		return false;
 	case X86_IDIV:
+		return (op2 == UD_Iidiv);
 	case X86_IMUL:
 		return (op2 == UD_Iimul);
 	case X86_IN:
+		return (op2 == UD_Iin);
 	case X86_INC:
 		return (op2 == UD_Iinc);
 	case X86_INS:
@@ -824,19 +874,31 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_INSD:
 		return (op2 == UD_Iinsd);
 	case X86_INSERTPS:
+		return (op2 == UD_Iinsertps);
 	case X86_INT:
+		return (op2 == UD_Iint);
 	case X86_INT1:
+		return (op2 == UD_Iint1);
 	case X86_INT3:
+		return (op2 == UD_Iint3);
 	case X86_ICEBP:
-	case X86_INTO:
-	case X86_INVD:
-	case X86_INVEPT:
-	case X86_INVLPG:
-	case X86_INVVPID:
-	case X86_IRET:
-	case X86_IRETD:
-	case X86_IRETQ:
 		return false;
+	case X86_INTO:
+		return (op2 == UD_Iinto);
+	case X86_INVD:
+		return (op2 == UD_Iinvd);
+	case X86_INVEPT:
+		return (op2 == UD_Iinvept);
+	case X86_INVLPG:
+		return (op2 == UD_Iinvlpg);
+	case X86_INVVPID:
+		return (op2 == UD_Iinvvpid);
+	case X86_IRET:
+		return (op2 == UD_Iiretw);
+	case X86_IRETD:
+		return (op2 == UD_Iiretd);
+	case X86_IRETQ:
+		return (op2 == UD_Iiretq);
 	case X86_JB:
 	case X86_JNAE: // Fall through
 		return (op2 == UD_Ijb);
@@ -907,6 +969,7 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_LEA:
 		return (op2 == UD_Ilea);
 	case X86_LEAVE:
+		return (op2 == UD_Ileave);
 	case X86_LES:
 	case X86_LFENCE:
 	case X86_LFS:
@@ -916,10 +979,15 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_LLDT:
 	case X86_LMSW:
 	case X86_LODS:
+		return false;
 	case X86_LODSB:
+		return (op2 == UD_Ilodsb);
 	case X86_LODSW:
+		return (op2 == UD_Ilodsw);
 	case X86_LODSD:
+		return (op2 == UD_Ilodsd);
 	case X86_LODSQ:
+		return (op2 == UD_Ilodsq);
 	case X86_LOOP:
 		return (op2 == UD_Iloop);
 	case X86_LOOPNZ:
@@ -989,7 +1057,9 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_MOVUPS:
 	case X86_MOVZX:
 	case X86_MPSADBW:
+		return false;
 	case X86_MUL:
+		return (op2 == UD_Imul);
 	case X86_MULPD:
 	case X86_MULPS:
 	case X86_MULSD:
@@ -1005,8 +1075,11 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_OR:
 		return (op2 == UD_Ior);
 	case X86_ORPD:
+		return (op2 == UD_Iorpd);
 	case X86_ORPS:
+		return (op2 == UD_Iorps);
 	case X86_OUT:
+		return (op2 == UD_Iout);
 	case X86_OUTS:
 		return false;
 	case X86_OUTSB:
@@ -1169,17 +1242,29 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_PUSHFD:
 		return (op2 == UD_Ipushfd);
 	case X86_PXOR:
+		return (op2 == UD_Ipxor);
 	case X86_RCL:
+		return (op2 == UD_Ircl);
 	case X86_RCPPS:
+		return (op2 == UD_Ircpps);
 	case X86_RCR:
+		return (op2 == UD_Ircr);
 	case X86_RDMSR:
+		return (op2 == UD_Irdmsr);
 	case X86_RDPMC:
+		return (op2 == UD_Irdpmc);
 	case X86_RDTSC:
+		return (op2 == UD_Irdtsc);
 	case X86_RDTSCP:
+		return (op2 == UD_Irdtscp);
 	case X86_RETF:
+		return (op2 == UD_Iretf);
 	case X86_RETN:
+		return (op2 == UD_Iret);
 	case X86_ROL:
+		return (op2 == UD_Irol);
 	case X86_ROR:
+		return (op2 == UD_Iror);
 	case X86_ROUNDPD:
 	case X86_ROUNDPS:
 	case X86_ROUNDSD:
@@ -1192,17 +1277,25 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 		return (op2 == UD_Isahf);
 	case X86_SAL:
 	case X86_SHL:
+		return (op2 == UD_Ishl);
 	case X86_SALC:
+		return (op2 == UD_Isalc);
 	case X86_SETALC:
-	case X86_SAR:
 		return false;
+	case X86_SAR:
+		return (op2 == UD_Isar);
 	case X86_SBB:
 		return (op2 == UD_Isbb);
 	case X86_SCAS:
+		return false;
 	case X86_SCASB:
+		return (op2 == UD_Iscasb);
 	case X86_SCASW:
+		return (op2 == UD_Iscasw);
 	case X86_SCASD:
+		return (op2 == UD_Iscasd);
 	case X86_SCASQ:
+		return (op2 == UD_Iscasq);
 	case X86_SETB:
 	case X86_SETNAE:
 	case X86_SETC:
@@ -1236,7 +1329,9 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_SFENCE:
 	case X86_SGDT:
 	case X86_SHLD:
+		return false;
 	case X86_SHR:
+		return (op2 == UD_Ishr);
 	case X86_SHRD:
 	case X86_SHUFPD:
 	case X86_SHUFPS:
@@ -1246,15 +1341,25 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_SQRTPS:
 	case X86_SQRTSD:
 	case X86_SQRTSS:
+		return false;
 	case X86_STC:
+		return (op2 == UD_Istc);
 	case X86_STD:
+		return (op2 == UD_Istd);
 	case X86_STI:
+		return (op2 == UD_Isti);
 	case X86_STMXCSR:
+		return (op2 == UD_Istmxcsr);
 	case X86_STOS:
+		return false;
 	case X86_STOSB:
+		return (op2 == UD_Istosb);
 	case X86_STOSW:
+		return (op2 == UD_Istosw);
 	case X86_STOSD:
+		return (op2 == UD_Istosd);
 	case X86_STOSQ:
+		return (op2 == UD_Istosq);
 	case X86_STR:
 		return false;
 	case X86_SUB:
@@ -1554,7 +1659,7 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_XGETBV:
 	case X86_XLAT:
 	case X86_XLATB:
-		return false;
+		return (op2 == UD_Ixlatb);
 	case X86_XOR:
 		return (op2 == UD_Ixor);
 	case X86_XORPD:
@@ -1738,6 +1843,20 @@ bool SkipOperandsCheck(X86Operation op)
 	case X86_OUTSB:
 	case X86_OUTSW:
 	case X86_OUTSD:
+	case X86_STOSB:
+	case X86_STOSW:
+	case X86_STOSD:
+	case X86_STOSQ:
+	case X86_LODSB:
+	case X86_LODSW:
+	case X86_LODSD:
+	case X86_LODSQ:
+	case X86_SCASB:
+	case X86_SCASW:
+	case X86_SCASD:
+	case X86_SCASQ:
+	case X86_XLAT:
+	case X86_XLATB:
 		return true;
 	default:
 		return false;
@@ -1747,10 +1866,38 @@ bool SkipOperandsCheck(X86Operation op)
 
 bool SkipOperandsSizeCheck(const X86Instruction* const instr, size_t operand)
 {
-	if (instr->op == X86_BOUND)
+	switch (instr->op)
+	{
+	case X86_BOUND:
 		return true;
-	if ((instr->op == X86_LEA) && (operand == 1))
+	case X86_LEA:
+	case X86_ROL:
+	case X86_ROR:
+	case X86_RCL:
+	case X86_RCR:
+	case X86_SHL:
+	case X86_SHR:
+	case X86_SAL:
+	case X86_SAR:
+		if (operand == 1)
+			return true;
+		break;
+	case X86_STOSB:
+	case X86_STOSW:
+	case X86_STOSD:
+	case X86_STOSQ:
+	case X86_LODSB:
+	case X86_LODSW:
+	case X86_LODSD:
+	case X86_LODSQ:
+	case X86_SCASB:
+	case X86_SCASW:
+	case X86_SCASD:
+	case X86_SCASQ:
 		return true;
+	default: break;
+	}
+
 	switch (instr->operands[operand].operandType)
 	{
 	case X86_SS:
@@ -1866,7 +2013,8 @@ TEST_F(AsmTest, Disassemble16)
 			switch (instr.operands[i].operandType)
 			{
 			case X86_IMMEDIATE:
-				ASSERT_TRUE (operand->type == UD_OP_IMM);
+				ASSERT_TRUE ((operand->type == UD_OP_IMM)
+					|| (operand->type == UD_OP_CONST) || (operand->type == UD_OP_JIMM));
 				result = CompareImmediates(&instr.operands[i], operand);
 				ASSERT_TRUE(result);
 				break;

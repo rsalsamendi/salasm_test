@@ -461,7 +461,7 @@ TEST_ARITHMETIC_RM16 mov, fs
 TEST_ARITHMETIC_RM16 mov, gs
 
 ; Row 9
-; one byte form
+; one byte r/r form
 nop
 xchg cx, ax
 xchg dx, ax
@@ -481,25 +481,268 @@ sahf
 lahf
 
 ; Row 0xa
-TEST_ARITHMETIC_MODRM8 mov
-TEST_ARITHMETIC_MODRM16 mov
-
-mov al, byte [1]
-mov al, byte [0xffff]
-
-mov ax, word [1]
-mov ax, word [0xffff]
-
-mov byte [1], al
-mov byte [0xffff], al
-
-mov word [1], ax
-mov word [0xffff], ax
+mov al, [0x1]
+mov al, [0xff]
+mov ax, [0x1]
+mov ax, [0xffff]
+mov [0x1], al
+mov [0xff], al
+mov [0x1], ax
+mov [0xffff], ax
 
 movsb
 movsw
 cmpsb
 cmpsw
+
+test al, 0x1
+test ax, 0xffff
+
+stosb
+stosw
+lodsb
+lodsw
+scasb
+scasw
+
+; Row 0xb
+mov al, 0xff
+mov cl, 0xff
+mov dl, 0xff
+mov bl, 0xff
+mov ah, 0xff
+mov ch, 0xff
+mov dh, 0xff
+mov bh, 0xff
+
+mov ax, 0xffff
+mov cx, 0xffff
+mov dx, 0xffff
+mov bx, 0xffff
+mov sp, 0xffff
+mov bp, 0xffff
+mov si, 0xffff
+mov di, 0xffff
+
+; Row 0xc
+%macro Group2Row 2
+rol %1, %2
+ror %1, %2
+rcl %1, %2
+rcr %1, %2
+shl %1, %2
+shr %1, %2
+sal %1, %2
+sar %1, %2
+%endmacro ; Group2Row
+%macro Group2Col 1
+; Row 0 (c0)
+Group2Row %1l, 2
+Group2Row %1h, 2
+
+; Row 1 (c1)
+Group2Row %1x, 2
+
+; Row 2 (d0)
+Group2Row %1l, 1
+Group2Row %1h, 1
+
+; Row 3 (d1)
+Group2Row %1x, 1
+
+; Row 4 (d2)
+Group2Row %1l, cl
+Group2Row %1h, cl
+
+; Row 5 (d3)
+Group2Row %1x, cl
+%endmacro ; Group2Col
+
+Group2Col a
+Group2Col c
+Group2Col d
+Group2Col b
+Group2Row sp, 2
+Group2Row bp, 2
+Group2Row si, 2
+Group2Row di, 2
+
+aam 0x1
+aad 0x1
+
+xlat
+xlatb
+
+retn 0xffff
+retn
+; FIXME
+; les [0xffff]
+; lds [0xffff]
+
+; Group11 eb, ib, ev, iz
+mov al, 2
+mov cl, 2
+mov dl, 2
+mov bl, 2
+mov ah, 2
+mov ch, 2
+mov dh, 2
+mov bh, 2
+
+mov ax, 0xffff
+mov cx, 0xffff
+mov dx, 0xffff
+mov bx, 0xffff
+mov sp, 0xffff
+mov bp, 0xffff
+mov si, 0xffff
+mov di, 0xffff
+
+enter 0xffff, 0x1f
+leave
+
+retf 0xffff
+retf
+
+int3
+int 2
+
+into
+
+iret
+
+; Row 0xd
+
+; Row 0xe
+loopne .label
+.label
+loope .label2
+.label2
+loop .label3
+.label3
+jcxz .label4
+.label4
+
+in al, 0xff
+in ax, 0xff
+out 0xff, al
+out 0xff, ax
+
+call 0xffff
+jmp 0xffff
+jmp [0xffff]
+jmp .label5
+.label5
+
+in al, dx
+in ax, dx
+out dx, al
+out dx, ax
+
+; Row 0xf
+clc
+stc
+cli
+sti
+cld
+std
+int1
+hlt
+cmc
+
+; Group3
+%macro Group3Col 1
+test %1, 2
+not %1
+neg %1
+mul %1
+imul %1
+div %1
+idiv %1
+%endmacro ; Group3Col
+%macro Group3Row 1
+Group3Col %1l
+Group3Col %1h
+Group3Col %1x
+%endmacro ; Group3Row
+
+Group3Row a
+Group3Row b
+Group3Row d
+Group3Row b
+Group3Col sp
+Group3Col bp
+Group3Col si
+Group3Col di
+
+; Group4
+inc al
+inc cl
+inc dl
+inc bl
+inc ah
+inc ch
+inc dh
+inc bh
+dec al
+dec cl
+dec dl
+dec bl
+dec ah
+dec ch
+dec dh
+dec bh
+
+; Group5
+inc ax
+inc cx
+inc dx
+inc bx
+inc sp
+inc bp
+inc si
+inc di
+
+dec ax
+dec cx
+dec dx
+dec bx
+dec sp
+dec bp
+dec si
+dec di
+
+call ax
+call cx
+call dx
+call bx
+call sp
+call bp
+call si
+call di
+
+call [0xffff]
+
+jmp ax
+jmp cx
+jmp dx
+jmp bx
+jmp sp
+jmp bp
+jmp si
+jmp di
+
+jmp [0xffff]
+
+push ax
+push cx
+push dx
+push bx
+push sp
+push bp
+push si
+push di
+
 
 
 
