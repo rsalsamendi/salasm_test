@@ -640,12 +640,6 @@ out dx, al
 out dx, ax
 
 ; Row 0xf
-clc
-stc
-cli
-sti
-cld
-std
 int1
 hlt
 cmc
@@ -674,6 +668,13 @@ Group3Col sp
 Group3Col bp
 Group3Col si
 Group3Col di
+
+clc
+stc
+cli
+sti
+cld
+std
 
 ; Group4
 inc al

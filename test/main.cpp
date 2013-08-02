@@ -853,7 +853,9 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_HADDPD:
 	case X86_HADDPS:
 	case X86_HINT_NOP:
+		return false;
 	case X86_HLT:
+		return (op2 == UD_Ihlt);
 	case X86_HSUBPD:
 	case X86_HSUBPS:
 		return false;
