@@ -613,6 +613,145 @@ iret
 
 ; Row 0xd
 
+; 0xd8
+%macro FpuMemoryOperand 2
+	; Test ModRM Mod==0
+	%1 %2 [BX + SI]
+	%1 %2 [BX + DI]
+	%1 %2 [BP + SI]
+	%1 %2 [SI]
+	%1 %2 [DI]
+	%1 %2 [0xffff]
+	%1 %2 [0x0001]
+	%1 %2 [BX]
+
+	; Test ModRM Mod==1
+	%1 %2 [BX + SI + 1]
+	%1 %2 [BX + SI + 0xff]
+	%1 %2 [SI + 1]
+	%1 %2 [SI + 0xff]
+	%1 %2 [DI + 1]
+	%1 %2 [DI + 0xff]
+	%1 %2 [BP + 1]
+	%1 %2 [BP + 0xff]
+	%1 %2 [BX + 1]
+	%1 %2 [BX + 0xff]
+
+	; Test ModRM Mod==2
+	%1 %2 [BX + SI + 0xffff]
+	%1 %2 [SI + 0xffff]
+	%1 %2 [DI + 0xffff]
+	%1 %2 [BP + 0xffff]
+	%1 %2 [BX + 0xffff]
+%endmacro ; TEST_ARITHMETIC_RM16
+
+%macro FpuCol 2
+FpuMemoryOperand %1, dword
+	%1 %2
+	%1 %2
+	%1 %2
+	%1 %2
+	%1 %2
+	%1 %2
+	%1 %2
+	%1 %2
+%endmacro ; FpuCol
+
+%macro FpuColNoMem 2
+	%1 %2
+	%1 %2
+	%1 %2
+	%1 %2
+	%1 %2
+	%1 %2
+	%1 %2
+	%1 %2
+%endmacro ; FpuCol
+
+%macro FpuRowD8 1
+FpuCol fadd, %1
+FpuCol fmul, %1
+FpuCol fcom, %1
+FpuCol fcomp, %1
+FpuCol fsub, %1
+FpuCol fsubr, %1
+FpuCol fdiv, %1
+FpuCol fdivr, %1
+%endmacro ; FpuRowD8
+
+FpuRowD8 st0
+FpuRowD8 st1
+FpuRowD8 st2
+FpuRowD8 st3
+FpuRowD8 st4
+FpuRowD8 st5
+FpuRowD8 st6
+FpuRowD8 st0
+
+; 0xd9
+%macro FpuRowD9 1
+FpuCol fld, %1
+%endmacro FpuRowD9
+
+FpuRowD9 st0
+FpuRowD9 st1
+FpuRowD9 st2
+FpuRowD9 st3
+FpuRowD9 st4
+FpuRowD9 st5
+FpuRowD9 st6
+FpuRowD9 st7
+
+%macro FpuRowNoMemD9 1
+FpuColNoMem %1, st0
+FpuColNoMem %1, st0
+FpuColNoMem %1, st0
+FpuColNoMem %1, st0
+FpuColNoMem %1, st0
+FpuColNoMem %1, st0
+FpuColNoMem %1, st0
+FpuColNoMem %1, st0
+%endmacro
+
+FpuRowNoMem fxch
+FpuMemoryOperand fst, dword
+fnop
+FpuMemoryOperand fstp, dword
+FpuMemoryOperand fstp, dword
+fldenv [0xffff]
+FpuMemoryOperand fldcw, word
+fstenv [0xffff]
+FpuMemoryOperand fnstcw, word
+fchs
+fabs
+ftst
+fxam
+fld1
+fldl2t
+fldl2e
+fldpi
+fldlg2
+fldln2
+fldz
+f2xm1
+fyl2x
+fptan
+fpatan
+fxtract
+fprem1
+fdecstp
+fincstp
+fprem
+fyl2xp1
+fsqrt
+fsincos
+frndint
+fscale
+fsin
+fcos
+
+; 0xda
+
 ; Row 0xe
 loopne .label
 .label
@@ -743,11 +882,3 @@ push sp
 push bp
 push si
 push di
-
-
-
-
-
-
-
-

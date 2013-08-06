@@ -565,6 +565,19 @@ TEST_F(AsmTest, DisassemblePastBugs)
 		ASSERT_TRUE(instr.operands[1].size == 1);
 		ASSERT_TRUE(instr.operands[1].operandType == X86_IMMEDIATE);
 	}
+
+	static const uint8_t faddMem[2] = {0xd8, 0x01};
+	{
+		X86Instruction instr;
+		SetOpcodeBytes(&m_data, faddMem, sizeof(faddMem));
+		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		ASSERT_TRUE(result);
+		ASSERT_TRUE(instr.op == X86_FADD);
+		ASSERT_TRUE(instr.length == 2);
+		ASSERT_TRUE(instr.operands[1].size == 4);
+		ASSERT_TRUE(instr.operands[1].operandType == X86_MEM);
+		ASSERT_TRUE(instr.operands[0].operandType == X86_ST0);
+	}
 }
 
 
@@ -767,69 +780,129 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_ENTER:
 		return (op2 == UD_Ienter);
 	case X86_EXTRACTPS:
+		return false;
 	case X86_F2XM1:
+		return (op2 == UD_If2xm1);
 	case X86_FABS:
+		return (op2 == UD_Ifabs);
 	case X86_FADD:
+		return (op2 == UD_Ifadd);
 	case X86_FADDP:
+		return (op2 == UD_Ifaddp);
 	case X86_FBLD:
+		return (op2 == UD_Ifbld);
 	case X86_FBSTP:
+		return (op2 == UD_Ifbstp);
 	case X86_FCHS:
+		return (op2 == UD_Ifchs);
 	case X86_FCLEX:
+		return (op2 == UD_Ifclex);
 	case X86_FCMOVB:
+		return (op2 == UD_Ifcmovb);
 	case X86_FCMOVBE:
+		return (op2 == UD_Ifcmovbe);
 	case X86_FCMOVE:
+		return (op2 == UD_Ifcmove);
 	case X86_FCMOVNB:
+		return (op2 == UD_Ifcmovnb);
 	case X86_FCMOVNBE:
+		return (op2 == UD_Ifcmovnbe);
 	case X86_FCMOVNE:
+		return (op2 == UD_Ifcmovne);
 	case X86_FCMOVNU:
+		return (op2 == UD_Ifcmovnu);
 	case X86_FCMOVU:
+		return (op2 == UD_Ifcmovu);
 	case X86_FCOM:
+		return (op2 == UD_Ifcom);
 	case X86_FCOM2:
+		return (op2 == UD_Ifcom2);
 	case X86_FCOMI:
+		return (op2 == UD_Ifcomi);
 	case X86_FCOMIP:
+		return (op2 == UD_Ifcomip);
 	case X86_FCOMP:
+		return (op2 == UD_Ifcomp);
 	case X86_FCOMP3:
+		return (op2 == UD_Ifcomp3);
 	case X86_FCOMP5:
+		return (op2 == UD_Ifcomp5);
 	case X86_FCOMPP:
+		return (op2 == UD_Ifcompp);
 	case X86_FCOS:
+		return (op2 == UD_Ifcos);
 	case X86_FDECSTP:
+		return (op2 == UD_Ifdecstp);
 	case X86_FDIV:
+		return (op2 == UD_Ifdiv);
 	case X86_FDIVP:
+		return (op2 == UD_Ifdivp);
 	case X86_FDIVR:
+		return (op2 == UD_Ifdivr);
 	case X86_FDIVRP:
+		return (op2 == UD_Ifdivrp);
 	case X86_FFREE:
+		return (op2 == UD_Iffree);
 	case X86_FFREEP:
+		return (op2 == UD_Iffreep);
 	case X86_FIADD:
+		return (op2 == UD_Ifiadd);
 	case X86_FICOM:
+		return (op2 == UD_Ificom);
 	case X86_FICOMP:
+		return (op2 == UD_Ificomp);
 	case X86_FIDIV:
+		return (op2 == UD_Ifidiv);
 	case X86_FIDIVR:
+		return (op2 == UD_Ifidivr);
 	case X86_FILD:
+		return (op2 == UD_Ifild);
 	case X86_FIMUL:
+		return (op2 == UD_Ifimul);
 	case X86_FINCSTP:
+		return (op2 == UD_Ifincstp);
 	case X86_FINIT:
+		// return (op2 == UD_Ifinit);
+		return false;
 	case X86_FIST:
+		return (op2 == UD_Ifist);
 	case X86_FISTP:
+		return (op2 == UD_Ifistp);
 	case X86_FISTTP:
+		return (op2 == UD_Ifisttp);
 	case X86_FISUB:
+		return (op2 == UD_Ifisub);
 	case X86_FISUBR:
+		return (op2 == UD_Ifisubr);
 	case X86_FLD:
+		return (op2 == UD_Ifld);
 	case X86_FLD1:
+		return (op2 == UD_Ifld1);
 	case X86_FLDCW:
+		return (op2 == UD_Ifldcw);
 	case X86_FLDENV:
+		return (op2 == UD_Ifldenv);
 	case X86_FLDL2E:
 	case X86_FLDL2T:
 	case X86_FLDLG2:
 	case X86_FLDLN2:
 	case X86_FLDPI:
+		return false;
 	case X86_FLDZ:
+		return (op2 == UD_Ifldz);
 	case X86_FMUL:
+		return (op2 == UD_Ifmul);
 	case X86_FMULP:
+		return (op2 == UD_Ifmulp);
 	case X86_FNCLEX:
+		// return (op2 == UD_Ifclex);
+		return false;
 	case X86_FNDISI:
 	case X86_FNENI:
 	case X86_FNINIT:
+		return false;
 	case X86_FNOP:
+		return (op2 == UD_Ifnop);
 	case X86_FNSAVE:
 	case X86_FNSETPM:
 	case X86_FNSTCW:
@@ -1849,6 +1922,22 @@ static bool CompareRegisters(X86OperandType operand1, enum ud_type operand2)
 		return (operand2 == UD_R_FS);
 	case X86_GS:
 		return (operand2 == UD_R_GS);
+	case X86_ST0:
+		return (operand2 == UD_R_ST0);
+	case X86_ST1:
+		return (operand2 == UD_R_ST1);
+	case X86_ST2:
+		return (operand2 == UD_R_ST2);
+	case X86_ST3:
+		return (operand2 == UD_R_ST3);
+	case X86_ST4:
+		return (operand2 == UD_R_ST4);
+	case X86_ST5:
+		return (operand2 == UD_R_ST5);
+	case X86_ST6:
+		return (operand2 == UD_R_ST6);
+	case X86_ST7:
+		return (operand2 == UD_R_ST7);
 	default:
 		return false;
 	}
@@ -1944,22 +2033,100 @@ bool SkipOperandsSizeCheck(const X86Instruction* const instr, size_t operand)
 
 bool CompareImmediates(const X86Operand* const operand, const struct ud_operand* const operand2)
 {
-	switch (operand2->size)
+	int result;
+	if (operand->size != (operand2->size >> 3))
+		return false;
+	result = memcmp(&operand2->lval.uqword, &operand->immediate, operand2->size >> 3);
+	return (result == 0);
+}
+
+
+static void CompareOperand(const X86Operand* const operand1, const struct ud_operand* const operand2)
+{
+	bool result;
+	switch (operand1->operandType)
 	{
-	case 8:
-		return (operand2->lval.sbyte == (int8_t)operand->immediate);
-	case 16:
-		return (operand2->lval.sword == (int16_t)operand->immediate);
-	case 32:
-		return (operand2->lval.sdword == (int32_t)operand->immediate);
-	case 64:
-		return (operand2->lval.sqword == operand->immediate);
+	case X86_IMMEDIATE:
+		ASSERT_TRUE ((operand2->type == UD_OP_IMM)
+			|| (operand2->type == UD_OP_CONST) || (operand2->type == UD_OP_JIMM));
+		result = CompareImmediates(operand1, operand2);
+		ASSERT_TRUE(result);
+		break;
+	case X86_MEM:
+		ASSERT_TRUE (operand2->type == UD_OP_MEM);
+		ASSERT_TRUE(CompareRegisters(operand1->components[0], operand2->base));
+		ASSERT_TRUE(CompareRegisters(operand1->components[1], operand2->index));
+		ASSERT_TRUE(operand1->scale == operand2->scale);
+		result = CompareImmediates(operand1, operand2);
+		ASSERT_TRUE(result);
+
+		break;
 	default:
-		// Evil instrs like lea have zero operand size but still an imm component
-		if (operand->immediate == SIGN_EXTEND64(operand2->lval.uqword, operand->size))
-			return true;
+		// A register of some sort.
+		bool match = CompareRegisters(operand1->operandType, operand2->base);
+		ASSERT_TRUE(match);
+	}
+}
+
+
+static bool FpuInstr(const X86Instruction* const instr, const ud_t* const ud_obj)
+{
+	const struct ud_operand* operand;
+
+	switch(instr->op)
+	{
+	case X86_FADD:
+	case X86_FMUL:
+	case X86_FCOM:
+	case X86_FCOMP:
+	case X86_FSUB:
+	case X86_FSUBR:
+	case X86_FDIV:
+	case X86_FDIVR:
+	case X86_FLD:
+	case X86_FXCH:
+	case X86_FNOP:
+	case X86_FLDENV:
+	case X86_FSTENV:
+	case X86_FCHS:
+	case X86_FABS:
+	case X86_FTST:
+	case X86_FXAM:
+	case X86_FLD1:
+	case X86_FLDL2T:
+	case X86_FLDL2E:
+	case X86_FLDPI:
+	case X86_FLDLG2:
+	case X86_FLDLN2:
+	case X86_FLDZ:
+	case X86_F2XM1:
+	case X86_FYL2X:
+	case X86_FPTAN:
+	case X86_FPATAN:
+	case X86_FXTRACT:
+	case X86_FPREM1:
+	case X86_FDECSTP:
+	case X86_FINCSTP:
+	case X86_FPREM:
+	case X86_FYL2XP1:
+	case X86_FSQRT:
+	case X86_FSINCOS:
+	case X86_FRNDINT:
+	case X86_FSCALE:
+	case X86_FSIN:
+	case X86_FCOS:
+		break;
+	default:
 		return false;
 	}
+
+	if (instr->operandCount == 1)
+		return false;
+
+	operand = ud_insn_opr(ud_obj, 0);
+	CompareOperand(&instr->operands[1], operand);
+
+	return true;
 }
 
 
@@ -2038,37 +2205,19 @@ TEST_F(AsmTest, Disassemble16)
 		if (SkipOperandsCheck(instr.op))
 			continue;
 
+		if (FpuInstr(&instr, &ud_obj))
+			continue;
+
 		for (size_t i = 0; i < instr.operandCount; i++)
 		{
 			// Ensure counts match.
-			bool result;
 			const struct ud_operand* const operand = ud_insn_opr(&ud_obj, (unsigned int)i);
 			ASSERT_TRUE(operand != NULL);
 
 			if (!SkipOperandsSizeCheck(&instr, i))
 				ASSERT_TRUE(instr.operands[i].size == (operand->size >> 3));
 
-			switch (instr.operands[i].operandType)
-			{
-			case X86_IMMEDIATE:
-				ASSERT_TRUE ((operand->type == UD_OP_IMM)
-					|| (operand->type == UD_OP_CONST) || (operand->type == UD_OP_JIMM));
-				result = CompareImmediates(&instr.operands[i], operand);
-				ASSERT_TRUE(result);
-				break;
-			case X86_MEM:
-				ASSERT_TRUE (operand->type == UD_OP_MEM);
-				ASSERT_TRUE(CompareRegisters(instr.operands[i].components[0], operand->base));
-				ASSERT_TRUE(CompareRegisters(instr.operands[i].components[1], operand->index));
-				ASSERT_TRUE(instr.operands[i].scale == operand->scale);
-				result = CompareImmediates(&instr.operands[i], operand);
-				ASSERT_TRUE(result);
-				break;
-			default:
-				// A register of some sort.
-				bool match = CompareRegisters(instr.operands[i].operandType, operand->base);
-				ASSERT_TRUE(match);
-			}
+			CompareOperand(&instr.operands[i], operand);
 		}
 	}
 
