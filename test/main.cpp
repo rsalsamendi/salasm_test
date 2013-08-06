@@ -29,6 +29,31 @@
 
 class AsmTest;
 
+#ifdef WIN32
+#define INIT_PERF_CTR(name) \
+	uint64_t time ## name = 0; \
+	LARGE_INTEGER name ## Freq; \
+	LARGE_INTEGER begin ## name ## Time, end ## name ## Time; \
+	ASSERT_NE(QueryPerformanceFrequency(&name ## Freq), 0);
+
+#define BEGIN_PERF_CTR(name) \
+	begin ## name ## Time.QuadPart = 0; \
+	end ## name ## Time.QuadPart = 0; \
+	QueryPerformanceCounter(&begin ## name ## Time);
+
+#define END_PERF_CTR(name) \
+	QueryPerformanceCounter(&end ## name ## Time); \
+	time ## name += (end ## name ## Time.QuadPart - begin ## name ## Time.QuadPart);
+
+#define PRINT_PERF_CTR(name) \
+	printf(# name ": %llu us\n", time ## name / (name ## Freq.QuadPart / 1000000));
+#else /* Linux */
+#define INIT_PERF_CTR(name)
+#define BEGIN_PERF_CTR(name)
+#define END_PERF_CTR(name)
+#define PRINT_PERF_CTR(name)
+#endif /* WIN32 */
+
 static const char* g_fileName = NULL;
 
 struct OpcodeData
@@ -139,8 +164,11 @@ int main(int argc, char **argv)
 	result = RUN_ALL_TESTS();
 
 #ifdef WIN32
-	fprintf(stderr, "Press any key to continue...\n");
-	while (!_kbhit());
+	if (IsDebuggerPresent())
+	{
+		fprintf(stderr, "Press any key to continue...\n");
+		while (!_kbhit());
+	}
 #endif /* WIN32 */
 
 	return result;
@@ -1944,6 +1972,9 @@ TEST_F(AsmTest, Disassemble16)
 	size_t fileLen;
 	ud_t ud_obj;
 
+	INIT_PERF_CTR(salsasm);
+	INIT_PERF_CTR(udis);
+
 	file = fopen(g_fileName, "rb");
 	ASSERT_TRUE(file != NULL);
 
@@ -1973,7 +2004,10 @@ TEST_F(AsmTest, Disassemble16)
 		unsigned int bytes;
 		bool result;
 
+		BEGIN_PERF_CTR(salsasm)
 		result = Disassemble16((uint16_t)(fileLen - len), AsmTest::Fetch, this, &instr);
+		END_PERF_CTR(salsasm)
+
 		ASSERT_TRUE(result);
 
 		if (instr.flags & X86_FLAG_INSUFFICIENT_LENGTH)
@@ -1987,7 +2021,9 @@ TEST_F(AsmTest, Disassemble16)
 		ASSERT_TRUE(instr.length <= len);
 
 		// Now try the oracle
+		BEGIN_PERF_CTR(udis)
 		bytes = ud_disassemble(&ud_obj);
+		END_PERF_CTR(udis);
 
 		// Ensure we both agree on how many bytes the instr is
 		ASSERT_TRUE(bytes == instr.length);
@@ -2035,4 +2071,7 @@ TEST_F(AsmTest, Disassemble16)
 			}
 		}
 	}
+
+	PRINT_PERF_CTR(salsasm);
+	PRINT_PERF_CTR(udis);
 }
