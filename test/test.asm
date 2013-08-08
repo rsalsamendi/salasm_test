@@ -751,6 +751,175 @@ fsin
 fcos
 
 ; 0xda
+fiadd dword [0xffff]
+fimul dword [0xffff]
+ficom dword [0xffff]
+ficomp dword [0xffff]
+fisub dword [0xffff]
+fisubr dword [0xffff]
+fidiv dword [0xffff]
+fidivr dword [0xffff]
+
+%macro fpcomp 1
+fcmovb st0, %1
+fcmove st0, %1
+fcmovbe st0, %1
+fcmovu st0, %1
+%endmacro ;fpcomp
+
+fpcomp st0
+fpcomp st1
+fpcomp st2
+fpcomp st3
+fpcomp st4
+fpcomp st5
+fpcomp st6
+fpcomp st7
+
+fucompp
+
+; 0xdb
+FpuMemoryOperand fild, dword
+FpuMemoryOperand fisttp, dword
+FpuMemoryOperand fist, dword
+FpuMemoryOperand fistp, dword
+FpuMemoryOperand fld, tword
+FpuMemoryOperand fstp, tword
+
+fnclex
+fninit
+
+%macro fpcomp2 1
+fcmovnb st0, %1
+fcmovne st0, %1
+fcmovnbe st0, %1
+fcmovnu st0, %1
+fucomi st0, %1
+fcomi st0, %1
+%endmacro ; fpcomp2
+
+fpcomp2 st0
+fpcomp2 st1
+fpcomp2 st2
+fpcomp2 st3
+fpcomp2 st4
+fpcomp2 st5
+fpcomp2 st6
+fpcomp2 st7
+
+; 0xdc
+FpuMemoryOperand fadd, qword
+FpuMemoryOperand fmul, qword
+FpuMemoryOperand fcom, qword
+FpuMemoryOperand fcomp, qword
+FpuMemoryOperand fsub, qword
+FpuMemoryOperand fsubr, qword
+FpuMemoryOperand fdiv, qword
+FpuMemoryOperand fdivr, qword
+
+%macro farithmetic 1
+fadd st0, %1
+fmul st0, %1
+fsubr st0, %1
+fsub st0, %1
+fdivr st0, %1
+fdiv st0, %1
+%endmacro ; farithmetic
+
+farithmetic st0
+farithmetic st1
+farithmetic st2
+farithmetic st3
+farithmetic st4
+farithmetic st5
+farithmetic st6
+farithmetic st7
+
+; 0xdd
+FpuMemoryOperand fld, qword
+FpuMemoryOperand fisttp, qword
+FpuMemoryOperand fst, qword
+FpuMemoryOperand fstp, qword
+frstor [0xffff]
+fnsave [0xffff]
+FpuMemoryOperand fnstsw, word
+
+%macro floadstore 1
+ffree %1
+fst %1
+fstp %1
+fucom st0, %1
+fucomp %1
+%endmacro ; floadstore
+
+floadstore st0
+floadstore st1
+floadstore st2
+floadstore st3
+floadstore st4
+floadstore st5
+floadstore st6
+floadstore st7
+
+; 0xde
+FpuMemoryOperand fiadd, word
+FpuMemoryOperand fimul, word
+FpuMemoryOperand ficom, word
+FpuMemoryOperand ficomp, word
+FpuMemoryOperand fisub, word
+FpuMemoryOperand fisubr, word
+FpuMemoryOperand fidiv, word
+FpuMemoryOperand fidivr, word
+
+fcompp
+
+%macro farithmeticp 1
+faddp %1, st0
+fmulp %1, st0
+fsubrp %1, st0
+fsubp %1, st0
+fdivrp %1, st0
+fdivp %1, st0
+%endmacro ; farithmeticp
+
+farithmeticp st0
+farithmeticp st1
+farithmeticp st2
+farithmeticp st3
+farithmeticp st4
+farithmeticp st5
+farithmeticp st6
+farithmeticp st7
+
+; 0xdf
+FpuMemoryOperand fild, word
+FpuMemoryOperand fisttp, word
+FpuMemoryOperand fist, word
+FpuMemoryOperand fistp, word
+FpuMemoryOperand fbld, tword
+FpuMemoryOperand fld, qword
+FpuMemoryOperand fbstp, tword
+FpuMemoryOperand fistp, qword
+
+fnstsw ax
+
+fucomip st0
+fucomip st1
+fucomip st2
+fucomip st3
+fucomip st4
+fucomip st5
+fucomip st6
+fucomip st7
+
+fcomip st0
+fcomip st1
+fcomip st2
+fcomip st3
+fcomip st4
+fcomip st5
+fcomip st6
+fcomip st7
 
 ; Row 0xe
 loopne .label

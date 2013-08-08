@@ -567,7 +567,7 @@ TEST_F(AsmTest, DisassemblePastBugs)
 		ASSERT_TRUE(instr.operands[1].operandType == X86_IMMEDIATE);
 	}
 
-	static const uint8_t faddMem[2] = {0xd8, 0x01};
+	static const uint8_t faddMem[] = {0xd8, 0x01};
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(&m_data, faddMem, sizeof(faddMem));
@@ -581,7 +581,7 @@ TEST_F(AsmTest, DisassemblePastBugs)
 		ASSERT_TRUE(instr.operands[0].operandType == X86_ST0);
 	}
 
-	static const uint8_t fldMem32[2] = {0xd9, 0x00};
+	static const uint8_t fldMem32[] = {0xd9, 0x00};
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(&m_data, fldMem32, sizeof(fldMem32));
@@ -595,7 +595,7 @@ TEST_F(AsmTest, DisassemblePastBugs)
 		ASSERT_TRUE(instr.operands[0].operandType == X86_ST0);
 	}
 
-	static const uint8_t fldReg[2] = {0xd9, 0xc0};
+	static const uint8_t fldReg[] = {0xd9, 0xc0};
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(&m_data, fldReg, sizeof(fldReg));
@@ -610,7 +610,7 @@ TEST_F(AsmTest, DisassemblePastBugs)
 		ASSERT_TRUE(instr.operands[0].operandType == X86_ST0);
 	}
 
-	static const uint8_t fnop[2] = {0xd9, 0xd0};
+	static const uint8_t fnop[] = {0xd9, 0xd0};
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(&m_data, fnop, sizeof(fnop));
@@ -619,6 +619,92 @@ TEST_F(AsmTest, DisassemblePastBugs)
 		ASSERT_TRUE(instr.op == X86_FNOP);
 		ASSERT_TRUE(instr.length == 2);
 		ASSERT_TRUE(instr.operandCount == 0);
+	}
+
+	static const uint8_t fiaddMem32[] = {0xda, 0x06, 0xff, 0xff};
+	{
+		X86Instruction instr;
+		SetOpcodeBytes(&m_data, fiaddMem32, sizeof(fiaddMem32));
+		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		ASSERT_TRUE(result);
+		ASSERT_TRUE(instr.op == X86_FIADD);
+		ASSERT_TRUE(instr.length == 4);
+		ASSERT_TRUE(instr.operandCount == 2);
+		ASSERT_TRUE(instr.operands[0].operandType == X86_ST0);
+		ASSERT_TRUE(instr.operands[1].operandType == X86_MEM);
+		ASSERT_TRUE(instr.operands[0].size == 10);
+		ASSERT_TRUE(instr.operands[1].size == 4);
+	}
+
+	static const uint8_t fild[] = {0xdb, 0x00};
+	{
+		X86Instruction instr;
+		SetOpcodeBytes(&m_data, fild, sizeof(fild));
+		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		ASSERT_TRUE(result);
+		ASSERT_TRUE(instr.op == X86_FILD);
+		ASSERT_TRUE(instr.length == 2);
+		ASSERT_TRUE(instr.operandCount == 2);
+		ASSERT_TRUE(instr.operands[0].operandType == X86_ST0);
+		ASSERT_TRUE(instr.operands[1].operandType == X86_MEM);
+		ASSERT_TRUE(instr.operands[0].size == 10);
+		ASSERT_TRUE(instr.operands[1].size == 4);
+	}
+
+	static const uint8_t fcmovnbe[] = {0xdb, 0xd0};
+	{
+		X86Instruction instr;
+		SetOpcodeBytes(&m_data, fcmovnbe, sizeof(fcmovnbe));
+		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		ASSERT_TRUE(result);
+		ASSERT_TRUE(instr.op == X86_FCMOVNBE);
+		ASSERT_TRUE(instr.length == 2);
+		ASSERT_TRUE(instr.operandCount == 2);
+		ASSERT_TRUE(instr.operands[0].operandType == X86_ST0);
+		ASSERT_TRUE(instr.operands[1].operandType == X86_ST0);
+		ASSERT_TRUE(instr.operands[0].size == 10);
+		ASSERT_TRUE(instr.operands[1].size == 10);
+	}
+
+	static const uint8_t fnstsw[] = {0xdd, 0x38};
+	{
+		X86Instruction instr;
+		SetOpcodeBytes(&m_data, fnstsw, sizeof(fnstsw));
+		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		ASSERT_TRUE(result);
+		ASSERT_TRUE(instr.op == X86_FNSTSW);
+		ASSERT_TRUE(instr.length == 2);
+		ASSERT_TRUE(instr.operandCount == 1);
+		ASSERT_TRUE(instr.operands[0].operandType == X86_MEM);
+		ASSERT_TRUE(instr.operands[0].size == 2);
+	}
+
+	static const uint8_t fild16[] = {0xdf, 0x00};
+	{
+		X86Instruction instr;
+		SetOpcodeBytes(&m_data, fild16, sizeof(fild16));
+		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		ASSERT_TRUE(result);
+		ASSERT_TRUE(instr.op == X86_FILD);
+		ASSERT_TRUE(instr.length == 2);
+		ASSERT_TRUE(instr.operandCount == 2);
+		ASSERT_TRUE(instr.operands[0].operandType == X86_ST0);
+		ASSERT_TRUE(instr.operands[0].size == 10);
+		ASSERT_TRUE(instr.operands[1].operandType == X86_MEM);
+		ASSERT_TRUE(instr.operands[1].size == 2);
+	}
+
+	static const uint8_t fnstswAx[] = {0xdf, 0xe0};
+	{
+		X86Instruction instr;
+		SetOpcodeBytes(&m_data, fnstswAx, sizeof(fnstswAx));
+		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		ASSERT_TRUE(result);
+		ASSERT_TRUE(instr.op == X86_FNSTSW);
+		ASSERT_TRUE(instr.length == 2);
+		ASSERT_TRUE(instr.operandCount == 1);
+		ASSERT_TRUE(instr.operands[0].operandType == X86_AX);
+		ASSERT_TRUE(instr.operands[0].size == 2);
 	}
 }
 
@@ -906,6 +992,8 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_FINIT:
 		// return (op2 == UD_Ifinit);
 		return false;
+	case X86_FNINIT:
+		return (op2 == UD_Ifninit);
 	case X86_FIST:
 		return (op2 == UD_Ifist);
 	case X86_FISTP:
@@ -941,11 +1029,9 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_FMULP:
 		return (op2 == UD_Ifmulp);
 	case X86_FNCLEX:
-		// return (op2 == UD_Ifclex);
-		return false;
+		return (op2 == UD_Ifclex);
 	case X86_FNDISI:
 	case X86_FNENI:
-	case X86_FNINIT:
 		return false;
 	case X86_FNOP:
 		return (op2 == UD_Ifnop);
@@ -2205,19 +2291,42 @@ static bool FpuInstr(const X86Instruction* const instr, const ud_t* const ud_obj
 	case X86_FSCALE:
 		return true;
 	case X86_FLD:
+	case X86_FILD:
 	case X86_FLDCW:
 	case X86_FST:
+	case X86_FIST:
+	case X86_FISTP:
+	case X86_FISTTP:
 	case X86_FNSTCW:
 	case X86_FSTP:
 	case X86_FADD:
+	case X86_FIADD:
+	case X86_FADDP:
 	case X86_FMUL:
+	case X86_FIMUL:
+	case X86_FMULP:
 	case X86_FCOM:
+	case X86_FICOM:
 	case X86_FCOMP:
+	case X86_FICOMP:
+	case X86_FCOMIP:
+	case X86_FUCOM:
+	case X86_FUCOMIP:
 	case X86_FSUB:
+	case X86_FISUB:
 	case X86_FSUBR:
+	case X86_FISUBR:
+	case X86_FSUBP:
+	case X86_FSUBRP:
 	case X86_FDIV:
+	case X86_FIDIV:
 	case X86_FDIVR:
+	case X86_FIDIVR:
+	case X86_FDIVP:
+	case X86_FDIVRP:
 	case X86_FXCH:
+	case X86_FBLD:
+	case X86_FBSTP:
 		break;
 	default:
 		return false;
@@ -2226,7 +2335,11 @@ static bool FpuInstr(const X86Instruction* const instr, const ud_t* const ud_obj
 	operand = ud_insn_opr(ud_obj, 0);
 	if ((operand->type != UD_OP_MEM) && (instr->op != X86_FLD)
 		&& (instr->op != X86_FLDCW) && (instr->op != X86_FST)
-		&& (instr->op != X86_FNSTCW) && (instr->op != X86_FSTP))
+		&& (instr->op != X86_FNSTCW) && (instr->op != X86_FSTP)
+		&& (instr->op != X86_FUCOM) && (instr->op != X86_FADDP)
+		&& (instr->op != X86_FMULP) && (instr->op != X86_FSUBRP)
+		&& (instr->op != X86_FSUBP) && (instr->op != X86_FDIVP)
+		&& (instr->op != X86_FDIVRP))
 	{
 		CompareOperand(&instr->operands[0], operand, addrSize);
 		operand = ud_insn_opr(ud_obj, 1);
@@ -2237,7 +2350,10 @@ static bool FpuInstr(const X86Instruction* const instr, const ud_t* const ud_obj
 	else
 	{
 		// udis86 doesn't include implicit operands, only ones that are fetched.
-		CompareOperand(&instr->operands[1], operand, addrSize);
+		if (instr->operandCount == 1)
+			CompareOperand(&instr->operands[0], operand, addrSize);
+		else
+			CompareOperand(&instr->operands[1], operand, addrSize);
 	}
 
 	return true;
