@@ -146,7 +146,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="test.asm">
+    <CustomBuild Include="test_primary.asm">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)yasm-1.2.0-win64.exe --oformat=bin --objfile=$(OutDir)%(Filename).bin %(FullPath)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)yasm-1.2.0-win64.exe --oformat=bin --objfile=$(OutDir)%(Filename).bin %(FullPath)</Command>
