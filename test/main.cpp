@@ -291,6 +291,7 @@ TEST_F(AsmTest, DisassemblePrimaryAdd)
 	// TEST_ARITHMETIC_RR(X86_ADD, addByteRegDest, 32, 1, X86_AL, X86_AL);
 }
 
+
 TEST_F(AsmTest, DisassemblePastBugs)
 {
 	static const uint8_t addByteImm[] = {4, 1};
@@ -706,6 +707,19 @@ TEST_F(AsmTest, DisassemblePastBugs)
 		ASSERT_TRUE(instr.operands[0].operandType == X86_AX);
 		ASSERT_TRUE(instr.operands[0].size == 2);
 	}
+
+	static const uint8_t movups[] = {0x0f, 0x10, 0xc0};
+	{
+		X86Instruction instr;
+		SetOpcodeBytes(&m_data, movups, sizeof(movups));
+		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		ASSERT_TRUE(result);
+		ASSERT_TRUE(instr.op == X86_MOVUPS);
+		ASSERT_TRUE(instr.length == 3);
+		ASSERT_TRUE(instr.operandCount == 2);
+		// ASSERT_TRUE(instr.operands[0].operandType == X86_AX);
+		// ASSERT_TRUE(instr.operands[0].size == 2);
+	}
 }
 
 
@@ -797,6 +811,8 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 		return (op2 == UD_Icld);
 	case X86_CLFLUSH:
 		return (op2 == UD_Iclflush);
+	case X86_CLGI:
+		return (op2 == UD_Iclgi);
 	case X86_CLI:
 		return (op2 == UD_Icli);
 	case X86_CLTS:
@@ -841,7 +857,9 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_CMP:
 		return (op2 == UD_Icmp);
 	case X86_CMPPD:
+		return (op2 == UD_Icmppd);
 	case X86_CMPPS:
+		return (op2 == UD_Icmpps);
 	case X86_CMPS:
 		return false;
 	case X86_CMPSB:
@@ -853,13 +871,21 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_CMPSQ:
 		return (op2 == UD_Icmpsq);
 	case X86_CMPSS:
+		return (op2 == UD_Icmpss);
 	case X86_CMPXCHG:
+		return (op2 == UD_Icmpxchg);
 	case X86_CMPXCHG8B:
+		return (op2 == UD_Icmpxchg8b);
 	case X86_CMPXCHG16B:
+		return (op2 == UD_Icmpxchg16b);
 	case X86_COMISD:
+		return (op2 == UD_Icomisd);
 	case X86_COMISS:
+		return (op2 == UD_Icomiss);
 	case X86_CPUID:
+		return (op2 == UD_Icpuid);
 	case X86_CRC32:
+		return (op2 == UD_Icrc32);
 	case X86_CVTDQ2PD:
 	case X86_CVTDQ2PS:
 	case X86_CVTPD2DQ:
@@ -1172,6 +1198,8 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 		return (op2 == UD_Iinvept);
 	case X86_INVLPG:
 		return (op2 == UD_Iinvlpg);
+	case X86_INVLPGA:
+		return (op2 == UD_Iinvlpga);
 	case X86_INVVPID:
 		return (op2 == UD_Iinvvpid);
 	case X86_IRET:
@@ -1243,10 +1271,13 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_LAHF:
 		return (op2 == UD_Ilahf);
 	case X86_LAR:
+		return (op2 == UD_Ilar);
 	case X86_LDDQU:
+		return (op2 == UD_Ilddqu);
 	case X86_LDMXCSR:
+		return (op2 == UD_Ildmxcsr);
 	case X86_LDS:
-		return false;
+		return (op2 == UD_Ilds);
 	case X86_LEA:
 		return (op2 == UD_Ilea);
 	case X86_LEAVE:
@@ -1286,48 +1317,85 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_LOOPE:
 		return (op2 == UD_Iloope);
 	case X86_LSL:
+		return (op2 == UD_Ilsl);
 	case X86_LSS:
+		return (op2 == UD_Ilss);
 	case X86_LTR:
+		return (op2 == UD_Iltr);
 	case X86_MASKMOVDQU:
+		return (op2 == UD_Imaskmovdqu);
 	case X86_MASKMOVQ:
+		return (op2 == UD_Imaskmovq);
 	case X86_MAXPD:
+		return (op2 == UD_Imaxpd);
 	case X86_MAXPS:
+		return (op2 == UD_Imaxps);
 	case X86_MAXSD:
+		return (op2 == UD_Imaxsd);
 	case X86_MAXSS:
+		return (op2 == UD_Imaxss);
 	case X86_MFENCE:
+		return (op2 == UD_Imfence);
 	case X86_MINPD:
+		return (op2 == UD_Iminpd);
 	case X86_MINPS:
+		return (op2 == UD_Iminps);
 	case X86_MINSD:
+		return (op2 == UD_Iminsd);
 	case X86_MINSS:
-		return false;
+		return (op2 == UD_Iminss);
 	case X86_MONITOR:
 		return (op2 == UD_Imonitor);
 	case X86_MOV:
 		return (op2 == UD_Imov);
 	case X86_MOVAPD:
+		return (op2 == UD_Imovapd);
 	case X86_MOVAPS:
+		return (op2 == UD_Imovaps);
 	case X86_MOVBE:
+		return (op2 == UD_Imovbe);
 	case X86_MOVD:
+		return (op2 == UD_Imovd);
 	case X86_MOVQ:
+		return (op2 == UD_Imovq);
 	case X86_MOVDDUP:
+		return (op2 == UD_Imovddup);
 	case X86_MOVDQ2Q:
+		return (op2 == UD_Imovdq2q);
 	case X86_MOVDQA:
+		return (op2 == UD_Imovdqa);
 	case X86_MOVDQU:
+		return (op2 == UD_Imovdqu);
 	case X86_MOVHLPS:
+		return (op2 == UD_Imovhlps);
 	case X86_MOVHPD:
+		return (op2 == UD_Imovhpd);
 	case X86_MOVHPS:
+		return (op2 == UD_Imovhps);
 	case X86_MOVLHPS:
+		return (op2 == UD_Imovlhps);
 	case X86_MOVLPD:
+		return (op2 == UD_Imovlpd);
 	case X86_MOVLPS:
+		return (op2 == UD_Imovlps);
 	case X86_MOVMSKPD:
+		return (op2 == UD_Imovmskpd);
 	case X86_MOVMSKPS:
+		return (op2 == UD_Imovmskps);
 	case X86_MOVNTDQ:
+		return (op2 == UD_Imovntdq);
 	case X86_MOVNTDQA:
+		return (op2 == UD_Imovntdqa);
 	case X86_MOVNTI:
+		return (op2 == UD_Imovnti);
 	case X86_MOVNTPD:
+		return (op2 == UD_Imovntpd);
 	case X86_MOVNTPS:
+		return (op2 == UD_Imovntps);
 	case X86_MOVNTQ:
+		return (op2 == UD_Imovntq);
 	case X86_MOVQ2DQ:
+		return (op2 == UD_Imovq2dq);
 	case X86_MOVS:
 		return false;
 	case X86_MOVSB:
@@ -1339,22 +1407,33 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_MOVSD:
 		return (op2 == UD_Imovsd);
 	case X86_MOVSHDUP:
+		return (op2 == UD_Imovshdup);
 	case X86_MOVSS:
+		return (op2 == UD_Imovss);
 	case X86_MOVSX:
+		return (op2 == UD_Imovsx);
 	case X86_MOVSXD:
+		return (op2 == UD_Imovsxd);
 	case X86_MOVUPD:
+		return (op2 == UD_Imovupd);
 	case X86_MOVUPS:
+		return (op2 == UD_Imovups);
 	case X86_MOVZX:
+		return (op2 == UD_Imovzx);
 	case X86_MPSADBW:
-		return false;
+		return (op2 == UD_Impsadbw);
 	case X86_MUL:
 		return (op2 == UD_Imul);
 	case X86_MULPD:
+		return (op2 == UD_Imulpd);
 	case X86_MULPS:
+		return (op2 == UD_Imulps);
 	case X86_MULSD:
+		return (op2 == UD_Imulsd);
 	case X86_MULSS:
+		return (op2 == UD_Imulss);
 	case X86_MWAIT:
-		return false;
+		return (op2 == UD_Imwait);
 	case X86_NEG:
 		return (op2 == UD_Ineg);
 	case X86_NOP:
@@ -1378,90 +1457,173 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_OUTSD:
 		return (op2 == UD_Ioutsd);
 	case X86_PABSB:
+		return (op2 == UD_Ipabsb);
 	case X86_PABSD:
+		return (op2 == UD_Ipabsd);
 	case X86_PABSW:
+		return (op2 == UD_Ipabsw);
 	case X86_PACKSSDW:
+		return (op2 == UD_Ipackssdw);
 	case X86_PACKSSWB:
+		return (op2 == UD_Ipacksswb);
 	case X86_PACKUSDW:
+		return (op2 == UD_Ipackusdw);
 	case X86_PACKUSWB:
+		return (op2 == UD_Ipackuswb);
 	case X86_PADDB:
+		return (op2 == UD_Ipaddb);
 	case X86_PADDD:
+		return (op2 == UD_Ipaddd);
 	case X86_PADDQ:
+		return (op2 == UD_Ipaddq);
 	case X86_PADDSB:
+		return (op2 == UD_Ipaddsb);
 	case X86_PADDSW:
+		return (op2 == UD_Ipaddsw);
 	case X86_PADDUSB:
+		return (op2 == UD_Ipaddusb);
 	case X86_PADDUSW:
+		return (op2 == UD_Ipaddusw);
 	case X86_PADDW:
+		return (op2 == UD_Ipaddw);
 	case X86_PALIGNR:
+		return (op2 == UD_Ipalignr);
 	case X86_PAND:
+		return (op2 == UD_Ipand);
 	case X86_PANDN:
+		return (op2 == UD_Ipandn);
 	case X86_PAUSE:
+		return (op2 == UD_Ipause);
 	case X86_PAVGB:
+		return (op2 == UD_Ipavgb);
 	case X86_PAVGW:
+		return (op2 == UD_Ipavgw);
 	case X86_PBLENDVB:
+		return (op2 == UD_Ipblendvb);
 	case X86_PBLENDW:
+		return (op2 == UD_Ipblendw);
 	case X86_PCMPEQB:
+		return (op2 == UD_Ipcmpeqd);
 	case X86_PCMPEQD:
+		return (op2 == UD_Ipcmpeqd);
 	case X86_PCMPEQQ:
+		return (op2 == UD_Ipcmpeqq);
 	case X86_PCMPEQW:
+		return (op2 == UD_Ipcmpeqw);
 	case X86_PCMPESTRI:
+		return (op2 == UD_Ipcmpestri);
 	case X86_PCMPESTRM:
+		return (op2 == UD_Ipcmpestrm);
 	case X86_PCMPGTB:
+		return (op2 == UD_Ipcmpgtb);
 	case X86_PCMPGTD:
+		return (op2 == UD_Ipcmpgtd);
 	case X86_PCMPGTQ:
+		return (op2 == UD_Ipcmpgtq);
 	case X86_PCMPGTW:
+		return (op2 == UD_Ipcmpgtw);
 	case X86_PCMPISTRI:
+		return (op2 == UD_Ipcmpistri);
 	case X86_PCMPISTRM:
+		return (op2 == UD_Ipcmpistrm);
 	case X86_PEXTRB:
+		return (op2 == UD_Ipextrb);
 	case X86_PEXTRD:
+		return (op2 == UD_Ipextrd);
 	case X86_PEXTRQ:
+		return (op2 == UD_Ipextrq);
 	case X86_PEXTRW:
+		return (op2 == UD_Ipextrw);
 	case X86_PHADDD:
+		return (op2 == UD_Iphaddd);
 	case X86_PHADDSW:
+		return (op2 == UD_Iphaddsw);
 	case X86_PHADDW:
+		return (op2 == UD_Iphaddw);
 	case X86_PHMINPOSUW:
+		return (op2 == UD_Iphminposuw);
 	case X86_PHSUBD:
+		return (op2 == UD_Iphsubd);
 	case X86_PHSUBSW:
+		return (op2 == UD_Iphsubsw);
 	case X86_PHSUBW:
+		return (op2 == UD_Iphsubw);
 	case X86_PINSRB:
+		return (op2 == UD_Ipinsrb);
 	case X86_PINSRD:
+		return (op2 == UD_Ipinsrd);
 	case X86_PINSRQ:
+		return (op2 == UD_Ipinsrq);
 	case X86_PINSRW:
+		return (op2 == UD_Ipinsrw);
 	case X86_PMADDUBSW:
+		return (op2 == UD_Ipmaddubsw);
 	case X86_PMADDWD:
+		return (op2 == UD_Ipmaddwd);
 	case X86_PMAXSB:
+		return (op2 == UD_Ipmaxsb);
 	case X86_PMAXSD:
+		return (op2 == UD_Ipmaxsd);
 	case X86_PMAXSW:
+		return (op2 == UD_Ipmaxsw);
 	case X86_PMAXUB:
+		return (op2 == UD_Ipmaxub);
 	case X86_PMAXUD:
+		return (op2 == UD_Ipmaxud);
 	case X86_PMAXUW:
+		return (op2 == UD_Ipmaxuw);
 	case X86_PMINSB:
+		return (op2 == UD_Ipminsb);
 	case X86_PMINSD:
+		return (op2 == UD_Ipminsd);
 	case X86_PMINSW:
+		return (op2 == UD_Ipminsw);
 	case X86_PMINUB:
+		return (op2 == UD_Ipminub);
 	case X86_PMINUD:
+		return (op2 == UD_Ipminud);
 	case X86_PMINUW:
+		return (op2 == UD_Ipminuw);
 	case X86_PMOVMSKB:
+		return (op2 == UD_Ipmovmskb);
 	case X86_PMOVSXBD:
+		return (op2 == UD_Ipmovsxbd);
 	case X86_PMOVSXBQ:
+		return (op2 == UD_Ipmovsxbq);
 	case X86_PMOVSXBW:
+		return (op2 == UD_Ipmovsxbw);
 	case X86_PMOVSXDQ:
+		return (op2 == UD_Ipmovsxdq);
 	case X86_PMOVSXWD:
+		return (op2 == UD_Ipmovsxwd);
 	case X86_PMOVSXWQ:
+		return (op2 == UD_Ipmovsxwq);
 	case X86_PMOVZXBD:
+		return (op2 == UD_Ipmovzxbd);
 	case X86_PMOVZXBQ:
+		return (op2 == UD_Ipmovzxbq);
 	case X86_PMOVZXBW:
+		return (op2 == UD_Ipmovzxbw);
 	case X86_PMOVZXDQ:
+		return (op2 == UD_Ipmovzxdq);
 	case X86_PMOVZXWD:
+		return (op2 == UD_Ipmovzxwd);
 	case X86_PMOVZXWQ:
+		return (op2 == UD_Ipmovzxwq);
 	case X86_PMULDQ:
+		return (op2 == UD_Ipmuldq);
 	case X86_PMULHRSW:
+		return (op2 == UD_Ipmulhrsw);
 	case X86_PMULHUW:
+		return (op2 == UD_Ipmulhuw);
 	case X86_PMULHW:
+		return (op2 == UD_Ipmulhw);
 	case X86_PMULLD:
+		return (op2 == UD_Ipmulld);
 	case X86_PMULLW:
+		return (op2 == UD_Ipmullw);
 	case X86_PMULUDQ:
-		return false;
+		return (op2 == UD_Ipmuludq);
 	case X86_POP:
 		return (op2 == UD_Ipop);
 	case X86_POPA:
@@ -1477,47 +1639,87 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_POPFD:
 		return (op2 == UD_Ipopfd);
 	case X86_POR:
+		return (op2 == UD_Ipor);
 	case X86_PREFETCHNTA:
+		return (op2 == UD_Iprefetchnta);
 	case X86_PREFETCHT0:
+		return (op2 == UD_Iprefetcht0);
 	case X86_PREFETCHT1:
+		return (op2 == UD_Iprefetcht1);
 	case X86_PREFETCHT2:
+		return (op2 == UD_Iprefetcht2);
 	case X86_PSADBW:
+		return (op2 == UD_Ipsadbw);
 	case X86_PSHUFB:
+		return (op2 == UD_Ipshufb);
 	case X86_PSHUFD:
+		return (op2 == UD_Ipshufd);
 	case X86_PSHUFHW:
+		return (op2 == UD_Ipshufhw);
 	case X86_PSHUFLW:
+		return (op2 == UD_Ipshuflw);
 	case X86_PSHUFW:
+		return (op2 == UD_Ipshufw);
 	case X86_PSIGNB:
+		return (op2 == UD_Ipsignb);
 	case X86_PSIGND:
+		return (op2 == UD_Ipsignd);
 	case X86_PSIGNW:
+		return (op2 == UD_Ipsignw);
 	case X86_PSLLD:
+		return (op2 == UD_Ipslld);
 	case X86_PSLLDQ:
+		return (op2 == UD_Ipslldq);
 	case X86_PSLLQ:
+		return (op2 == UD_Ipsllq);
 	case X86_PSLLW:
+		return (op2 == UD_Ipsllw);
 	case X86_PSRAD:
+		return (op2 == UD_Ipsrad);
 	case X86_PSRAW:
+		return (op2 == UD_Ipsraw);
 	case X86_PSRLD:
+		return (op2 == UD_Ipsrld);
 	case X86_PSRLDQ:
+		return (op2 == UD_Ipsrldq);
 	case X86_PSRLQ:
+		return (op2 == UD_Ipsrlq);
 	case X86_PSRLW:
+		return (op2 == UD_Ipsrlw);
 	case X86_PSUBB:
+		return (op2 == UD_Ipsubb);
 	case X86_PSUBD:
+		return (op2 == UD_Ipsubd);
 	case X86_PSUBQ:
+		return (op2 == UD_Ipsubq);
 	case X86_PSUBSB:
+		return (op2 == UD_Ipsubsb);
 	case X86_PSUBSW:
+		return (op2 == UD_Ipsubsw);
 	case X86_PSUBUSB:
+		return (op2 == UD_Ipsubusb);
 	case X86_PSUBUSW:
+		return (op2 == UD_Ipsubusw);
 	case X86_PSUBW:
+		return (op2 == UD_Ipsubw);
 	case X86_PTEST:
+		return (op2 == UD_Iptest);
 	case X86_PUNPCKHBW:
+		return (op2 == UD_Ipunpckhbw);
 	case X86_PUNPCKHDQ:
+		return (op2 == UD_Ipunpckhdq);
 	case X86_PUNPCKHQDQ:
+		return (op2 == UD_Ipunpckhqdq);
 	case X86_PUNPCKHWD:
+		return (op2 == UD_Ipunpckhwd);
 	case X86_PUNPCKLBW:
+		return (op2 == UD_Ipunpcklbw);
 	case X86_PUNPCKLDQ:
+		return (op2 == UD_Ipunpckldq);
 	case X86_PUNPCKLQDQ:
+		return (op2 == UD_Ipunpcklqdq);
 	case X86_PUNPCKLWD:
-		return false;
+		return (op2 == UD_Ipunpcklwd);
 	case X86_PUSH:
 		return (op2 == UD_Ipush);
 	case X86_PUSHA:
@@ -1555,13 +1757,19 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_ROR:
 		return (op2 == UD_Iror);
 	case X86_ROUNDPD:
+		return (op2 == UD_Iroundpd);
 	case X86_ROUNDPS:
+		return (op2 == UD_Iroundps);
 	case X86_ROUNDSD:
+		return (op2 == UD_Iroundsd);
 	case X86_ROUNDSS:
+		return (op2 == UD_Iroundss);
 	case X86_RSM:
+		return (op2 == UD_Irsm);
 	case X86_RSQRTPS:
+		return (op2 == UD_Irsqrtps);
 	case X86_RSQRTSS:
-		return false;
+		return (op2 == UD_Irsqrtss);
 	case X86_SAHF:
 		return (op2 == UD_Isahf);
 	case X86_SAL:
@@ -1586,55 +1794,101 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_SCASQ:
 		return (op2 == UD_Iscasq);
 	case X86_SETB:
+		return (op2 == UD_Isetb);
 	case X86_SETNAE:
+		return (op2 == UD_Isetb);
 	case X86_SETC:
-	case X86_SETBE:
-	case X86_SETNA:
-	case X86_SETL:
-	case X86_SETNGE:
-	case X86_SETLE:
-	case X86_SETNG:
-	case X86_SETNB:
-	case X86_SETAE:
-	case X86_SETNC:
-	case X86_SETNBE:
-	case X86_SETA:
-	case X86_SETNL:
-	case X86_SETGE:
-	case X86_SETNLE:
-	case X86_SETG:
-	case X86_SETNO:
-	case X86_SETNP:
-	case X86_SETPO:
-	case X86_SETNS:
-	case X86_SETNZ:
-	case X86_SETNE:
-	case X86_SETO:
-	case X86_SETP:
-	case X86_SETPE:
-	case X86_SETS:
-	case X86_SETZ:
-	case X86_SETE:
-	case X86_SFENCE:
-	case X86_SGDT:
-	case X86_SHLD:
 		return false;
+	case X86_SETBE:
+		return (op2 == UD_Isetbe);
+	case X86_SETNA:
+		return false;
+	case X86_SETL:
+		return (op2 == UD_Isetl);
+	case X86_SETNGE:
+		return false;
+	case X86_SETLE:
+		return (op2 == UD_Isetle);
+	case X86_SETNG:
+		return false;
+	case X86_SETNB:
+		return false;
+	case X86_SETAE:
+		return (op2 == UD_Isetae);
+	case X86_SETNC:
+		return false;
+	case X86_SETNBE:
+		return false;
+	case X86_SETA:
+		return (op2 == UD_Iseta);
+	case X86_SETNL:
+		return false;
+	case X86_SETGE:
+		return (op2 == UD_Isetge);
+	case X86_SETNLE:
+		return false;
+	case X86_SETG:
+		return (op2 == UD_Isetg);
+	case X86_SETNO:
+		return (op2 == UD_Isetno);
+	case X86_SETNP:
+		return (op2 == UD_Isetnp);
+	case X86_SETPO:
+		return false;
+	case X86_SETNS:
+		return (op2 == UD_Isetns);
+	case X86_SETNZ:
+		return (op2 == UD_Isetnz);
+	case X86_SETNE:
+		return false;
+	case X86_SETO:
+		return (op2 == UD_Iseto);
+	case X86_SETP:
+		return (op2 == UD_Isetp);
+	case X86_SETPE:
+		return false;
+	case X86_SETS:
+		return (op2 == UD_Isets);
+	case X86_SETZ:
+		return (op2 == UD_Isetz);
+	case X86_SETE:
+		return false;
+	case X86_SFENCE:
+		return (op2 == UD_Isfence);
+	case X86_SGDT:
+		return (op2 == UD_Isgdt);
+	case X86_SKINIT:
+		return (op2 == UD_Iskinit);
+	case X86_SLDT:
+		return (op2 == UD_Isldt);
+	case X86_SHLD:
+		return (op2 == UD_Ishld);
 	case X86_SHR:
 		return (op2 == UD_Ishr);
 	case X86_SHRD:
+		return (op2 == UD_Ishrd);
 	case X86_SHUFPD:
+		return (op2 == UD_Ishufpd);
 	case X86_SHUFPS:
+		return (op2 == UD_Ishufps);
 	case X86_SIDT:
+		return (op2 == UD_Isidt);
 	case X86_SMSW:
+		return (op2 == UD_Ismsw);
 	case X86_SQRTPD:
+		return (op2 == UD_Isqrtpd);
 	case X86_SQRTPS:
+		return (op2 == UD_Isqrtps);
 	case X86_SQRTSD:
+		return (op2 == UD_Isqrtsd);
 	case X86_SQRTSS:
-		return false;
+		return (op2 == UD_Isqrtss);
 	case X86_STC:
 		return (op2 == UD_Istc);
 	case X86_STD:
 		return (op2 == UD_Istd);
+	case X86_STGI:
+		return (op2 == UD_Istgi);
 	case X86_STI:
 		return (op2 == UD_Isti);
 	case X86_STMXCSR:
@@ -1650,24 +1904,35 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_STOSQ:
 		return (op2 == UD_Istosq);
 	case X86_STR:
-		return false;
+		return (op2 == UD_Istr);
 	case X86_SUB:
 		return (op2 == UD_Isub);
 	case X86_SUBPD:
+		return (op2 == UD_Isubpd);
 	case X86_SUBPS:
+		return (op2 == UD_Isubps);
 	case X86_SUBSD:
+		return (op2 == UD_Isubsd);
 	case X86_SUBSS:
+		return (op2 == UD_Isubss);
 	case X86_SWAPGS:
+		return (op2 == UD_Iswapgs);
 	case X86_SYSCALL:
+		return (op2 == UD_Isyscall);
 	case X86_SYSENTER:
+		return (op2 == UD_Isysenter);
 	case X86_SYSRET:
-		return false;
+		return (op2 == UD_Isysret);
 	case X86_TEST:
 		return (op2 == UD_Itest);
 	case X86_UCOMISD:
+		return (op2 == UD_Iucomisd);
 	case X86_UCOMISS:
+		return (op2 == UD_Iucomiss);
 	case X86_UD:
+		return false;
 	case X86_UD2:
+		return (op2 == UD_Iud2);
 	case X86_UNPCKHPD:
 	case X86_UNPCKHPS:
 	case X86_UNPCKLPD:
@@ -1921,41 +2186,67 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_VPERM2F128:
 	case X86_VTESTPD:
 	case X86_VTESTPS:
-	case X86_VERR:
-	case X86_VERW:
-	case X86_VMCALL:
-	case X86_VMCLEAR:
-	case X86_VMLAUNCH:
-	case X86_VMPTRLD:
-	case X86_VMPTRST:
-	case X86_VMREAD:
-	case X86_VMFUNC:
-	case X86_VMRESUME:
-	case X86_VMWRITE:
-	case X86_VMXOFF:
-	case X86_VMXON:
-	case X86_VMLOAD:
-	case X86_VMMCALL:
-	case X86_VMRUN:
-	case X86_VMSAVE:
-	case X86_WBINVD:
-	case X86_WRMSR:
 		return false;
+	case X86_VERR:
+		return (op2 == UD_Iverr);
+	case X86_VERW:
+		return (op2 == UD_Iverw);
+	case X86_VMCALL:
+		return (op2 == UD_Ivmcall);
+	case X86_VMCLEAR:
+		return (op2 == UD_Ivmclear);
+	case X86_VMLAUNCH:
+		return (op2 == UD_Ivmlaunch);
+	case X86_VMPTRLD:
+		return (op2 == UD_Ivmptrld);
+	case X86_VMPTRST:
+		return (op2 == UD_Ivmptrst);
+	case X86_VMREAD:
+		return (op2 == UD_Ivmread);
+	case X86_VMFUNC:
+		// return (op2 == UD_Ivmfunc);
+		return false;
+	case X86_VMRESUME:
+		return (op2 == UD_Ivmresume);
+	case X86_VMWRITE:
+		return (op2 == UD_Ivmwrite);
+	case X86_VMXOFF:
+		return (op2 == UD_Ivmxoff);
+	case X86_VMXON:
+		return (op2 == UD_Ivmxon);
+	case X86_VMLOAD:
+		return (op2 == UD_Ivmload);
+	case X86_VMMCALL:
+		return (op2 == UD_Ivmmcall);
+	case X86_VMRUN:
+		return (op2 == UD_Ivmrun);
+	case X86_VMSAVE:
+		return (op2 == UD_Ivmsave);
+	case X86_WBINVD:
+		return (op2 == UD_Iwbinvd);
+	case X86_WRMSR:
+		return (op2 == UD_Iwrmsr);
 	case X86_XADD:
 		return (op2 == UD_Ixadd);
 	case X86_XCHG:
 		return (op2 == UD_Ixchg);
 	case X86_XGETBV:
+		return (op2 == UD_Ixgetbv);
 	case X86_XLAT:
 	case X86_XLATB:
 		return (op2 == UD_Ixlatb);
 	case X86_XOR:
 		return (op2 == UD_Ixor);
 	case X86_XORPD:
+		return (op2 == UD_Ixorpd);
 	case X86_XORPS:
+		return (op2 == UD_Ixorps);
 	case X86_XRSTOR:
+		return (op2 == UD_Ixrstor);
 	case X86_XSAVE:
+		return (op2 == UD_Ixsave);
 	case X86_XSETBV:
+		return (op2 == UD_Ixsetbv);
 	default:
 		return false;
 	}
