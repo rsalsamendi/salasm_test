@@ -717,8 +717,55 @@ TEST_F(AsmTest, DisassemblePastBugs)
 		ASSERT_TRUE(instr.op == X86_MOVUPS);
 		ASSERT_TRUE(instr.length == 3);
 		ASSERT_TRUE(instr.operandCount == 2);
-		// ASSERT_TRUE(instr.operands[0].operandType == X86_AX);
-		// ASSERT_TRUE(instr.operands[0].size == 2);
+		ASSERT_TRUE(instr.operands[0].operandType == X86_XMM0);
+		ASSERT_TRUE(instr.operands[0].size == 16);
+		ASSERT_TRUE(instr.operands[1].operandType == X86_XMM0);
+		ASSERT_TRUE(instr.operands[1].size == 16);
+	}
+
+	static const uint8_t unpckhps[] = {0x0f, 0x15, 0xc0};
+	{
+		X86Instruction instr;
+		SetOpcodeBytes(&m_data, unpckhps, sizeof(unpckhps));
+		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		ASSERT_TRUE(result);
+		ASSERT_TRUE(instr.op == X86_UNPCKHPS);
+		ASSERT_TRUE(instr.length == 3);
+		ASSERT_TRUE(instr.operandCount == 2);
+		ASSERT_TRUE(instr.operands[0].operandType == X86_XMM0);
+		ASSERT_TRUE(instr.operands[0].size == 16);
+		ASSERT_TRUE(instr.operands[1].operandType == X86_XMM0);
+		ASSERT_TRUE(instr.operands[1].size == 16);
+	}
+
+	static const uint8_t unpcklps[] = {0x0f, 0x14, 0xc1};
+	{
+		X86Instruction instr;
+		SetOpcodeBytes(&m_data, unpcklps, sizeof(unpcklps));
+		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		ASSERT_TRUE(result);
+		ASSERT_TRUE(instr.op == X86_UNPCKLPS);
+		ASSERT_TRUE(instr.length == 3);
+		ASSERT_TRUE(instr.operandCount == 2);
+		ASSERT_TRUE(instr.operands[0].operandType == X86_XMM0);
+		ASSERT_TRUE(instr.operands[0].size == 16);
+		ASSERT_TRUE(instr.operands[1].operandType == X86_XMM1);
+		ASSERT_TRUE(instr.operands[1].size == 16);
+	}
+
+	static const uint8_t movControlReg[] = {0x0f, 0x22, 0xc0};
+	{
+		X86Instruction instr;
+		SetOpcodeBytes(&m_data, movControlReg, sizeof(movControlReg));
+		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		ASSERT_TRUE(result);
+		ASSERT_TRUE(instr.op == X86_MOV);
+		ASSERT_TRUE(instr.length == 3);
+		ASSERT_TRUE(instr.operandCount == 2);
+		ASSERT_TRUE(instr.operands[0].operandType == X86_CR0);
+		ASSERT_TRUE(instr.operands[0].size == 4);
+		ASSERT_TRUE(instr.operands[1].operandType == X86_EAX);
+		ASSERT_TRUE(instr.operands[1].size == 4);
 	}
 }
 
@@ -1923,6 +1970,8 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 		return (op2 == UD_Isysenter);
 	case X86_SYSRET:
 		return (op2 == UD_Isysret);
+	case X86_SYSEXIT:
+		return (op2 == UD_Isysexit);
 	case X86_TEST:
 		return (op2 == UD_Itest);
 	case X86_UCOMISD:
@@ -1934,9 +1983,13 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_UD2:
 		return (op2 == UD_Iud2);
 	case X86_UNPCKHPD:
+		return (op2 == UD_Iunpckhpd);
 	case X86_UNPCKHPS:
+		return (op2 == UD_Iunpckhps);
 	case X86_UNPCKLPD:
+		return (op2 == UD_Iunpcklpd);
 	case X86_UNPCKLPS:
+		return (op2 == UD_Iunpcklps);
 	case X86_VBLENDPD:
 	case X86_VBLENDPS:
 	case X86_VBLENDVPD:
@@ -2415,6 +2468,116 @@ static bool CompareRegisters(X86OperandType operand1, enum ud_type operand2)
 		return (operand2 == UD_R_ST6);
 	case X86_ST7:
 		return (operand2 == UD_R_ST7);
+	case X86_MM0:
+		return (operand2 == UD_R_MM0);
+	case X86_MM1:
+		return (operand2 == UD_R_MM1);
+	case X86_MM2:
+		return (operand2 == UD_R_MM2);
+	case X86_MM3:
+		return (operand2 == UD_R_MM3);
+	case X86_MM4:
+		return (operand2 == UD_R_MM4);
+	case X86_MM5:
+		return (operand2 == UD_R_MM5);
+	case X86_MM6:
+		return (operand2 == UD_R_MM6);
+	case X86_MM7:
+		return (operand2 == UD_R_MM7);
+	case X86_XMM0:
+		return (operand2 == UD_R_XMM0);
+	case X86_XMM1:
+		return (operand2 == UD_R_XMM1);
+	case X86_XMM2:
+		return (operand2 == UD_R_XMM2);
+	case X86_XMM3:
+		return (operand2 == UD_R_XMM3);
+	case X86_XMM4:
+		return (operand2 == UD_R_XMM4);
+	case X86_XMM5:
+		return (operand2 == UD_R_XMM5);
+	case X86_XMM6:
+		return (operand2 == UD_R_XMM6);
+	case X86_XMM7:
+		return (operand2 == UD_R_XMM7);
+	case X86_XMM8:
+		return (operand2 == UD_R_XMM8);
+	case X86_XMM9:
+		return (operand2 == UD_R_XMM9);
+	case X86_XMM10:
+		return (operand2 == UD_R_XMM10);
+	case X86_XMM11:
+		return (operand2 == UD_R_XMM11);
+	case X86_XMM12:
+		return (operand2 == UD_R_XMM12);
+	case X86_XMM13:
+		return (operand2 == UD_R_XMM13);
+	case X86_XMM14:
+		return (operand2 == UD_R_XMM14);
+	case X86_XMM15:
+		return (operand2 == UD_R_XMM15);
+	case X86_YMM0:
+	case X86_YMM1:
+	case X86_YMM2:
+	case X86_YMM3:
+	case X86_YMM4:
+	case X86_YMM5:
+	case X86_YMM6:
+	case X86_YMM7:
+	case X86_YMM8:
+	case X86_YMM9:
+	case X86_YMM10:
+	case X86_YMM11:
+	case X86_YMM12:
+	case X86_YMM13:
+	case X86_YMM14:
+	case X86_YMM15:
+		// ud86 doesn't support these yet
+		return false;
+	case X86_ZMM0:
+	case X86_ZMM1:
+	case X86_ZMM2:
+	case X86_ZMM3:
+	case X86_ZMM4:
+	case X86_ZMM5:
+	case X86_ZMM6:
+	case X86_ZMM7:
+	case X86_ZMM8:
+	case X86_ZMM9:
+	case X86_ZMM10:
+	case X86_ZMM11:
+	case X86_ZMM12:
+	case X86_ZMM13:
+	case X86_ZMM14:
+	case X86_ZMM15:
+		// ud86 doesn't support these yet
+		return false;
+	case X86_CR0:
+		return (operand2 == UD_R_CR0);
+	case X86_CR2:
+		return (operand2 == UD_R_CR2);
+	case X86_CR3:
+		return (operand2 == UD_R_CR3);
+	case X86_CR4:
+		return (operand2 == UD_R_CR4);
+	case X86_CR8:
+		return (operand2 == UD_R_CR8);
+	case X86_DR0:
+		return (operand2 == UD_R_DR0);
+	case X86_DR1:
+		return (operand2 == UD_R_DR1);
+	case X86_DR2:
+		return (operand2 == UD_R_DR2);
+	case X86_DR3:
+		return (operand2 == UD_R_DR3);
+	case X86_DR4:
+		return (operand2 == UD_R_DR4);
+	case X86_DR5:
+		return (operand2 == UD_R_DR5);
+	case X86_DR6:
+		return (operand2 == UD_R_DR6);
+	case X86_DR7:
+		return (operand2 == UD_R_DR7);
 	default:
 		return false;
 	}
@@ -2502,6 +2665,19 @@ bool SkipOperandsSizeCheck(const X86Instruction* const instr, size_t operand)
 	case X86_DS:
 	case X86_FS:
 	case X86_GS:
+	case X86_CR0:
+	case X86_CR2:
+	case X86_CR3:
+	case X86_CR4:
+	case X86_CR8:
+	case X86_DR0:
+	case X86_DR1:
+	case X86_DR2:
+	case X86_DR3:
+	case X86_DR4:
+	case X86_DR5:
+	case X86_DR6:
+	case X86_DR7:
 		return true;
 	}
 	return false;
