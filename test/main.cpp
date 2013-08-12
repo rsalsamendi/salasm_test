@@ -1042,6 +1042,8 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 		return (op2 == UD_Ifdivr);
 	case X86_FDIVRP:
 		return (op2 == UD_Ifdivrp);
+	case X86_FEMMS:
+		return (op2 == UD_Ifemms);
 	case X86_FFREE:
 		return (op2 == UD_Iffree);
 	case X86_FFREEP:
@@ -1687,6 +1689,9 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 		return (op2 == UD_Ipopfd);
 	case X86_POR:
 		return (op2 == UD_Ipor);
+	case X86_PREFETCH:
+	case X86_PREFETCHW:
+		return (op2 == UD_Iprefetch);
 	case X86_PREFETCHNTA:
 		return (op2 == UD_Iprefetchnta);
 	case X86_PREFETCHT0:
@@ -2628,6 +2633,12 @@ bool SkipOperandsSizeCheck(const X86Instruction* const instr, size_t operand)
 	switch (instr->op)
 	{
 	case X86_BOUND:
+	case X86_PREFETCH:
+	case X86_PREFETCHW:
+	case X86_PREFETCHNTA:
+	case X86_PREFETCHT0:
+	case X86_PREFETCHT1:
+	case X86_PREFETCHT2:
 		return true;
 	case X86_LEA:
 	case X86_ROL:
