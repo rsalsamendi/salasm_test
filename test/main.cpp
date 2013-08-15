@@ -878,27 +878,45 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_CMOVNGE: // Fall through
 		return (op2 == UD_Icmovl);
 	case X86_CMOVLE:
+		return (op2 == UD_Icmovle);
 	case X86_CMOVNG:
+		return false;
 	case X86_CMOVNB:
 	case X86_CMOVAE:
+		return (op2 == UD_Icmovae);
 	case X86_CMOVNC:
+		return false;
 	case X86_CMOVNBE:
 	case X86_CMOVA:
+		return (op2 == UD_Icmova);
 	case X86_CMOVNL:
 	case X86_CMOVGE:
+		return (op2 == UD_Icmovge);
 	case X86_CMOVNLE:
 	case X86_CMOVG:
+		return (op2 == UD_Icmovg);
 	case X86_CMOVNO:
+		return (op2 == UD_Icmovno);
 	case X86_CMOVNP:
+		return (op2 == UD_Icmovnp);
 	case X86_CMOVPO:
+		return false;
 	case X86_CMOVNS:
+		return (op2 == UD_Icmovns);
 	case X86_CMOVNZ:
+		return (op2 == UD_Icmovnz);
 	case X86_CMOVNE:
+		return false;
 	case X86_CMOVO:
+		return (op2 == UD_Icmovo);
 	case X86_CMOVP:
+		return (op2 == UD_Icmovp);
 	case X86_CMOVPE:
+		return false;
 	case X86_CMOVS:
+		return (op2 == UD_Icmovs);
 	case X86_CMOVZ:
+		return (op2 == UD_Icmovz);
 	case X86_CMOVE:
 		return false;
 	case X86_CMP:

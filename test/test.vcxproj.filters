@@ -23,10 +23,13 @@
     <CustomBuild Include="test_primary.asm">
       <Filter>Source Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="test_secondary.asm">
+      <Filter>Source Files</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <None Include="test_secondary.asm">
-      <Filter>Source Files</Filter>
+    <None Include="test.inc">
+      <Filter>Header Files</Filter>
     </None>
   </ItemGroup>
 </Project>
