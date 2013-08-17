@@ -472,6 +472,17 @@ emms
 %1 mm7, %2
 %endmacro ; TestMmxGpr
 
+%macro TestMmxGprRev 2
+%1 %2, mm0
+%1 %2, mm1
+%1 %2, mm2
+%1 %2, mm3
+%1 %2, mm4
+%1 %2, mm5
+%1 %2, mm6
+%1 %2, mm7
+%endmacro ; TestMmxGpr
+
 ; FIXME: Test memory operands
 TestMmxGpr movd, eax
 TestMmxGpr movd, ecx
@@ -481,6 +492,15 @@ TestMmxGpr movd, ebp
 TestMmxGpr movd, esp
 TestMmxGpr movd, esi
 TestMmxGpr movd, edi
+
+TestMmxGprRev movd, eax
+TestMmxGprRev movd, ecx
+TestMmxGprRev movd, edx
+TestMmxGprRev movd, ebx
+TestMmxGprRev movd, ebp
+TestMmxGprRev movd, esp
+TestMmxGprRev movd, esi
+TestMmxGprRev movd, edi
 
 ; Row 8
 jo 0xffff
