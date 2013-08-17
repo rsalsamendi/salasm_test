@@ -509,9 +509,73 @@ pop fs
 cpuid
 TEST_ARITHMETIC_MODRM16 bt
 
+%macro TestModRmMemoryThreeOperand 3
+	; Test ModRM Mod==0
+	%1 [BX + SI], %2, %3
+	%1 [BX + DI], %2, %3
+	%1 [BP + SI], %2, %3
+	%1 [SI], %2, %3
+	%1 [DI], %2, %3
+	%1 [0xffff], %2, %3
+	%1 [0x0001], %2, %3
+	%1 [BX], %2, %3
 
-hld eax, ebx, 1
+	; Test ModRM Mod==1
+	%1 [BX + SI + 1], %2, %3
+	%1 [BX + SI + 0xff], %2, %3
+	%1 [SI + 1], %2, %3
+	%1 [SI + 0xff], %2, %3
+	%1 [DI + 1], %2, %3
+	%1 [DI + 0xff], %2, %3
+	%1 [BP + 1], %2, %3
+	%1 [BP + 0xff], %2, %3
+	%1 [BX + 1], %2, %3
+	%1 [BX + 0xff], %2, %3
+%endmacro ; TestModRmMemory
 
+%macro TestShiftDoubleRow 2
+TestModRmMemoryThreeOperand %1, %2, 0
+TestModRmMemoryThreeOperand %1, %2, 0xff
+TestModRmMemoryThreeOperand %1, %2, cl
+%1 %2, eax, 0
+%1 %2, eax, 0xff
+%1 %2, eax, cl
+%1 %2, ecx, 0
+%1 %2, ecx, 0xff
+%1 %2, ecx, cl
+%1 %2, edx, 0
+%1 %2, edx, 0xff
+%1 %2, edx, cl
+%1 %2, ebx, 0
+%1 %2, ebx, 0xff
+%1 %2, ebx, cl
+%1 %2, ebp, 0
+%1 %2, ebp, 0xff
+%1 %2, ebp, cl
+%1 %2, esp, 0
+%1 %2, esp, 0xff
+%1 %2, esp, cl
+%1 %2, esi, 0
+%1 %2, esi, 0xff
+%1 %2, esi, cl
+%1 %2, edi, 0
+%1 %2, edi, 0xff
+%1 %2, edi, cl
+%endmacro ; TestShiftDoubleRow
+
+%macro TestShiftDouble 1
+TestShiftDoubleRow %1, eax
+TestShiftDoubleRow %1, ecx
+TestShiftDoubleRow %1, edx
+TestShiftDoubleRow %1, ebx
+TestShiftDoubleRow %1, ebp
+TestShiftDoubleRow %1, esp
+TestShiftDoubleRow %1, esi
+TestShiftDoubleRow %1, edi
+%endmacro ; TestShiftDouble
+
+TestShiftDouble shld
+TestShiftDouble shrd
 
 
 ; Row 0xb
