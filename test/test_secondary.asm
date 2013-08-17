@@ -73,6 +73,8 @@ femms
 	; Test ModRM Mod==1
 	%1 [BX + SI + 1], %2
 	%1 [BX + SI + 0xff], %2
+	%1 [BX + DI + 1], %2
+	%1 [BX + DI + 0xff], %2
 	%1 [SI + 1], %2
 	%1 [SI + 0xff], %2
 	%1 [DI + 1], %2
@@ -84,6 +86,9 @@ femms
 
 	; Test ModRM Mod==2
 	%1 [BX + SI + 0xffff], %2
+	%1 [BX + DI + 0xffff], %2
+	%1 [BP + SI + 0xffff], %2
+	%1 [BP + DI + 0xffff], %2
 	%1 [SI + 0xffff], %2
 	%1 [DI + 0xffff], %2
 	%1 [BP + 0xffff], %2
@@ -104,6 +109,8 @@ femms
 	; Test ModRM Mod==1
 	%1 %2, [BX + SI + 1]
 	%1 %2, [BX + SI + 0xff]
+	%1 %2, [BX + DI + 1]
+	%1 %2, [BX + DI + 0xff]
 	%1 %2, [SI + 1]
 	%1 %2, [SI + 0xff]
 	%1 %2, [DI + 1]
@@ -115,6 +122,9 @@ femms
 
 	; Test ModRM Mod==2
 	%1 %2, [BX + SI + 0xffff]
+	%1 %2, [BX + DI + 0xffff]
+	%1 %2, [BP + SI + 0xffff]
+	%1 %2, [BP + DI + 0xffff]
 	%1 %2, [SI + 0xffff]
 	%1 %2, [DI + 0xffff]
 	%1 %2, [BP + 0xffff]
@@ -540,6 +550,8 @@ TestMmx packssdw
 	; Test ModRM Mod==1
 	%1 %2, [BX + SI + 1], %3
 	%1 %2, [BX + SI + 0xff], %3
+	%1 %2, [BX + DI + 1], %3
+	%1 %2, [BX + DI + 0xff], %3
 	%1 %2, [SI + 1], %3
 	%1 %2, [SI + 0xff], %3
 	%1 %2, [DI + 1], %3
@@ -551,6 +563,9 @@ TestMmx packssdw
 
 	; Test ModRM Mod==2
 	%1 %2, [BX + SI + 0xffff], %3
+	%1 %2, [BX + DI + 0xffff], %3
+	%1 %2, [BP + SI + 0xffff], %3
+	%1 %2, [BP + DI + 0xffff], %3
 	%1 %2, [SI + 0xffff], %3
 	%1 %2, [DI + 0xffff], %3
 	%1 %2, [BP + 0xffff], %3
@@ -754,6 +769,8 @@ TEST_ARITHMETIC_MODRM16 bt
 	; Test ModRM Mod==1
 	%1 [BX + SI + 1], %2, %3
 	%1 [BX + SI + 0xff], %2, %3
+	%1 [BX + DI + 1], %2, %3
+	%1 [BX + DI + 0xff], %2, %3
 	%1 [SI + 1], %2, %3
 	%1 [SI + 0xff], %2, %3
 	%1 [DI + 1], %2, %3
@@ -765,6 +782,9 @@ TEST_ARITHMETIC_MODRM16 bt
 
 	; Test ModRM Mod==2
 	%1 [BX + SI + 0xffff], %2, %3
+	%1 [BX + DI + 0xffff], %2, %3
+	%1 [BP + SI + 0xffff], %2, %3
+	%1 [BP + DI + 0xffff], %2, %3
 	%1 [SI + 0xffff], %2, %3
 	%1 [DI + 0xffff], %2, %3
 	%1 [BP + 0xffff], %2, %3
@@ -885,6 +905,7 @@ ud1
 	 %1 word [BX + SI], %2
 	%1 word [BX + DI], %2
 	%1 word [BP + SI], %2
+	%1 word [BP + DI], %2
 	%1 word [SI], %2
 	%1 word [DI], %2
 	%1 word [0xffff], %2
@@ -894,6 +915,8 @@ ud1
 	; Test ModRM Mod==1
 	%1 word [BX + SI + 1], %2
 	%1 word [BX + SI + 0xff], %2
+	%1 word [BX + DI + 1], %2
+	%1 word [BX + DI + 0xff], %2
 	%1 word [SI + 1], %2
 	%1 word [SI + 0xff], %2
 	%1 word [DI + 1], %2
@@ -905,6 +928,9 @@ ud1
 
 	; Test ModRM Mod==2
 	%1 word [BX + SI + 0xffff], %2
+	%1 word [BX + DI + 0xffff], %2
+	%1 word [BP + SI + 0xffff], %2
+	%1 word [BP + DI + 0xffff], %2
 	%1 word [SI + 0xffff], %2
 	%1 word [DI + 0xffff], %2
 	%1 word [BP + 0xffff], %2

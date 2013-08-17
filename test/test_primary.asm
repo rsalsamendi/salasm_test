@@ -178,6 +178,7 @@ TEST_ARITHMETIC_RM16_REV mov, gs
 lea %1, word [BX + SI]
 lea %1, word [BX + DI]
 lea %1, word [BP + SI]
+lea %1, word [BP + DI]
 lea %1, word [SI]
 lea %1, word [DI]
 lea %1, word [0xffff]
@@ -187,6 +188,8 @@ lea %1, word [BX]
 ; Test ModRM Mod==1
 lea %1, word [BX + SI + 1]
 lea %1, word [BX + SI + 0xff]
+lea %1, word [BX + DI + 1]
+lea %1, word [BX + DI + 0xff]
 lea %1, word [SI + 1]
 lea %1, word [SI + 0xff]
 lea %1, word [DI + 1]
@@ -198,6 +201,9 @@ lea %1, word [BX + 0xff]
 
 ; Test ModRM Mod==2
 lea %1, word [BX + SI + 0xffff]
+lea %1, word [BX + DI + 0xffff]
+lea %1, word [BP + SI + 0xffff]
+lea %1, word [BP + DI + 0xffff]
 lea %1, word [SI + 0xffff]
 lea %1, word [DI + 0xffff]
 lea %1, word [BP + 0xffff]
@@ -379,6 +385,7 @@ iret
 	%1 %2 [BX + SI]
 	%1 %2 [BX + DI]
 	%1 %2 [BP + SI]
+	%1 %2 [BP + DI]
 	%1 %2 [SI]
 	%1 %2 [DI]
 	%1 %2 [0xffff]
@@ -388,6 +395,8 @@ iret
 	; Test ModRM Mod==1
 	%1 %2 [BX + SI + 1]
 	%1 %2 [BX + SI + 0xff]
+	%1 %2 [BX + DI + 1]
+	%1 %2 [BX + DI + 0xff]
 	%1 %2 [SI + 1]
 	%1 %2 [SI + 0xff]
 	%1 %2 [DI + 1]
@@ -399,6 +408,9 @@ iret
 
 	; Test ModRM Mod==2
 	%1 %2 [BX + SI + 0xffff]
+	%1 %2 [BX + DI + 0xffff]
+	%1 %2 [BP + SI + 0xffff]
+	%1 %2 [BP + DI + 0xffff]
 	%1 %2 [SI + 0xffff]
 	%1 %2 [DI + 0xffff]
 	%1 %2 [BP + 0xffff]
