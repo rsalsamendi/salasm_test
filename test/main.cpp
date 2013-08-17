@@ -2917,12 +2917,8 @@ TEST_F(AsmTest, Disassemble16)
 
 		ASSERT_TRUE(result);
 
-		if (instr.flags & X86_FLAG_INSUFFICIENT_LENGTH)
-		{
-			// FIXME: This means we reached the end of the page but
-			// there is an instruction across the boundary, need to handle this case
-			break;
-		}
+		// Watch out for stray flags
+		ASSERT_FALSE(instr.flags & X86_FLAG_INSUFFICIENT_LENGTH);
 
 		// Watch out for going too far.
 		ASSERT_TRUE(instr.length <= len);
