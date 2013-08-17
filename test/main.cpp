@@ -2688,6 +2688,8 @@ bool SkipOperandsSizeCheck(const X86Instruction* const instr, size_t operand)
 	case X86_CMPXCHG8B:
 	case X86_MOVLPS: // Possibly report to ud86, these are zero size
 	case X86_MOVHPS:
+	case X86_MOVNTPS:
+	case X86_MOVNTI:
 		return true;
 	case X86_LEA:
 	case X86_ROL:

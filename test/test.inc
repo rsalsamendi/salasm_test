@@ -86,7 +86,7 @@
 	%1 %2, BH
 %endmacro ; TEST_ARITHMETIC_RM8
 
-%macro TEST_ARITHMETIC_RM16 2
+%macro TEST_ARITHMETIC_RM16_MEMORY 2
 	; Test ModRM Mod==0
 	%1 word [BX + SI], %2
 	%1 word [BX + DI], %2
@@ -115,7 +115,10 @@
 	%1 word [DI + 0xffff], %2
 	%1 word [BP + 0xffff], %2
 	%1 word [BX + 0xffff], %2
+%endmacro ; TEST_ARITHMETIC_RM16_MEMORY
 
+%macro TEST_ARITHMETIC_RM16 2
+	TEST_ARITHMETIC_RM16_MEMORY %1, %2
 	; Test ModRM Mod==3
 	%1 AX, %2
 	%1 CX, %2
@@ -245,3 +248,65 @@
 %macro TEST_ARITHMETIC_ONE_OPERAND 2
 %1 %2
 %endmacro ; TEST_ARITHMETIC_ONE_OPERAND
+
+%macro TEST_ARITHMETIC_RM32_MEMORY 2
+	; Test ModRM Mod==0
+	%1 dword [BX + SI], %2
+	%1 dword [BX + DI], %2
+	%1 dword [BP + SI], %2
+	%1 dword [SI], %2
+	%1 dword [DI], %2
+	%1 dword [0xffff], %2
+	%1 dword [0x0001], %2
+	%1 dword [BX], %2
+
+	; Test ModRM Mod==1
+	%1 dword [BX + SI + 1], %2
+	%1 dword [BX + SI + 0xff], %2
+	%1 dword [SI + 1], %2
+	%1 dword [SI + 0xff], %2
+	%1 dword [DI + 1], %2
+	%1 dword [DI + 0xff], %2
+	%1 dword [BP + 1], %2
+	%1 dword [BP + 0xff], %2
+	%1 dword [BX + 1], %2
+	%1 dword [BX + 0xff], %2
+
+	; Test ModRM Mod==2
+	%1 dword [BX + SI + 0xffff], %2
+	%1 dword [SI + 0xffff], %2
+	%1 dword [DI + 0xffff], %2
+	%1 dword [BP + 0xffff], %2
+	%1 dword [BX + 0xffff], %2
+%endmacro ; TEST_ARITHMETIC_RM32_MEMORY
+
+%macro TEST_ARITHMETIC_RM64_MEMORY 2
+	; Test ModRM Mod==0
+	%1 qword [BX + SI], %2
+	%1 qword [BX + DI], %2
+	%1 qword [BP + SI], %2
+	%1 qword [SI], %2
+	%1 qword [DI], %2
+	%1 qword [0xffff], %2
+	%1 qword [0x0001], %2
+	%1 qword [BX], %2
+
+	; Test ModRM Mod==1
+	%1 qword [BX + SI + 1], %2
+	%1 qword [BX + SI + 0xff], %2
+	%1 qword [SI + 1], %2
+	%1 qword [SI + 0xff], %2
+	%1 qword [DI + 1], %2
+	%1 qword [DI + 0xff], %2
+	%1 qword [BP + 1], %2
+	%1 qword [BP + 0xff], %2
+	%1 qword [BX + 1], %2
+	%1 qword [BX + 0xff], %2
+
+	; Test ModRM Mod==2
+	%1 qword [BX + SI + 0xffff], %2
+	%1 qword [SI + 0xffff], %2
+	%1 qword [DI + 0xffff], %2
+	%1 qword [BP + 0xffff], %2
+	%1 qword [BX + 0xffff], %2
+%endmacro ; TEST_ARITHMETIC_RM64_MEMORY

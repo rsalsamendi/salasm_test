@@ -358,7 +358,22 @@ TestSimdMmxRow %1, xmm7
 
 TestSimdMmx cvtpi2ps
 
-; TestSimdRev movntps
+TestModRmMemory movntps, xmm0
+TestModRmMemory movntps, xmm1
+TestModRmMemory movntps, xmm2
+TestModRmMemory movntps, xmm3
+TestModRmMemory movntps, xmm4
+TestModRmMemory movntps, xmm5
+TestModRmMemory movntps, xmm6
+TestModRmMemory movntps, xmm7
+; TestModRmMemory movntps, xmm8
+; TestModRmMemory movntps, xmm9
+; TestModRmMemory movntps, xmm10
+; TestModRmMemory movntps, xmm11
+; TestModRmMemory movntps, xmm12
+; TestModRmMemory movntps, xmm13
+; TestModRmMemory movntps, xmm14
+; TestModRmMemory movntps, xmm15
 
 %macro TestMmxSimdRow 2
 TestModRmMemoryRev %1, %2
@@ -1013,7 +1028,15 @@ TestSimdImm cmpss
 %1 mm7, %2, 0xff
 %endmacro ; TestMmxGprImm
 
-; movnti
+TEST_ARITHMETIC_RM32_MEMORY movnti, eax
+TEST_ARITHMETIC_RM32_MEMORY movnti, ecx
+TEST_ARITHMETIC_RM32_MEMORY movnti, edx
+TEST_ARITHMETIC_RM32_MEMORY movnti, ebx
+TEST_ARITHMETIC_RM32_MEMORY movnti, ebp
+TEST_ARITHMETIC_RM32_MEMORY movnti, esp
+TEST_ARITHMETIC_RM32_MEMORY movnti, esi
+TEST_ARITHMETIC_RM32_MEMORY movnti, edi
+
 TestMmxGprImm pinsrw, eax
 TestMmxGprImm pinsrw, ecx
 TestMmxGprImm pinsrw, edx
@@ -1118,6 +1141,15 @@ TestMmx pmulhuw
 TestMmx pmulhw
 
 ; movntq
+; FIXME
+; TEST_ARITHMETIC_RM64_MEMORY movntq, rax
+; TEST_ARITHMETIC_RM64_MEMORY movntq, rcx
+; TEST_ARITHMETIC_RM64_MEMORY movntq, rdx
+; TEST_ARITHMETIC_RM64_MEMORY movntq, rbx
+; TEST_ARITHMETIC_RM64_MEMORY movntq, rbp
+; TEST_ARITHMETIC_RM64_MEMORY movntq, rsp
+; TEST_ARITHMETIC_RM64_MEMORY movntq, rsi
+; TEST_ARITHMETIC_RM64_MEMORY movntq, rdi
 
 TestMmx psubsb
 TestMmx psubsw
