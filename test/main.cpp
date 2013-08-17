@@ -952,28 +952,49 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_CRC32:
 		return (op2 == UD_Icrc32);
 	case X86_CVTDQ2PD:
+		return (op2 == UD_Icvtdq2pd);
 	case X86_CVTDQ2PS:
+		return (op2 == UD_Icvtdq2ps);
 	case X86_CVTPD2DQ:
+		return (op2 == UD_Icvtpd2dq);
 	case X86_CVTPD2PI:
+		return (op2 == UD_Icvtpd2pi);
 	case X86_CVTPD2PS:
+		return (op2 == UD_Icvtpd2ps);
 	case X86_CVTPI2PD:
+		return (op2 == UD_Icvtpi2pd);
 	case X86_CVTPI2PS:
+		return (op2 == UD_Icvtpi2ps);
 	case X86_CVTPS2DQ:
+		return (op2 == UD_Icvtps2dq);
 	case X86_CVTPS2PD:
+		return (op2 == UD_Icvtps2pd);
 	case X86_CVTPS2PI:
+		return (op2 == UD_Icvtsd2si);
 	case X86_CVTSD2SI:
+		return (op2 == UD_Icvtsd2si);
 	case X86_CVTSD2SS:
+		return (op2 == UD_Icvtsd2ss);
 	case X86_CVTSI2SD:
+		return (op2 == UD_Icvtsi2sd);
 	case X86_CVTSI2SS:
+		return (op2 == UD_Icvtsi2ss);
 	case X86_CVTSS2SD:
+		return (op2 == UD_Icvtss2sd);
 	case X86_CVTSS2SI:
+		return (op2 == UD_Icvtss2si);
 	case X86_CVTTPD2DQ:
+		return (op2 == UD_Icvttpd2dq);
 	case X86_CVTTPD2PI:
+		return (op2 == UD_Icvttpd2pi);
 	case X86_CVTTPS2DQ:
+		return (op2 == UD_Icvttps2dq);
 	case X86_CVTTPS2PI:
+		return (op2 == UD_Icvttps2pi);
 	case X86_CVTTSD2SI:
+		return (op2 == UD_Icvttsd2si);
 	case X86_CVTTSS2SI:
-		return false;
+		return (op2 == UD_Icvttss2si);
 	case X86_CWD:
 		return (op2 == UD_Icwd);
 	case X86_CDQ:
