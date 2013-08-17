@@ -970,7 +970,7 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_CVTPS2PD:
 		return (op2 == UD_Icvtps2pd);
 	case X86_CVTPS2PI:
-		return (op2 == UD_Icvtsd2si);
+		return (op2 == UD_Icvtps2pi);
 	case X86_CVTSD2SI:
 		return (op2 == UD_Icvtsd2si);
 	case X86_CVTSD2SS:

@@ -359,8 +359,41 @@ TestSimdMmxRow %1, xmm7
 TestSimdMmx cvtpi2ps
 
 ; TestSimdRev movntps
-; TestSimd cvttps2pi
-; TestSimd cvtps2pi
+
+%macro TestMmxSimdRow 2
+TestModRmMemoryRev %1, %2
+%1 %2, xmm0
+%1 %2, xmm1
+%1 %2, xmm2
+%1 %2, xmm3
+%1 %2, xmm4
+%1 %2, xmm5
+%1 %2, xmm6
+%1 %2, xmm7
+; %1, xmm8, %2
+; %1, xmm9, %2
+; %1, xmm10, %2
+; %1, xmm11, %2
+; %1, xmm12, %2
+; %1, xmm13, %2
+; %1, xmm14, %2
+; %1, xmm15, %2
+%endmacro ; TestMmxSimdRow
+
+%macro TestMmxSimd 1
+TestMmxSimdRow %1, mm0
+TestMmxSimdRow %1, mm1
+TestMmxSimdRow %1, mm2
+TestMmxSimdRow %1, mm3
+TestMmxSimdRow %1, mm4
+TestMmxSimdRow %1, mm5
+TestMmxSimdRow %1, mm6
+TestMmxSimdRow %1, mm7
+%endmacro ; TestMmxSimd
+
+TestMmxSimd cvttps2pi
+TestMmxSimd cvtps2pi
+
 TestSimd ucomiss
 TestSimd comiss
 
