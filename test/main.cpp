@@ -989,13 +989,19 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_DIV:
 		return (op2 == UD_Idiv);
 	case X86_DIVPD:
+		return (op2 == UD_Idivpd);
 	case X86_DIVPS:
+		return (op2 == UD_Idivps);
 	case X86_DIVSD:
+		return (op2 == UD_Idivsd);
 	case X86_DIVSS:
+		return (op2 == UD_Idivss);
 	case X86_DPPD:
+		return (op2 == UD_Idppd);
 	case X86_DPPS:
+		return (op2 == UD_Idpps);
 	case X86_EMMS:
-		return false;
+		return (op2 == UD_Iemms);
 	case X86_ENTER:
 		return (op2 == UD_Ienter);
 	case X86_EXTRACTPS:
@@ -1570,7 +1576,7 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_PBLENDW:
 		return (op2 == UD_Ipblendw);
 	case X86_PCMPEQB:
-		return (op2 == UD_Ipcmpeqd);
+		return (op2 == UD_Ipcmpeqb);
 	case X86_PCMPEQD:
 		return (op2 == UD_Ipcmpeqd);
 	case X86_PCMPEQQ:
@@ -1882,21 +1888,17 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_SETNG:
 		return false;
 	case X86_SETNB:
-		return false;
 	case X86_SETAE:
 		return (op2 == UD_Isetae);
 	case X86_SETNC:
 		return false;
 	case X86_SETNBE:
-		return false;
 	case X86_SETA:
 		return (op2 == UD_Iseta);
 	case X86_SETNL:
-		return false;
 	case X86_SETGE:
 		return (op2 == UD_Isetge);
 	case X86_SETNLE:
-		return false;
 	case X86_SETG:
 		return (op2 == UD_Isetg);
 	case X86_SETNO:
@@ -2002,7 +2004,8 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_UCOMISS:
 		return (op2 == UD_Iucomiss);
 	case X86_UD:
-		return false;
+	case X86_UD1:
+		return (op2 == UD_Iinvalid);
 	case X86_UD2:
 		return (op2 == UD_Iud2);
 	case X86_UNPCKHPD:
@@ -2657,6 +2660,10 @@ bool SkipOperandsSizeCheck(const X86Instruction* const instr, size_t operand)
 	case X86_PREFETCHT0:
 	case X86_PREFETCHT1:
 	case X86_PREFETCHT2:
+	case X86_CLFLUSH:
+	case X86_LSS:
+	case X86_LFS:
+	case X86_LGS:
 		return true;
 	case X86_LEA:
 	case X86_ROL:
@@ -2667,6 +2674,13 @@ bool SkipOperandsSizeCheck(const X86Instruction* const instr, size_t operand)
 	case X86_SHR:
 	case X86_SAL:
 	case X86_SAR:
+	case X86_PUNPCKLBW: // Maybe report a bug to ud86 as these should be dwords not qwords
+	case X86_PUNPCKLWD:
+	case X86_PUNPCKLDQ:
+	case X86_PUNPCKHBW:
+	case X86_PUNPCKHWD:
+	case X86_PUNPCKHDQ:
+	case X86_PACKSSDW:
 		if (operand == 1)
 			return true;
 		break;

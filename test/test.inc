@@ -1,4 +1,4 @@
-%macro TEST_ARITHMETIC_RM8 2
+%macro TEST_ARITHMETIC_RM8_MEMORY 2
 	; Test ModRM Mod==0
 	%1 byte [BX + SI], %2
 	%1 byte [BX + DI], %2
@@ -27,7 +27,10 @@
 	%1 byte [DI + 0xffff], %2
 	%1 byte [BP + 0xffff], %2
 	%1 byte [BX + 0xffff], %2
+%endmacro ; TEST_ARITHMETIC_RM8_MEMORY
 
+%macro TEST_ARITHMETIC_RM8 2
+	TEST_ARITHMETIC_RM8_MEMORY %1, %2
 	; Test ModRM Mod==3
 	%1 AL, %2
 	%1 CL, %2
@@ -39,7 +42,7 @@
 	%1 BH, %2
 %endmacro ; TEST_ARITHMETIC_RM8
 
-%macro TEST_ARITHMETIC_RM8_REV 2
+%macro TEST_ARITHMETIC_RM8_REV_MEMORY 2
 	; Test ModRM Mod==0
 	%1 %2, byte [BX + SI]
 	%1 %2, byte [BX + DI]
@@ -68,7 +71,10 @@
 	%1 %2, byte [DI + 0xffff]
 	%1 %2, byte [BP + 0xffff]
 	%1 %2, byte [BX + 0xffff]
+%endmacro ; TEST_ARITHMETIC_RM8_REV_MEMORY
 
+%macro TEST_ARITHMETIC_RM8_REV 2
+	TEST_ARITHMETIC_RM8_REV_MEMORY %1, %2
 	; Test ModRM Mod==3
 	%1 %2, AL
 	%1 %2, CL

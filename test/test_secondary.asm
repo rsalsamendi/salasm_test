@@ -180,6 +180,29 @@ SimdModRmRow %1, xmm7
 ; SimdModRmRow %1, xmm15
 %endmacro ; TestSimd
 
+%macro MmxModRmRevRow 2
+TestModRmMemoryRev %1, %2
+%1 mm0, %2
+%1 mm1, %2
+%1 mm2, %2
+%1 mm3, %2
+%1 mm4, %2
+%1 mm5, %2
+%1 mm6, %2
+%1 mm7, %2
+%endmacro ; MmxModRmRevRow
+
+%macro TestMmxRev 1
+MmxModRmRevRow %1, mm0
+MmxModRmRevRow %1, mm1
+MmxModRmRevRow %1, mm2
+MmxModRmRevRow %1, mm3
+MmxModRmRevRow %1, mm4
+MmxModRmRevRow %1, mm5
+MmxModRmRevRow %1, mm6
+MmxModRmRevRow %1, mm7
+%endmacro ; TestMmxRev
+
 %macro TestSimdRev 1
 SimdModRmRevRow %1, xmm0
 SimdModRmRevRow %1, xmm1
@@ -303,9 +326,13 @@ TEST_ARITHMETIC_MODRM16_REV cmovnle
 ; Row 5
 ; FIXME
 ; TestSimd movmskps
-TestSimd sqrtss
-TestSimd rsqrtss
-TestSimd rcpss
+TestSimd sqrtps
+TestSimd rsqrtps
+TestSimd rcpps
+TestSimd andps
+TestSimd andnps
+TestSimd orps
+TestSimd xorps
 
 TEST_ARITHMETIC_MODRM16_REV cmovs
 TEST_ARITHMETIC_MODRM16_REV cmovns
@@ -317,14 +344,14 @@ TEST_ARITHMETIC_MODRM16_REV cmovle
 TEST_ARITHMETIC_MODRM16_REV cmovnle
 
 ; Row 6
-TestSimdRev punpcklbw
-TestSimdRev punpcklwd
-TestSimdRev punpckldq
-TestSimdRev packsswb
-TestSimdRev pcmpgtb
-TestSimdRev pcmpgtw
-TestSimdRev pcmpgtd
-TestSimdRev packuswb
+TestMmxRev punpcklbw
+TestMmxRev punpcklwd
+TestMmxRev punpckldq
+TestMmxRev packsswb
+TestMmxRev pcmpgtb
+TestMmxRev pcmpgtw
+TestMmxRev pcmpgtd
+TestMmxRev packuswb
 
 %macro TestMmxRow 2
 TestModRmMemoryRev %1, %2
@@ -434,27 +461,26 @@ TestMmx pcmpeqw
 TestMmx pcmpeqd
 emms
 
-%macro TestMmxRowRev 2
-%1 %2, mm0
-%1 %2, mm1
-%1 %2, mm2
-%1 %2, mm3
-%1 %2, mm4
-%1 %2, mm5
-%1 %2, mm6
-%1 %2, mm7
-%endmacro
+%macro TestMmxGpr 2
+%1 mm0, %2
+%1 mm1, %2
+%1 mm2, %2
+%1 mm3, %2
+%1 mm4, %2
+%1 mm5, %2
+%1 mm6, %2
+%1 mm7, %2
+%endmacro ; TestMmxGpr
 
-TestMmxRowRev movd, eax
-TestMmxRowRev movd, ecx
-TestMmxRowRev movd, edx
-TestMmxRowRev movd, ebx
-TestMmxRowRev movd, ebp
-TestMmxRowRev movd, esp
-TestMmxRowRev movd, esi
-TestMmxRowRev movd, edi
-
-TestMmx movq
+; FIXME: Test memory operands
+TestMmxGpr movd, eax
+TestMmxGpr movd, ecx
+TestMmxGpr movd, edx
+TestMmxGpr movd, ebx
+TestMmxGpr movd, ebp
+TestMmxGpr movd, esp
+TestMmxGpr movd, esi
+TestMmxGpr movd, edi
 
 ; Row 8
 jo 0xffff
@@ -575,10 +601,32 @@ TestShiftDoubleRow %1, edi
 %endmacro ; TestShiftDouble
 
 TestShiftDouble shld
+push gs
+pop gs
+rsm
+TEST_ARITHMETIC_MODRM16 bts
 TestShiftDouble shrd
+
+; Group 15
+fxsave [0xffff]
+fxrstor [0xffff]
+ldmxcsr [0xffff]
+stmxcsr [0xffff]
+xsave [0xffff]
+lfence
+mfence
+sfence
+xrstor [0xffff]
+xsave [0xffff]
+clflush [0xffff]
+
+TEST_ARITHMETIC_MODRM16_REV imul
 
 
 ; Row 0xb
+
+TEST_ARITHMETIC_MODRM8 cmpxchg
+TEST_ARITHMETIC_MODRM16 cmpxchg
 
 %macro TestLoadSegment 1
 TestModRmMemoryRev %1, eax
@@ -591,6 +639,85 @@ TestModRmMemoryRev %1, esi
 TestModRmMemoryRev %1, edi
 %endmacro ; TestLoadSegment
 
+TestLoadSegment lss
+
+TEST_ARITHMETIC_MODRM16 btr
+
 TestLoadSegment lfs
 TestLoadSegment lgs
 
+TEST_ARITHMETIC_RM8_REV movzx, ax
+TEST_ARITHMETIC_RM8_REV movzx, cx
+TEST_ARITHMETIC_RM8_REV movzx, dx
+TEST_ARITHMETIC_RM8_REV movzx, bx
+TEST_ARITHMETIC_RM8_REV movzx, bp
+TEST_ARITHMETIC_RM8_REV movzx, sp
+TEST_ARITHMETIC_RM8_REV movzx, si
+TEST_ARITHMETIC_RM8_REV movzx, di
+
+TEST_ARITHMETIC_RM16_REV movzx, eax
+TEST_ARITHMETIC_RM16_REV movzx, ecx
+TEST_ARITHMETIC_RM16_REV movzx, edx
+TEST_ARITHMETIC_RM16_REV movzx, ebx
+TEST_ARITHMETIC_RM16_REV movzx, ebp
+TEST_ARITHMETIC_RM16_REV movzx, esp
+TEST_ARITHMETIC_RM16_REV movzx, esi
+TEST_ARITHMETIC_RM16_REV movzx, edi
+
+; Group 10
+ud1
+
+; Group 8
+%macro TestBits 2
+	; Test ModRM Mod==0
+	 %1 word [BX + SI], %2
+	%1 word [BX + DI], %2
+	%1 word [BP + SI], %2
+	%1 word [SI], %2
+	%1 word [DI], %2
+	%1 word [0xffff], %2
+	%1 word [0x0001], %2
+	%1 word [BX], %2
+
+	; Test ModRM Mod==1
+	%1 word [BX + SI + 1], %2
+	%1 word [BX + SI + 0xff], %2
+	%1 word [SI + 1], %2
+	%1 word [SI + 0xff], %2
+	%1 word [DI + 1], %2
+	%1 word [DI + 0xff], %2
+	%1 word [BP + 1], %2
+	%1 word [BP + 0xff], %2
+	%1 word [BX + 1], %2
+	%1 word [BX + 0xff], %2
+
+	; Test ModRM Mod==2
+	%1 word [BX + SI + 0xffff], %2
+	%1 word [SI + 0xffff], %2
+	%1 word [DI + 0xffff], %2
+	%1 word [BP + 0xffff], %2
+	%1 word [BX + 0xffff], %2
+
+	; Test ModRM Mod==3
+	%1 ax, %2
+	%1 cx, %2
+	%1 dx, %2
+	%1 bx, %2
+	%1 bp, %2
+	%1 sp, %2
+	%1 si, %2
+	%1 di, %2
+%endmacro ; TestBits
+
+TestBits bt, 0
+TestBits bt, 1
+TestBits bt, 0xff
+TestBits bts, 0
+TestBits bts, 1
+TestBits bts, 0xff
+TestBits btr, 0
+TestBits btr, 1
+TestBits btr, 0xff
+TestBits btc, 0
+TestBits btc, 1
+TestBits btc, 0xff
