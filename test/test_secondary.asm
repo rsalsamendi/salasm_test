@@ -741,3 +741,45 @@ TestBits btr, 0xff
 TestBits btc, 0
 TestBits btc, 1
 TestBits btc, 0xff
+
+TEST_ARITHMETIC_MODRM16 btc
+TEST_ARITHMETIC_MODRM16_REV bsf
+TEST_ARITHMETIC_MODRM16_REV bsr
+
+TEST_ARITHMETIC_RM8_REV movsx, ax
+TEST_ARITHMETIC_RM8_REV movsx, cx
+TEST_ARITHMETIC_RM8_REV movsx, dx
+TEST_ARITHMETIC_RM8_REV movsx, bx
+TEST_ARITHMETIC_RM8_REV movsx, bp
+TEST_ARITHMETIC_RM8_REV movsx, sp
+TEST_ARITHMETIC_RM8_REV movsx, si
+TEST_ARITHMETIC_RM8_REV movsx, di
+
+TEST_ARITHMETIC_RM16_REV movsx, eax
+TEST_ARITHMETIC_RM16_REV movsx, ecx
+TEST_ARITHMETIC_RM16_REV movsx, edx
+TEST_ARITHMETIC_RM16_REV movsx, ebx
+TEST_ARITHMETIC_RM16_REV movsx, ebp
+TEST_ARITHMETIC_RM16_REV movsx, esp
+TEST_ARITHMETIC_RM16_REV movsx, esi
+TEST_ARITHMETIC_RM16_REV movsx, edi
+
+; Row 0xc
+TEST_ARITHMETIC_MODRM8 xadd
+TEST_ARITHMETIC_MODRM16 xadd
+; cmpss
+; movnti
+; pinsrw
+; pextrw
+; shufps
+
+bswap eax
+bswap ecx
+bswap edx
+bswap ebx
+bswap ebp
+bswap esp
+bswap esi
+bswap edi
+
+
