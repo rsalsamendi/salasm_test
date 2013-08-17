@@ -2734,31 +2734,39 @@ bool CompareImmediates(const X86Operand* const operand, const struct ud_operand*
 }
 
 
-static void CompareOperand(const X86Operand* const operand1, const struct ud_operand* const operand2, size_t addrSize)
+static bool CompareOperand(const X86Operand* const operand1, const struct ud_operand* const operand2, size_t addrSize)
 {
-	bool result;
 	switch (operand1->operandType)
 	{
 	case X86_IMMEDIATE:
-		ASSERT_TRUE ((operand2->type == UD_OP_IMM)
-			|| (operand2->type == UD_OP_CONST) || (operand2->type == UD_OP_JIMM));
-		result = CompareImmediates(operand1, operand2, operand1->size);
-		ASSERT_TRUE(result);
+		if ((operand2->type != UD_OP_IMM)
+			&& (operand2->type != UD_OP_CONST) && (operand2->type != UD_OP_JIMM))
+		{
+			return false;
+		}
+		if (!CompareImmediates(operand1, operand2, operand1->size))
+			return false;
 		break;
 	case X86_MEM:
-		ASSERT_TRUE (operand2->type == UD_OP_MEM);
-		ASSERT_TRUE(CompareRegisters(operand1->components[0], operand2->base));
-		ASSERT_TRUE(CompareRegisters(operand1->components[1], operand2->index));
-		ASSERT_TRUE(operand1->scale == operand2->scale);
-		result = CompareImmediates(operand1, operand2, addrSize);
-		ASSERT_TRUE(result);
-
+		if (operand2->type != UD_OP_MEM)
+			return false;
+		if (!CompareRegisters(operand1->components[0], operand2->base))
+			return false;
+		if (!CompareRegisters(operand1->components[1], operand2->index))
+			return false;
+		if (operand1->scale != operand2->scale)
+			return false;
+		if (!CompareImmediates(operand1, operand2, addrSize))
+			return false;
 		break;
 	default:
 		// A register of some sort.
-		bool match = CompareRegisters(operand1->operandType, operand2->base);
-		ASSERT_TRUE(match);
+		if (!CompareRegisters(operand1->operandType, operand2->base))
+			return false;
+		break;
 	}
+
+	return true;
 }
 
 
@@ -2851,19 +2859,27 @@ static bool FpuInstr(const X86Instruction* const instr, const ud_t* const ud_obj
 		&& (instr->op != X86_FSUBP) && (instr->op != X86_FDIVP)
 		&& (instr->op != X86_FDIVRP))
 	{
-		CompareOperand(&instr->operands[0], operand, addrSize);
+		if (!CompareOperand(&instr->operands[0], operand, addrSize))
+			return false;
 		operand = ud_insn_opr(ud_obj, 1);
 		if (!operand)
 			return false;
-		CompareOperand(&instr->operands[1], operand, addrSize);
+		if (!CompareOperand(&instr->operands[1], operand, addrSize))
+			return false;
 	}
 	else
 	{
 		// udis86 doesn't include implicit operands, only ones that are fetched.
 		if (instr->operandCount == 1)
-			CompareOperand(&instr->operands[0], operand, addrSize);
+		{
+			if (!CompareOperand(&instr->operands[0], operand, addrSize))
+				return false;
+		}
 		else
-			CompareOperand(&instr->operands[1], operand, addrSize);
+		{
+			if (!CompareOperand(&instr->operands[1], operand, addrSize))
+				return false;
+		}
 	}
 
 	return true;
@@ -2953,7 +2969,8 @@ TEST_F(AsmTest, Disassemble16)
 			if (!SkipOperandsSizeCheck(&instr, i))
 				ASSERT_TRUE(instr.operands[i].size == (operand->size >> 3));
 
-			CompareOperand(&instr.operands[i], operand, 2);
+			bool result = CompareOperand(&instr.operands[i], operand, 2);
+			ASSERT_TRUE(result);
 		}
 	}
 

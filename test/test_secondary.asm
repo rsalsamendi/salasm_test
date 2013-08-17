@@ -767,9 +767,85 @@ TEST_ARITHMETIC_RM16_REV movsx, edi
 ; Row 0xc
 TEST_ARITHMETIC_MODRM8 xadd
 TEST_ARITHMETIC_MODRM16 xadd
-; cmpss
+
+%macro TestSimdRowImm 2
+; TestModRmMemoryImm %1, %2 ; FIXME
+%1 xmm0, %2, 0
+%1 xmm0, %2, 0xff
+%1 xmm1, %2, 0
+%1 xmm1, %2, 0xff
+%1 xmm2, %2, 0
+%1 xmm2, %2, 0xff
+%1 xmm3, %2, 0
+%1 xmm3, %2, 0xff
+%1 xmm4, %2, 0
+%1 xmm4, %2, 0xff
+%1 xmm5, %2, 0
+%1 xmm5, %2, 0xff
+%1 xmm6, %2, 0
+%1 xmm6, %2, 0xff
+%1 xmm7, %2, 0
+%1 xmm7, %2, 0xff
+%endmacro ; TestSimdRowImm
+
+%macro TestSimdImm 1
+TestSimdRowImm %1, xmm0
+TestSimdRowImm %1, xmm0
+TestSimdRowImm %1, xmm1
+TestSimdRowImm %1, xmm1
+TestSimdRowImm %1, xmm2
+TestSimdRowImm %1, xmm2
+TestSimdRowImm %1, xmm3
+TestSimdRowImm %1, xmm3
+TestSimdRowImm %1, xmm4
+TestSimdRowImm %1, xmm4
+TestSimdRowImm %1, xmm5
+TestSimdRowImm %1, xmm5
+TestSimdRowImm %1, xmm6
+TestSimdRowImm %1, xmm6
+TestSimdRowImm %1, xmm7
+TestSimdRowImm %1, xmm7
+%endmacro ; TestSimdImm
+
+TestSimdImm cmpss
+
+%macro TestMmxGprImm 2
+%1 mm0, %2, 0
+%1 mm0, %2, 1
+%1 mm0, %2, 0xff
+%1 mm1, %2, 0
+%1 mm1, %2, 1
+%1 mm1, %2, 0xff
+%1 mm2, %2, 0
+%1 mm2, %2, 1
+%1 mm2, %2, 0xff
+%1 mm3, %2, 0
+%1 mm3, %2, 1
+%1 mm3, %2, 0xff
+%1 mm4, %2, 0
+%1 mm4, %2, 1
+%1 mm4, %2, 0xff
+%1 mm5, %2, 0
+%1 mm5, %2, 1
+%1 mm5, %2, 0xff
+%1 mm6, %2, 0
+%1 mm6, %2, 1
+%1 mm6, %2, 0xff
+%1 mm7, %2, 0
+%1 mm7, %2, 1
+%1 mm7, %2, 0xff
+%endmacro ; TestMmxGprImm
+
 ; movnti
-; pinsrw
+TestMmxGprImm pinsrw, eax
+TestMmxGprImm pinsrw, ecx
+TestMmxGprImm pinsrw, edx
+TestMmxGprImm pinsrw, ebx
+TestMmxGprImm pinsrw, ebp
+TestMmxGprImm pinsrw, esp
+TestMmxGprImm pinsrw, esi
+TestMmxGprImm pinsrw, edi
+
 ; pextrw
 ; shufps
 
