@@ -225,14 +225,48 @@ SimdModRmRevRow %1, xmm7
 ; Row 1
 TestSimd movups
 TestSimdRev movups
-; TestSimd movlps ; FIXME
-; TestSimdRev movlps ; FIXME
+
+TestModRmMemory movlps, xmm0
+TestModRmMemory movlps, xmm1
+TestModRmMemory movlps, xmm2
+TestModRmMemory movlps, xmm3
+TestModRmMemory movlps, xmm4
+TestModRmMemory movlps, xmm5
+TestModRmMemory movlps, xmm6
+TestModRmMemory movlps, xmm7
+; FIXME: xmm8-15
+
+TestModRmMemoryRev movlps, xmm0
+TestModRmMemoryRev movlps, xmm1
+TestModRmMemoryRev movlps, xmm2
+TestModRmMemoryRev movlps, xmm3
+TestModRmMemoryRev movlps, xmm4
+TestModRmMemoryRev movlps, xmm5
+TestModRmMemoryRev movlps, xmm6
+TestModRmMemoryRev movlps, xmm7
+
 TestSimd movhlps
 TestSimd unpcklps
 TestSimd unpckhps
 TestSimd movlhps
-; TestSimd movhps ; FIXME
-; TestSimdRev movhps
+
+TestModRmMemory movhps, xmm0
+TestModRmMemory movhps, xmm1
+TestModRmMemory movhps, xmm2
+TestModRmMemory movhps, xmm3
+TestModRmMemory movhps, xmm4
+TestModRmMemory movhps, xmm5
+TestModRmMemory movhps, xmm6
+TestModRmMemory movhps, xmm7
+
+TestModRmMemoryRev movhps, xmm0
+TestModRmMemoryRev movhps, xmm1
+TestModRmMemoryRev movhps, xmm2
+TestModRmMemoryRev movhps, xmm3
+TestModRmMemoryRev movhps, xmm4
+TestModRmMemoryRev movhps, xmm5
+TestModRmMemoryRev movhps, xmm6
+TestModRmMemoryRev movhps, xmm7
 
 prefetchnta [0xffff]
 prefetcht0 [0xffff]
@@ -846,8 +880,46 @@ TestMmxGprImm pinsrw, esp
 TestMmxGprImm pinsrw, esi
 TestMmxGprImm pinsrw, edi
 
-; pextrw
-; shufps
+%macro TestGprMmxImm 2
+%1 %2, mm0, 0
+%1 %2, mm0, 1
+%1 %2, mm0, 0xff
+%1 %2, mm1, 0
+%1 %2, mm1, 1
+%1 %2, mm1, 0xff
+%1 %2, mm2, 0
+%1 %2, mm2, 1
+%1 %2, mm2, 0xff
+%1 %2, mm3, 0
+%1 %2, mm3, 1
+%1 %2, mm3, 0xff
+%1 %2, mm4, 0
+%1 %2, mm4, 1
+%1 %2, mm4, 0xff
+%1 %2, mm5, 0
+%1 %2, mm5, 1
+%1 %2, mm5, 0xff
+%1 %2, mm6, 0
+%1 %2, mm6, 1
+%1 %2, mm6, 0xff
+%1 %2, mm7, 0
+%1 %2, mm7, 1
+%1 %2, mm7, 0xff
+%endmacro ; TestGprMmxImm
+
+TestGprMmxImm pextrw, eax
+TestGprMmxImm pextrw, ecx
+TestGprMmxImm pextrw, edx
+TestGprMmxImm pextrw, ebx
+TestGprMmxImm pextrw, ebp
+TestGprMmxImm pextrw, esp
+TestGprMmxImm pextrw, esi
+TestGprMmxImm pextrw, edi
+
+TestSimdImm shufps
+
+cmpxchg8b [0xffff]
+; cmpxchg16b
 
 bswap eax
 bswap ecx
@@ -858,4 +930,99 @@ bswap esp
 bswap esi
 bswap edi
 
+; Row 0xd
+TestMmx psrlw
+TestMmx psrld
+TestMmx psrlq
+TestMmx paddq
+TestMmx pmullw
 
+%macro TestGprMmx 2
+%1 %2, mm0
+%1 %2, mm1
+%1 %2, mm2
+%1 %2, mm3
+%1 %2, mm4
+%1 %2, mm5
+%1 %2, mm6
+%1 %2, mm7
+%endmacro ; TestGprMmx
+
+TestGprMmx pmovmskb, eax
+TestGprMmx pmovmskb, ecx
+TestGprMmx pmovmskb, edx
+TestGprMmx pmovmskb, ebx
+TestGprMmx pmovmskb, ebp
+TestGprMmx pmovmskb, esp
+TestGprMmx pmovmskb, esi
+TestGprMmx pmovmskb, edi
+
+TestMmx psubusb
+TestMmx psubusw
+TestMmx pminub
+TestMmx pand
+TestMmx paddusb
+TestMmx paddusw
+TestMmx pmaxub
+TestMmx pandn
+
+; Row 0xe
+TestMmx pavgb
+TestMmx psraw
+TestMmx psrad
+TestMmx pavgw
+TestMmx pmulhuw
+TestMmx pmulhw
+
+; movntq
+
+TestMmx psubsb
+TestMmx psubsw
+TestMmx pminsw
+TestMmx por
+TestMmx paddsb
+TestMmx paddsw
+TestMmx pmaxsw
+TestMmx pxor
+
+; Row 0xf
+TestMmx psllw
+TestMmx pslld
+TestMmx psllq
+TestMmx pmuludq
+TestMmx pmaddwd
+TestMmx psadbw
+
+%macro MmxModRmRevRegRow 2
+%1 mm0, %2
+%1 mm1, %2
+%1 mm2, %2
+%1 mm3, %2
+%1 mm4, %2
+%1 mm5, %2
+%1 mm6, %2
+%1 mm7, %2
+%endmacro ; MmxModRmRevRegRow
+
+%macro TestMmxRevReg 1
+MmxModRmRevRegRow %1, mm0
+MmxModRmRevRegRow %1, mm1
+MmxModRmRevRegRow %1, mm2
+MmxModRmRevRegRow %1, mm3
+MmxModRmRevRegRow %1, mm4
+MmxModRmRevRegRow %1, mm5
+MmxModRmRevRegRow %1, mm6
+MmxModRmRevRegRow %1, mm7
+%endmacro ; TestMmxRevReg
+
+TestMmxRevReg maskmovq
+
+TestMmx psubb
+TestMmx psubw
+TestMmx psubd
+TestMmx psubq
+TestMmx paddb
+TestMmx paddw
+TestMmx paddd
+
+ud0
