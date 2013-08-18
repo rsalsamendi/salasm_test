@@ -56,8 +56,93 @@ prefetch [0xffff]
 prefetchw [0xffff]
 femms
 
-; TODO: 3dnow
+%macro TestModRmMemoryRev 2
+	; Test ModRM Mod==0
+	%1 %2, [BX + SI]
+	%1 %2, [BX + DI]
+	%1 %2, [BP + SI]
+	%1 %2, [SI]
+	%1 %2, [DI]
+	%1 %2, [0xffff]
+	%1 %2, [0x0001]
+	%1 %2, [BX]
 
+	; Test ModRM Mod==1
+	%1 %2, [BX + SI + 1]
+	%1 %2, [BX + SI + 0xff]
+	%1 %2, [BX + DI + 1]
+	%1 %2, [BX + DI + 0xff]
+	%1 %2, [SI + 1]
+	%1 %2, [SI + 0xff]
+	%1 %2, [DI + 1]
+	%1 %2, [DI + 0xff]
+	%1 %2, [BP + 1]
+	%1 %2, [BP + 0xff]
+	%1 %2, [BX + 1]
+	%1 %2, [BX + 0xff]
+
+	; Test ModRM Mod==2
+	%1 %2, [BX + SI + 0xffff]
+	%1 %2, [BX + DI + 0xffff]
+	%1 %2, [BP + SI + 0xffff]
+	%1 %2, [BP + DI + 0xffff]
+	%1 %2, [SI + 0xffff]
+	%1 %2, [DI + 0xffff]
+	%1 %2, [BP + 0xffff]
+	%1 %2, [BX + 0xffff]
+	%1 %2, [BX + 1]
+%endmacro ; TestModRmMemoryRev
+
+%macro MmxModRmRevRow 2
+TestModRmMemoryRev %1, %2
+%1 mm0, %2
+%1 mm1, %2
+%1 mm2, %2
+%1 mm3, %2
+%1 mm4, %2
+%1 mm5, %2
+%1 mm6, %2
+%1 mm7, %2
+%endmacro ; MmxModRmRevRow
+
+%macro TestMmxRev 1
+MmxModRmRevRow %1, mm0
+MmxModRmRevRow %1, mm1
+MmxModRmRevRow %1, mm2
+MmxModRmRevRow %1, mm3
+MmxModRmRevRow %1, mm4
+MmxModRmRevRow %1, mm5
+MmxModRmRevRow %1, mm6
+MmxModRmRevRow %1, mm7
+%endmacro ; TestMmxRev
+
+; 3dnow
+TestMmxRev pfcmpge
+TestMmxRev pfcmpgt
+TestMmxRev pfcmpeq
+TestMmxRev pfmin
+TestMmxRev pfmax
+TestMmxRev pfmul
+TestMmxRev pfrcp
+TestMmxRev pfrcpit1
+TestMmxRev pfrcpit2
+TestMmxRev pfrsqrt
+TestMmxRev pfrsqit1
+; TestMmxRev pmulhrw ; yasm doesn't support yet?!
+
+TestMmxRev pi2fw
+TestMmxRev pf2iw
+TestMmxRev pi2fd
+TestMmxRev pf2id
+
+TestMmxRev pfsub ; signed
+TestMmxRev pfsubr ; signed
+TestMmxRev pswapd ; signed
+TestMmxRev pfpnacc ; signed
+TestMmxRev pfadd ; signed
+TestMmxRev pfacc ; signed
+TestMmxRev pavgusb ; signed
+TestMmxRev pfnacc ; signed
 
 %macro TestModRmMemory 2
 	; Test ModRM Mod==0
@@ -94,42 +179,6 @@ femms
 	%1 [BP + 0xffff], %2
 	%1 [BX + 0xffff], %2
 %endmacro ; TestModRmMemory
-
-%macro TestModRmMemoryRev 2
-	; Test ModRM Mod==0
-	%1 %2, [BX + SI]
-	%1 %2, [BX + DI]
-	%1 %2, [BP + SI]
-	%1 %2, [SI]
-	%1 %2, [DI]
-	%1 %2, [0xffff]
-	%1 %2, [0x0001]
-	%1 %2, [BX]
-
-	; Test ModRM Mod==1
-	%1 %2, [BX + SI + 1]
-	%1 %2, [BX + SI + 0xff]
-	%1 %2, [BX + DI + 1]
-	%1 %2, [BX + DI + 0xff]
-	%1 %2, [SI + 1]
-	%1 %2, [SI + 0xff]
-	%1 %2, [DI + 1]
-	%1 %2, [DI + 0xff]
-	%1 %2, [BP + 1]
-	%1 %2, [BP + 0xff]
-	%1 %2, [BX + 1]
-	%1 %2, [BX + 0xff]
-
-	; Test ModRM Mod==2
-	%1 %2, [BX + SI + 0xffff]
-	%1 %2, [BX + DI + 0xffff]
-	%1 %2, [BP + SI + 0xffff]
-	%1 %2, [BP + DI + 0xffff]
-	%1 %2, [SI + 0xffff]
-	%1 %2, [DI + 0xffff]
-	%1 %2, [BP + 0xffff]
-	%1 %2, [BX + 0xffff]
-%endmacro ; TestModRmMemoryRev
 
 %macro TestModRmMemoryImm 3
 	; Test ModRM Mod==0
@@ -225,29 +274,6 @@ SimdModRmRow %1, xmm7
 ; SimdModRmRow %1, xmm14
 ; SimdModRmRow %1, xmm15
 %endmacro ; TestSimd
-
-%macro MmxModRmRevRow 2
-TestModRmMemoryRev %1, %2
-%1 mm0, %2
-%1 mm1, %2
-%1 mm2, %2
-%1 mm3, %2
-%1 mm4, %2
-%1 mm5, %2
-%1 mm6, %2
-%1 mm7, %2
-%endmacro ; MmxModRmRevRow
-
-%macro TestMmxRev 1
-MmxModRmRevRow %1, mm0
-MmxModRmRevRow %1, mm1
-MmxModRmRevRow %1, mm2
-MmxModRmRevRow %1, mm3
-MmxModRmRevRow %1, mm4
-MmxModRmRevRow %1, mm5
-MmxModRmRevRow %1, mm6
-MmxModRmRevRow %1, mm7
-%endmacro ; TestMmxRev
 
 %macro TestSimdRev 1
 SimdModRmRevRow %1, xmm0

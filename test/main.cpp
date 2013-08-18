@@ -1628,6 +1628,55 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 		return (op2 == UD_Ipextrq);
 	case X86_PEXTRW:
 		return (op2 == UD_Ipextrw);
+	// 3dnow!
+	case X86_PFCMPGE:
+		return (op2 == UD_Ipfcmpge);
+	case X86_PFCMPGT:
+		return (op2 == UD_Ipfcmpgt);
+	case X86_PFCMPEQ:
+		return (op2 == UD_Ipfcmpeq);
+	case X86_PFMIN:
+		return (op2 == UD_Ipfmin);
+	case X86_PFMAX:
+		return (op2 == UD_Ipfmax);
+	case X86_PFMUL:
+		return (op2 == UD_Ipfmul);
+	case X86_PFRCP:
+		return (op2 == UD_Ipfrcp);
+	case X86_PFRCPIT1:
+		return (op2 == UD_Ipfrcpit1);
+	case X86_PFRCPIT2:
+		return (op2 == UD_Ipfrcpit2);
+	case X86_PFRSQRT:
+		return (op2 == UD_Ipfrsqrt);
+	case X86_PFRSQIT1:
+		return (op2 == UD_Ipfrsqit1);
+	case X86_PFNACC:
+		return (op2 == UD_Ipfnacc);
+	case X86_PFSUB:
+		return (op2 == UD_Ipfsub);
+	case X86_PFSUBR:
+		return (op2 == UD_Ipfsubr);
+	case X86_PSWAPD:
+		return (op2 == UD_Ipswapd);
+	case X86_PFPNACC:
+		return (op2 == UD_Ipfpnacc);
+	case X86_PFADD:
+		return (op2 == UD_Ipfadd);
+	case X86_PFACC:
+		return (op2 == UD_Ipfacc);
+	case X86_PAVGUSB:
+		return (op2 == UD_Ipavgusb);
+	case X86_PI2FW:
+		return (op2 == UD_Ipi2fw);
+	case X86_PF2IW:
+		return (op2 == UD_Ipf2iw);
+	case X86_PI2FD:
+		return (op2 == UD_Ipi2fd);
+	case X86_PF2ID:
+		return (op2 == UD_Ipf2id);
+	case X86_PMULHRW:
+		return (op2 == UD_Ipmulhrw);
 	case X86_PHADDD:
 		return (op2 == UD_Iphaddd);
 	case X86_PHADDSW:
