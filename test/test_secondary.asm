@@ -131,6 +131,42 @@ femms
 	%1 %2, [BX + 0xffff]
 %endmacro ; TestModRmMemoryRev
 
+%macro TestModRmMemoryImm 3
+	; Test ModRM Mod==0
+	%1 %2, [BX + SI], %3
+	%1 %2, [BX + DI], %3
+	%1 %2, [BP + SI], %3
+	%1 %2, [SI], %3
+	%1 %2, [DI], %3
+	%1 %2, [0xffff], %3
+	%1 %2, [0x0001], %3
+	%1 %2, [BX], %3
+
+	; Test ModRM Mod==1
+	%1 %2, [BX + SI + 1], %3
+	%1 %2, [BX + SI + 0xff], %3
+	%1 %2, [BX + DI + 1], %3
+	%1 %2, [BX + DI + 0xff], %3
+	%1 %2, [SI + 1], %3
+	%1 %2, [SI + 0xff], %3
+	%1 %2, [DI + 1], %3
+	%1 %2, [DI + 0xff], %3
+	%1 %2, [BP + 1], %3
+	%1 %2, [BP + 0xff], %3
+	%1 %2, [BX + 1], %3
+	%1 %2, [BX + 0xff], %3
+
+	; Test ModRM Mod==2
+	%1 %2, [BX + SI + 0xffff], %3
+	%1 %2, [BX + DI + 0xffff], %3
+	%1 %2, [BP + SI + 0xffff], %3
+	%1 %2, [BP + DI + 0xffff], %3
+	%1 %2, [SI + 0xffff], %3
+	%1 %2, [DI + 0xffff], %3
+	%1 %2, [BP + 0xffff], %3
+	%1 %2, [BX + 0xffff], %3
+%endmacro ; TestModRmMemoryImm
+
 %macro SimdModRmRow 2
 ; TestModRmMemory %1, %2
 %1 %2, xmm0
@@ -1004,22 +1040,32 @@ TEST_ARITHMETIC_MODRM8 xadd
 TEST_ARITHMETIC_MODRM16 xadd
 
 %macro TestSimdRowImm 2
-; TestModRmMemoryImm %1, %2 ; FIXME
+TestModRmMemoryImm %1, %2, 0
+TestModRmMemoryImm %1, %2, 1
+TestModRmMemoryImm %1, %2, 0xff
 %1 xmm0, %2, 0
+%1 xmm0, %2, 1
 %1 xmm0, %2, 0xff
 %1 xmm1, %2, 0
+%1 xmm1, %2, 1
 %1 xmm1, %2, 0xff
 %1 xmm2, %2, 0
+%1 xmm2, %2, 1
 %1 xmm2, %2, 0xff
 %1 xmm3, %2, 0
+%1 xmm3, %2, 1
 %1 xmm3, %2, 0xff
 %1 xmm4, %2, 0
+%1 xmm4, %2, 1
 %1 xmm4, %2, 0xff
 %1 xmm5, %2, 0
+%1 xmm5, %2, 1
 %1 xmm5, %2, 0xff
 %1 xmm6, %2, 0
+%1 xmm6, %2, 1
 %1 xmm6, %2, 0xff
 %1 xmm7, %2, 0
+%1 xmm7, %2, 1
 %1 xmm7, %2, 0xff
 %endmacro ; TestSimdRowImm
 
