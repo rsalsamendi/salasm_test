@@ -128,7 +128,9 @@ TestMmxRev pfrcpit1
 TestMmxRev pfrcpit2
 TestMmxRev pfrsqrt
 TestMmxRev pfrsqit1
+
 ; TestMmxRev pmulhrw ; yasm doesn't support yet?!
+db 0x0f, 0x0f, 0x00, 0xb7
 
 TestMmxRev pi2fw
 TestMmxRev pf2iw
