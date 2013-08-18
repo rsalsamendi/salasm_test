@@ -1025,7 +1025,7 @@ TestSimdRowImm %1, xmm7
 TestSimdRowImm %1, xmm7
 %endmacro ; TestSimdImm
 
-TestSimdImm cmpss
+TestSimdImm cmpps
 
 %macro TestMmxGprImm 2
 %1 mm0, %2, 0
