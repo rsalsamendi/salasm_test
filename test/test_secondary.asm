@@ -683,7 +683,24 @@ emms
 %1 %2, mm7
 %endmacro ; TestMmxGpr
 
-; FIXME: Test memory operands
+TestModRmMemory movd, mm0
+TestModRmMemory movd, mm1
+TestModRmMemory movd, mm2
+TestModRmMemory movd, mm3
+TestModRmMemory movd, mm4
+TestModRmMemory movd, mm5
+TestModRmMemory movd, mm6
+TestModRmMemory movd, mm7
+
+TestModRmMemoryRev movd, mm0
+TestModRmMemoryRev movd, mm1
+TestModRmMemoryRev movd, mm2
+TestModRmMemoryRev movd, mm3
+TestModRmMemoryRev movd, mm4
+TestModRmMemoryRev movd, mm5
+TestModRmMemoryRev movd, mm6
+TestModRmMemoryRev movd, mm7
+
 TestMmxGpr movd, eax
 TestMmxGpr movd, ecx
 TestMmxGpr movd, edx
