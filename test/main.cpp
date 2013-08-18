@@ -2739,6 +2739,11 @@ bool SkipOperandsSizeCheck(const X86Instruction* const instr, size_t operand)
 	case X86_MOVHPS:
 	case X86_MOVNTPS:
 	case X86_MOVNTI:
+	case X86_SGDT:
+	case X86_SIDT:
+	case X86_LGDT:
+	case X86_LIDT:
+	case X86_INVLPG:
 		return true;
 	case X86_LEA:
 	case X86_ROL:
@@ -3001,6 +3006,7 @@ TEST_F(AsmTest, Disassemble16)
 	{
 		unsigned int bytes;
 		bool result;
+		uint8_t operandCount;
 
 		BEGIN_PERF_CTR(salsasm)
 		result = Disassemble16((uint16_t)(fileLen - len), AsmTest::Fetch, this, &instr);
@@ -3034,6 +3040,17 @@ TEST_F(AsmTest, Disassemble16)
 
 		if (FpuInstr(&instr, &ud_obj, 2))
 			continue;
+
+		operandCount = 0;
+		for (size_t i = 0; i < 4; i++)
+		{
+			const struct ud_operand* const operand = ud_insn_opr(&ud_obj, (unsigned int)i);
+			if (operand == NULL)
+				break;
+			operandCount++;
+		};
+
+		ASSERT_TRUE(operandCount == instr.operandCount);
 
 		for (size_t i = 0; i < instr.operandCount; i++)
 		{
