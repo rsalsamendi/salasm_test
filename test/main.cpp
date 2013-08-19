@@ -1322,8 +1322,9 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_JLE:
 	case X86_JNG: // Fall through
 		return (op2 == UD_Ijle);
-	case X86_JMP:
-	case X86_JMPF: // Fall through
+	case X86_JMPN:
+		return (op2 == UD_Ijmp);
+	case X86_JMPF:
 		return (op2 == UD_Ijmp);
 	case X86_JNC:
 		return false;
