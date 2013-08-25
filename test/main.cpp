@@ -782,6 +782,23 @@ TEST_F(AsmTest, DisassemblePastBugs)
 		ASSERT_TRUE(instr.operands[1].operandType == X86_XMM0);
 		ASSERT_TRUE(instr.operands[1].size == 8);
 	}
+
+	static const uint8_t movqMmx[] = {0x0f, 0x7f, 0x00};
+	{
+		X86Instruction instr;
+		SetOpcodeBytes(&m_data, movqMmx, sizeof(movqMmx));
+		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		ASSERT_TRUE(result);
+		ASSERT_TRUE(instr.op == X86_MOVQ);
+		ASSERT_TRUE(instr.length == sizeof(movqMmx));
+		ASSERT_TRUE(instr.operandCount == 2);
+		ASSERT_TRUE(instr.operands[0].operandType == X86_MEM);
+		ASSERT_TRUE(instr.operands[0].components[0] == X86_BX);
+		ASSERT_TRUE(instr.operands[0].components[1] == X86_SI);
+		ASSERT_TRUE(instr.operands[0].size == 8);
+		ASSERT_TRUE(instr.operands[1].operandType == X86_MM0);
+		ASSERT_TRUE(instr.operands[1].size == 8);
+	}
 }
 
 
@@ -2777,6 +2794,15 @@ bool SkipOperandsSizeCheck(const X86Instruction* const instr, size_t operand)
 	case X86_PUNPCKLBW: // Maybe report a bug to ud86 as these should be dwords not qwords
 	case X86_PUNPCKLWD:
 	case X86_PUNPCKLDQ:
+	case X86_MOVD:
+	case X86_MOVQ:
+	case X86_MOVQ2DQ:
+	case X86_MOVDQ2Q:
+	case X86_MOVNTQ:
+	case X86_MOVNTDQ:
+	case X86_PSHUFHW:
+	case X86_PSHUFLW:
+	case X86_LDDQU:
 		return true;
 	case X86_LEA:
 	case X86_ROL:

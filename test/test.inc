@@ -347,3 +347,77 @@
 	%1 qword [BP + 0xffff], %2
 	%1 qword [BX + 0xffff], %2
 %endmacro ; TEST_ARITHMETIC_RM64_MEMORY
+
+%macro TEST_ARITHMETIC_RM128_MEMORY 2
+	; Test ModRM Mod==0
+	%1 oword [BX + SI], %2
+	%1 oword [BX + DI], %2
+	%1 oword [BP + SI], %2
+	%1 oword [BP + DI], %2
+	%1 oword [SI], %2
+	%1 oword [DI], %2
+	%1 oword [0xffff], %2
+	%1 oword [0x0001], %2
+	%1 oword [BX], %2
+
+	; Test ModRM Mod==1
+	%1 oword [BX + SI + 1], %2
+	%1 oword [BX + SI + 0xff], %2
+	%1 oword [BX + DI + 1], %2
+	%1 oword [BX + DI + 0xff], %2
+	%1 oword [SI + 1], %2
+	%1 oword [SI + 0xff], %2
+	%1 oword [DI + 1], %2
+	%1 oword [DI + 0xff], %2
+	%1 oword [BP + 1], %2
+	%1 oword [BP + 0xff], %2
+	%1 oword [BX + 1], %2
+	%1 oword [BX + 0xff], %2
+
+	; Test ModRM Mod==2
+	%1 oword [BX + SI + 0xffff], %2
+	%1 oword [BX + DI + 0xffff], %2
+	%1 oword [BP + SI + 0xffff], %2
+	%1 oword [BP + DI + 0xffff], %2
+	%1 oword [SI + 0xffff], %2
+	%1 oword [DI + 0xffff], %2
+	%1 oword [BP + 0xffff], %2
+	%1 oword [BX + 0xffff], %2
+%endmacro ; TEST_ARITHMETIC_RM128_MEMORY
+
+%macro TEST_ARITHMETIC_RM128_MEMORY_REV 2
+	; Test ModRM Mod==0
+	%1 %2, oword [BX + SI]
+	%1 %2, oword [BX + DI]
+	%1 %2, oword [BP + SI]
+	%1 %2, oword [BP + DI]
+	%1 %2, oword [SI]
+	%1 %2, oword [DI]
+	%1 %2, oword [0xffff]
+	%1 %2, oword [0x0001]
+	%1 %2, oword [BX]
+
+	; Test ModRM Mod==1
+	%1 %2, oword [BX + SI + 1]
+	%1 %2, oword [BX + SI + 0xff]
+	%1 %2, oword [BX + DI + 1]
+	%1 %2, oword [BX + DI + 0xff]
+	%1 %2, oword [SI + 1]
+	%1 %2, oword [SI + 0xff]
+	%1 %2, oword [DI + 1]
+	%1 %2, oword [DI + 0xff]
+	%1 %2, oword [BP + 1]
+	%1 %2, oword [BP + 0xff]
+	%1 %2, oword [BX + 1]
+	%1 %2, oword [BX + 0xff]
+
+	; Test ModRM Mod==2
+	%1 %2, oword [BX + SI + 0xffff]
+	%1 %2, oword [BX + DI + 0xffff]
+	%1 %2, oword [BP + SI + 0xffff]
+	%1 %2, oword [BP + DI + 0xffff]
+	%1 %2, oword [SI + 0xffff]
+	%1 %2, oword [DI + 0xffff]
+	%1 %2, oword [BP + 0xffff]
+	%1 %2, oword [BX + 0xffff]
+%endmacro ; TEST_ARITHMETIC_RM128_MEMORY_REV
