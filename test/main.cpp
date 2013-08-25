@@ -778,8 +778,8 @@ TEST_F(AsmTest, DisassemblePastBugs)
 		ASSERT_TRUE(instr.length == 4);
 		ASSERT_TRUE(instr.operandCount == 2);
 		ASSERT_TRUE(instr.operands[0].operandType == X86_XMM1);
-		ASSERT_TRUE(instr.operands[0].size == 16);
-		ASSERT_TRUE(instr.operands[1].operandType == X86_MM0);
+		ASSERT_TRUE(instr.operands[0].size == 8);
+		ASSERT_TRUE(instr.operands[1].operandType == X86_XMM0);
 		ASSERT_TRUE(instr.operands[1].size == 8);
 	}
 }
