@@ -299,6 +299,12 @@ SimdModRmRevRow %1, xmm7
 ; Row 1
 TestSimd movups
 TestSimdRev movups
+TestSimd movss
+TestSimdRev movss
+TestSimd movupd
+TestSimdRev movupd
+TestSimd movsd
+TestSimdRev movsd
 
 TestModRmMemory movlps, xmm0
 TestModRmMemory movlps, xmm1
@@ -318,6 +324,28 @@ TestModRmMemoryRev movlps, xmm4
 TestModRmMemoryRev movlps, xmm5
 TestModRmMemoryRev movlps, xmm6
 TestModRmMemoryRev movlps, xmm7
+
+TestSimd movsldup
+
+TestModRmMemoryRev movlpd, xmm0
+TestModRmMemoryRev movlpd, xmm1
+TestModRmMemoryRev movlpd, xmm2
+TestModRmMemoryRev movlpd, xmm3
+TestModRmMemoryRev movlpd, xmm4
+TestModRmMemoryRev movlpd, xmm5
+TestModRmMemoryRev movlpd, xmm6
+TestModRmMemoryRev movlpd, xmm7
+
+TestModRmMemory movlpd, xmm0
+TestModRmMemory movlpd, xmm1
+TestModRmMemory movlpd, xmm2
+TestModRmMemory movlpd, xmm3
+TestModRmMemory movlpd, xmm4
+TestModRmMemory movlpd, xmm5
+TestModRmMemory movlpd, xmm6
+TestModRmMemory movlpd, xmm7
+
+TestSimd movddup
 
 TestSimd movhlps
 TestSimd unpcklps

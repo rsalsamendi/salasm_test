@@ -1501,6 +1501,8 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 		return (op2 == UD_Imovsq);
 	case X86_MOVSD:
 		return (op2 == UD_Imovsd);
+	case X86_MOVSLDUP:
+		return (op2 == UD_Imovsldup);
 	case X86_MOVSHDUP:
 		return (op2 == UD_Imovshdup);
 	case X86_MOVSS:
@@ -2724,6 +2726,7 @@ bool SkipOperandsSizeCheck(const X86Instruction* const instr, size_t operand)
 {
 	switch (instr->op)
 	{
+	case X86_MOVLPD:
 	case X86_BOUND:
 	case X86_PREFETCH:
 	case X86_PREFETCHW:
