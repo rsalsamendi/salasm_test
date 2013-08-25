@@ -767,6 +767,21 @@ TEST_F(AsmTest, DisassemblePastBugs)
 		ASSERT_TRUE(instr.operands[1].operandType == X86_EAX);
 		ASSERT_TRUE(instr.operands[1].size == 4);
 	}
+
+	static const uint8_t punpcklbwSse[] = {0x66, 0x0f, 0x60, 0xc8};
+	{
+		X86Instruction instr;
+		SetOpcodeBytes(&m_data, punpcklbwSse, sizeof(punpcklbwSse));
+		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		ASSERT_TRUE(result);
+		ASSERT_TRUE(instr.op == X86_PUNPCKLBW);
+		ASSERT_TRUE(instr.length == 4);
+		ASSERT_TRUE(instr.operandCount == 2);
+		ASSERT_TRUE(instr.operands[0].operandType == X86_XMM1);
+		ASSERT_TRUE(instr.operands[0].size == 16);
+		ASSERT_TRUE(instr.operands[1].operandType == X86_MM0);
+		ASSERT_TRUE(instr.operands[1].size == 8);
+	}
 }
 
 
@@ -1887,6 +1902,8 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 		return (op2 == UD_Ircl);
 	case X86_RCPPS:
 		return (op2 == UD_Ircpps);
+	case X86_RCPSS:
+		return (op2 == UD_Ircpss);
 	case X86_RCR:
 		return (op2 == UD_Ircr);
 	case X86_RDMSR:
@@ -2748,6 +2765,18 @@ bool SkipOperandsSizeCheck(const X86Instruction* const instr, size_t operand)
 	case X86_LGDT:
 	case X86_LIDT:
 	case X86_INVLPG:
+	case X86_UNPCKLPD:
+	case X86_UNPCKHPD:
+	case X86_MOVHPD:
+	case X86_PUNPCKHBW:
+	case X86_PUNPCKHWD:
+	case X86_PUNPCKHDQ:
+	case X86_PACKSSDW:
+	case X86_PUNPCKLQDQ:
+	case X86_PUNPCKHQDQ:
+	case X86_PUNPCKLBW: // Maybe report a bug to ud86 as these should be dwords not qwords
+	case X86_PUNPCKLWD:
+	case X86_PUNPCKLDQ:
 		return true;
 	case X86_LEA:
 	case X86_ROL:
@@ -2758,13 +2787,6 @@ bool SkipOperandsSizeCheck(const X86Instruction* const instr, size_t operand)
 	case X86_SHR:
 	case X86_SAL:
 	case X86_SAR:
-	case X86_PUNPCKLBW: // Maybe report a bug to ud86 as these should be dwords not qwords
-	case X86_PUNPCKLWD:
-	case X86_PUNPCKLDQ:
-	case X86_PUNPCKHBW:
-	case X86_PUNPCKHWD:
-	case X86_PUNPCKHDQ:
-	case X86_PACKSSDW:
 		if (operand == 1)
 			return true;
 		break;

@@ -93,6 +93,29 @@ femms
 	%1 %2, [BX + 1]
 %endmacro ; TestModRmMemoryRev
 
+%macro TestMmxRow 2
+TestModRmMemory %1, %2
+%1 mm0, %2
+%1 mm1, %2
+%1 mm2, %2
+%1 mm3, %2
+%1 mm4, %2
+%1 mm5, %2
+%1 mm6, %2
+%1 mm7, %2
+%endmacro
+
+%macro TestMmx 1
+TestMmxRow %1, mm0
+TestMmxRow %1, mm1
+TestMmxRow %1, mm2
+TestMmxRow %1, mm3
+TestMmxRow %1, mm4
+TestMmxRow %1, mm5
+TestMmxRow %1, mm6
+TestMmxRow %1, mm7
+%endmacro ; TestMmx
+
 %macro MmxModRmRevRow 2
 TestModRmMemoryRev %1, %2
 %1 mm0, %2
@@ -349,7 +372,9 @@ TestSimd movddup
 
 TestSimd movhlps
 TestSimd unpcklps
+TestSimd unpcklpd
 TestSimd unpckhps
+TestSimd unpckhpd
 TestSimd movlhps
 
 TestModRmMemory movhps, xmm0
@@ -369,6 +394,24 @@ TestModRmMemoryRev movhps, xmm4
 TestModRmMemoryRev movhps, xmm5
 TestModRmMemoryRev movhps, xmm6
 TestModRmMemoryRev movhps, xmm7
+
+TestModRmMemoryRev movhpd, xmm0
+TestModRmMemoryRev movhpd, xmm1
+TestModRmMemoryRev movhpd, xmm2
+TestModRmMemoryRev movhpd, xmm3
+TestModRmMemoryRev movhpd, xmm4
+TestModRmMemoryRev movhpd, xmm5
+TestModRmMemoryRev movhpd, xmm6
+TestModRmMemoryRev movhpd, xmm7
+
+TestModRmMemory movhpd, xmm0
+TestModRmMemory movhpd, xmm1
+TestModRmMemory movhpd, xmm2
+TestModRmMemory movhpd, xmm3
+TestModRmMemory movhpd, xmm4
+TestModRmMemory movhpd, xmm5
+TestModRmMemory movhpd, xmm6
+TestModRmMemory movhpd, xmm7
 
 prefetchnta [0xffff]
 prefetcht0 [0xffff]
@@ -427,6 +470,9 @@ TestSpecialRegRev edi
 TestSimd movaps
 TestSimdRev movaps
 
+TestSimd movapd
+TestSimdRev movapd
+
 %macro TestSimdMmxRow 2
 TestModRmMemoryRev %1, %2
 %1 %2, mm0
@@ -459,7 +505,11 @@ TestSimdMmxRow %1, xmm7
 %endmacro ; TestSimdMmx
 
 TestSimdMmx cvtpi2ps
+; TestSimdGpr cvtsi2ss ; FIXME
+; TestSimd cvtpi2pd ; FIXME
+; TestSimd cvtsi2sd
 
+%macro TestMovnt 1
 TestModRmMemory movntps, xmm0
 TestModRmMemory movntps, xmm1
 TestModRmMemory movntps, xmm2
@@ -476,6 +526,12 @@ TestModRmMemory movntps, xmm7
 ; TestModRmMemory movntps, xmm13
 ; TestModRmMemory movntps, xmm14
 ; TestModRmMemory movntps, xmm15
+%endmacro ; TestMovnt
+
+TestMovnt movntps
+TestMovnt movntss
+TestMovnt movntpd
+TestMovnt movntsd
 
 %macro TestMmxSimdRow 2
 TestModRmMemoryRev %1, %2
@@ -510,36 +566,8 @@ TestMmxSimdRow %1, mm7
 
 TestMmxSimd cvttps2pi
 TestMmxSimd cvtps2pi
+TestMmxSimd cvttpd2pi
 
-TestSimd ucomiss
-TestSimd comiss
-
-wrmsr
-rdtsc
-rdmsr
-rdpmc
-sysenter
-sysexit
-
-; Row 4
-TEST_ARITHMETIC_MODRM16_REV cmovo
-TEST_ARITHMETIC_MODRM16_REV cmovno
-TEST_ARITHMETIC_MODRM16_REV cmovb
-TEST_ARITHMETIC_MODRM16_REV cmovnb
-TEST_ARITHMETIC_MODRM16_REV cmovz
-TEST_ARITHMETIC_MODRM16_REV cmovnz
-TEST_ARITHMETIC_MODRM16_REV cmovbe
-TEST_ARITHMETIC_MODRM16_REV cmovnbe
-TEST_ARITHMETIC_MODRM16_REV cmovs
-TEST_ARITHMETIC_MODRM16_REV cmovns
-TEST_ARITHMETIC_MODRM16_REV cmovp
-TEST_ARITHMETIC_MODRM16_REV cmovnp
-TEST_ARITHMETIC_MODRM16_REV cmovl
-TEST_ARITHMETIC_MODRM16_REV cmovnl
-TEST_ARITHMETIC_MODRM16_REV cmovle
-TEST_ARITHMETIC_MODRM16_REV cmovnle
-
-; Row 5
 %macro TestGprSimdRow 2
 %1 eax, %2
 %1 ecx, %2
@@ -570,15 +598,38 @@ TestGprSimdRow %1, xmm7
 ; TestGprSimdRow %1, xmm15
 %endmacro ; TestGprSimd
 
-TestGprSimd movmskps
+TestGprSimd cvttsd2si
 
-TestSimd sqrtps
-TestSimd rsqrtps
-TestSimd rcpps
-TestSimd andps
-TestSimd andnps
-TestSimd orps
-TestSimd xorps
+TestSimd ucomiss
+TestSimd ucomisd
+TestSimd comiss
+TestSimd comisd
+
+; Row 3
+wrmsr
+rdtsc
+rdmsr
+rdpmc
+sysenter
+sysexit
+
+; Row 4
+TEST_ARITHMETIC_MODRM16_REV cmovo
+TEST_ARITHMETIC_MODRM16_REV cmovno
+TEST_ARITHMETIC_MODRM16_REV cmovb
+TEST_ARITHMETIC_MODRM16_REV cmovnb
+TEST_ARITHMETIC_MODRM16_REV cmovz
+TEST_ARITHMETIC_MODRM16_REV cmovnz
+TEST_ARITHMETIC_MODRM16_REV cmovbe
+TEST_ARITHMETIC_MODRM16_REV cmovnbe
+TEST_ARITHMETIC_MODRM16_REV cmovs
+TEST_ARITHMETIC_MODRM16_REV cmovns
+TEST_ARITHMETIC_MODRM16_REV cmovp
+TEST_ARITHMETIC_MODRM16_REV cmovnp
+TEST_ARITHMETIC_MODRM16_REV cmovl
+TEST_ARITHMETIC_MODRM16_REV cmovnl
+TEST_ARITHMETIC_MODRM16_REV cmovle
+TEST_ARITHMETIC_MODRM16_REV cmovnle
 
 TEST_ARITHMETIC_MODRM16_REV cmovs
 TEST_ARITHMETIC_MODRM16_REV cmovns
@@ -589,43 +640,106 @@ TEST_ARITHMETIC_MODRM16_REV cmovnl
 TEST_ARITHMETIC_MODRM16_REV cmovle
 TEST_ARITHMETIC_MODRM16_REV cmovnle
 
+
+; Row 5
+TestGprSimd movmskps
+TestGprSimd movmskpd
+
+TestSimd sqrtps
+TestSimd sqrtss
+TestSimd sqrtpd
+TestSimd sqrtsd
+
+TestSimd rsqrtps
+TestSimd rsqrtss
+
+TestSimd rcpps
+TestSimd rcpss
+
+TestSimd andps
+TestSimd andpd
+
+TestSimd andnps
+TestSimd andnpd
+
+TestSimd orps
+TestSimd orpd
+
+TestSimd xorps
+TestSimd xorpd
+
+TestSimd addps
+TestSimd addss
+TestSimd addpd
+TestSimd addsd
+
+TestSimd mulps
+TestSimd mulss
+TestSimd mulpd
+TestSimd mulsd
+
+TestSimd cvtps2pd
+TestSimd cvtss2sd
+TestSimd cvtpd2ps
+TestSimd cvtsd2ss
+
+TestMmxSimd cvtps2pi
+TestGprSimd cvtss2si
+TestMmxSimd cvtpd2pi
+TestGprSimd cvtsd2si
+
+TestSimd subps
+TestSimd subss
+TestSimd subpd
+TestSimd subsd
+
+TestSimd minps
+TestSimd minss
+TestSimd minpd
+TestSimd minsd
+
+TestSimd divps
+TestSimd divss
+TestSimd divpd
+TestSimd divsd
+
+TestSimd maxps
+TestSimd maxss
+TestSimd maxpd
+TestSimd maxsd
+
 ; Row 6
 TestMmxRev punpcklbw
+TestSimdRev punpcklbw
+
 TestMmxRev punpcklwd
+TestSimdRev punpcklwd
+
 TestMmxRev punpckldq
+TestSimdRev punpckldq
+
 TestMmxRev packsswb
+TestSimdRev packsswb
+
 TestMmxRev pcmpgtb
+TestSimdRev pcmpgtb
+
 TestMmxRev pcmpgtw
+TestSimdRev pcmpgtw
+
 TestMmxRev pcmpgtd
+TestSimdRev pcmpgtd
+
 TestMmxRev packuswb
+TestSimdRev packuswb
 
-%macro TestMmxRow 2
-TestModRmMemoryRev %1, %2
-%1 mm0, %2
-%1 mm1, %2
-%1 mm2, %2
-%1 mm3, %2
-%1 mm4, %2
-%1 mm5, %2
-%1 mm6, %2
-%1 mm7, %2
-%endmacro
+TestMmxRev punpckhbw
+TestSimd punpckhbw
 
-%macro TestMmx 1
-TestMmxRow %1, mm0
-TestMmxRow %1, mm1
-TestMmxRow %1, mm2
-TestMmxRow %1, mm3
-TestMmxRow %1, mm4
-TestMmxRow %1, mm5
-TestMmxRow %1, mm6
-TestMmxRow %1, mm7
-%endmacro ; TestMmx
-
-TestMmx punpckhbw
-TestMmx punpckhwd
-TestMmx punpckhdq
-TestMmx packssdw
+TestMmxRev punpckhbw
+TestMmxRev punpckhwd
+TestMmxRev punpckhdq
+TestMmxRev packssdw
 
 ; Row 7
 %macro TestModRmMemoryThreeOperandRev 3
@@ -748,9 +862,9 @@ TestMmxRowImm2Operand pslld
 TestMmxRowImm2Operand psrlq
 TestMmxRowImm2Operand psllq
 
-TestMmx pcmpeqb
-TestMmx pcmpeqw
-TestMmx pcmpeqd
+TestMmxRev pcmpeqb
+TestMmxRev pcmpeqw
+TestMmxRev pcmpeqd
 emms
 
 %macro TestMmxGpr 2
@@ -1242,11 +1356,11 @@ bswap esi
 bswap edi
 
 ; Row 0xd
-TestMmx psrlw
-TestMmx psrld
-TestMmx psrlq
-TestMmx paddq
-TestMmx pmullw
+TestMmxRev psrlw
+TestMmxRev psrld
+TestMmxRev psrlq
+TestMmxRev paddq
+TestMmxRev pmullw
 
 %macro TestGprMmx 2
 %1 %2, mm0
@@ -1268,22 +1382,22 @@ TestGprMmx pmovmskb, esp
 TestGprMmx pmovmskb, esi
 TestGprMmx pmovmskb, edi
 
-TestMmx psubusb
-TestMmx psubusw
-TestMmx pminub
-TestMmx pand
-TestMmx paddusb
-TestMmx paddusw
-TestMmx pmaxub
-TestMmx pandn
+TestMmxRev psubusb
+TestMmxRev psubusw
+TestMmxRev pminub
+TestMmxRev pand
+TestMmxRev paddusb
+TestMmxRev paddusw
+TestMmxRev pmaxub
+TestMmxRev pandn
 
 ; Row 0xe
-TestMmx pavgb
-TestMmx psraw
-TestMmx psrad
-TestMmx pavgw
-TestMmx pmulhuw
-TestMmx pmulhw
+TestMmxRev pavgb
+TestMmxRev psraw
+TestMmxRev psrad
+TestMmxRev pavgw
+TestMmxRev pmulhuw
+TestMmxRev pmulhw
 
 ; movntq
 ; FIXME
@@ -1296,22 +1410,22 @@ TestMmx pmulhw
 ; TEST_ARITHMETIC_RM64_MEMORY movntq, rsi
 ; TEST_ARITHMETIC_RM64_MEMORY movntq, rdi
 
-TestMmx psubsb
-TestMmx psubsw
-TestMmx pminsw
-TestMmx por
-TestMmx paddsb
-TestMmx paddsw
-TestMmx pmaxsw
-TestMmx pxor
+TestMmxRev psubsb
+TestMmxRev psubsw
+TestMmxRev pminsw
+TestMmxRev por
+TestMmxRev paddsb
+TestMmxRev paddsw
+TestMmxRev pmaxsw
+TestMmxRev pxor
 
 ; Row 0xf
-TestMmx psllw
-TestMmx pslld
-TestMmx psllq
-TestMmx pmuludq
-TestMmx pmaddwd
-TestMmx psadbw
+TestMmxRev psllw
+TestMmxRev pslld
+TestMmxRev psllq
+TestMmxRev pmuludq
+TestMmxRev pmaddwd
+TestMmxRev psadbw
 
 %macro MmxModRmRevRegRow 2
 %1 mm0, %2
@@ -1337,12 +1451,12 @@ MmxModRmRevRegRow %1, mm7
 
 TestMmxRevReg maskmovq
 
-TestMmx psubb
-TestMmx psubw
-TestMmx psubd
-TestMmx psubq
-TestMmx paddb
-TestMmx paddw
-TestMmx paddd
+TestMmxRev psubb
+TestMmxRev psubw
+TestMmxRev psubd
+TestMmxRev psubq
+TestMmxRev paddb
+TestMmxRev paddw
+TestMmxRev paddd
 
 ud0
