@@ -82,12 +82,9 @@ struct OpcodeData
 	size_t opcodeIndex;
 };
 
-// The fixture for testing class Foo.
-class AsmTest: public TestWithParam<const char*>
+class AsmTest
 {
 protected:
-	const char* m_fileName;
-
 	// Objects declared here can be used by all tests in the test case for Foo.
 	size_t GetOpcodeLength(OpcodeData& data) const;
 	size_t GetOpcodeBytes(OpcodeData& data, uint8_t* const opcode, const size_t len);
@@ -98,10 +95,7 @@ protected:
 
 	OpcodeData m_data;
 	OpcodeData m_ud86Data;
-
 public:
-	// You can remove any or all of the following functions if its body
-	// is empty.
 	virtual ~AsmTest()
 	{
 		// You can do clean-up work that doesn't throw exceptions here.
@@ -111,10 +105,7 @@ public:
 			free(m_ud86Data.opcodeBytes);
 	}
 
-	// If the constructor and destructor are not enough for setting up
-	// and cleaning up each test, you can define the following methods:
-
-	virtual void SetUp()
+	virtual void Init()
 	{
 		// Code here will be called immediately after the constructor (right
 		// before each test).
@@ -122,7 +113,33 @@ public:
 		m_data.opcodeLen = 0;
 		m_ud86Data.opcodeBytes = NULL;
 		m_ud86Data.opcodeLen = 0;
+	}
+};
 
+class AsmStandaloneTest: public AsmTest, public ::testing::Test
+{
+public:
+	virtual void SetUp()
+	{
+		AsmTest::Init();
+	};
+};
+
+// The fixture for testing class Foo.
+class AsmFileTest: public AsmTest, public TestWithParam<const char*>
+{
+protected:
+	const char* m_fileName;
+
+public:
+	// You can remove any or all of the following functions if its body
+	// is empty.
+	// If the constructor and destructor are not enough for setting up
+	// and cleaning up each test, you can define the following methods:
+
+	virtual void SetUp()
+	{
+		AsmTest::Init();
 		m_fileName = GetParam();
 	}
 
@@ -131,7 +148,6 @@ public:
 		// Code here will be called immediately after each test (right
 		// before the destructor).
 	}
-
 };
 
 
@@ -226,7 +242,7 @@ int AsmTest::FetchForUd86(struct ud* u)
 	X86Instruction instr; \
 	const size_t opcodeLen = sizeof(bytes); \
 	SetOpcodeBytes(m_data, bytes, opcodeLen); \
-	bool result = Disassemble ## addrSize ##(0, AsmTest::Fetch, this, &instr); \
+	bool result = Disassemble ## addrSize ##(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr); \
 	ASSERT_TRUE(result); \
 	ASSERT_TRUE(instr.op == operation); \
 	ASSERT_TRUE(instr.operandCount == 2); \
@@ -244,7 +260,7 @@ int AsmTest::FetchForUd86(struct ud* u)
 	X86Instruction instr; \
 	const size_t opcodeLen = sizeof(bytes); \
 	SetOpcodeBytes(m_data, bytes, opcodeLen); \
-	bool result = Disassemble ## addrSize ##(0, AsmTest::Fetch, this, &instr); \
+	bool result = Disassemble ## addrSize ##(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr); \
 	ASSERT_TRUE(result); \
 	ASSERT_TRUE(instr.op == operation); \
 	ASSERT_TRUE(instr.operandCount == 2); \
@@ -262,7 +278,7 @@ int AsmTest::FetchForUd86(struct ud* u)
 	X86Instruction instr; \
 	const size_t opcodeLen = sizeof(bytes); \
 	SetOpcodeBytes(m_data, bytes, opcodeLen); \
-	bool result = Disassemble ## addrSize ##(0, AsmTest::Fetch, this, &instr); \
+	bool result = Disassemble ## addrSize ##(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr); \
 	ASSERT_TRUE(result); \
 	ASSERT_TRUE(instr.op == operation); \
 	ASSERT_TRUE(instr.operandCount == 2); \
@@ -277,7 +293,7 @@ int AsmTest::FetchForUd86(struct ud* u)
 	X86Instruction instr; \
 	const size_t opcodeLen = sizeof(bytes); \
 	SetOpcodeBytes(m_data, bytes, opcodeLen); \
-	bool result = Disassemble ## addrSize ##(0, AsmTest::Fetch, this, &instr); \
+	bool result = Disassemble ## addrSize ##(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr); \
 	ASSERT_TRUE(result); \
 	ASSERT_TRUE(instr.op == operation); \
 	ASSERT_TRUE(instr.operandCount == 2); \
@@ -291,7 +307,7 @@ int AsmTest::FetchForUd86(struct ud* u)
 }
 
 
-TEST_P(AsmTest, DisassemblePrimaryAdd)
+TEST_F(AsmStandaloneTest, DisassemblePrimaryAdd)
 {
 	static const uint8_t addByteMemDest[] = {0, 0, 0};
 	TEST_ARITHMETIC_MR(X86_ADD, addByteMemDest, 16, 1, X86_AL, X86_BX, X86_SI);
@@ -303,7 +319,7 @@ TEST_P(AsmTest, DisassemblePrimaryAdd)
 }
 
 
-TEST_P(AsmTest, DisassemblePastBugs)
+TEST_F(AsmStandaloneTest, DisassemblePastBugs)
 {
 	static const uint8_t addByteImm[] = {4, 1};
 	TEST_ARITHMETIC_RI(X86_ADD, addByteImm, 16, 1, X86_AL, 1);
@@ -315,7 +331,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(m_data, &das, 1);
-		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_DAS);
 		ASSERT_TRUE(instr.length == 1);
@@ -325,7 +341,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(m_data, jmpByteImm, sizeof(jmpByteImm));
-		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_JO);
 		ASSERT_TRUE(instr.length == 2);
@@ -335,7 +351,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(m_data, &xchgRbxRax, sizeof(xchgRbxRax));
-		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_XCHG);
 		ASSERT_TRUE(instr.length == 1);
@@ -345,7 +361,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(m_data, movAxOffset, sizeof(movAxOffset));
-		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_MOV);
 		ASSERT_TRUE(instr.length == 3);
@@ -355,7 +371,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(m_data, &movsb, sizeof(movsb));
-		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_MOVSB);
 		ASSERT_TRUE(instr.length == 1);
@@ -365,7 +381,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(m_data, &movsw, sizeof(movsw));
-		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_MOVSW);
 		ASSERT_TRUE(instr.length == 1);
@@ -375,7 +391,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(m_data, &pushCs, sizeof(pushCs));
-		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_PUSH);
 		ASSERT_TRUE(instr.length == 1);
@@ -386,7 +402,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(m_data, &decAx, sizeof(decAx));
-		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_DEC);
 		ASSERT_TRUE(instr.length == 1);
@@ -397,7 +413,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(m_data, group1Add, sizeof(group1Add));
-		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_ADD);
 		ASSERT_TRUE(instr.length == 4);
@@ -411,7 +427,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(m_data, &xchgAxCx, sizeof(xchgAxCx));
-		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_XCHG);
 		ASSERT_TRUE(instr.length == 1);
@@ -425,7 +441,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(m_data, movModRm, sizeof(movModRm));
-		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_MOV);
 		ASSERT_TRUE(instr.length == 2);
@@ -439,7 +455,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(m_data, pushImmByte, sizeof(pushImmByte));
-		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_PUSH);
 		ASSERT_TRUE(instr.length == 2);
@@ -452,7 +468,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(m_data, imul16, sizeof(imul16));
-		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_IMUL);
 		ASSERT_TRUE(instr.length == 3);
@@ -471,7 +487,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(m_data, testImmByte, sizeof(testImmByte));
-		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_TEST);
 		ASSERT_TRUE(instr.length == 2);
@@ -483,7 +499,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(m_data, movImmByte, sizeof(movImmByte));
-		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_MOV);
 		ASSERT_TRUE(instr.length == 3);
@@ -498,7 +514,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(m_data, movSeg, sizeof(movSeg));
-		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_MOV);
 		ASSERT_TRUE(instr.length == 2);
@@ -512,7 +528,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(m_data, lea, sizeof(lea));
-		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_LEA);
 		ASSERT_TRUE(instr.length == 2);
@@ -528,7 +544,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(m_data, &popf, sizeof(popf));
-		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_POPF);
 		ASSERT_TRUE(instr.length == 1);
@@ -538,7 +554,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(m_data, &stosw, sizeof(stosw));
-		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_STOSW);
 		ASSERT_TRUE(instr.length == 1);
@@ -548,7 +564,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(m_data, &lodsb, sizeof(lodsb));
-		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_LODSB);
 		ASSERT_TRUE(instr.length == 1);
@@ -558,7 +574,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(m_data, rolCl, sizeof(rolCl));
-		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_ROL);
 		ASSERT_TRUE(instr.length == 2);
@@ -570,7 +586,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(m_data, inByte, sizeof(inByte));
-		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_IN);
 		ASSERT_TRUE(instr.length == 2);
@@ -583,7 +599,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(m_data, faddMem, sizeof(faddMem));
-		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_FADD);
 		ASSERT_TRUE(instr.length == 2);
@@ -597,7 +613,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(m_data, fldMem32, sizeof(fldMem32));
-		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_FLD);
 		ASSERT_TRUE(instr.operandCount == 2);
@@ -611,7 +627,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(m_data, fldReg, sizeof(fldReg));
-		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_FLD);
 		ASSERT_TRUE(instr.length == 2);
@@ -626,7 +642,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(m_data, fnop, sizeof(fnop));
-		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_FNOP);
 		ASSERT_TRUE(instr.length == 2);
@@ -637,7 +653,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(m_data, fiaddMem32, sizeof(fiaddMem32));
-		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_FIADD);
 		ASSERT_TRUE(instr.length == 4);
@@ -652,7 +668,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(m_data, fild, sizeof(fild));
-		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_FILD);
 		ASSERT_TRUE(instr.length == 2);
@@ -667,7 +683,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(m_data, fcmovnbe, sizeof(fcmovnbe));
-		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_FCMOVNBE);
 		ASSERT_TRUE(instr.length == 2);
@@ -682,7 +698,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(m_data, fnstsw, sizeof(fnstsw));
-		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_FNSTSW);
 		ASSERT_TRUE(instr.length == 2);
@@ -695,7 +711,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(m_data, fild16, sizeof(fild16));
-		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_FILD);
 		ASSERT_TRUE(instr.length == 2);
@@ -710,7 +726,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(m_data, fnstswAx, sizeof(fnstswAx));
-		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_FNSTSW);
 		ASSERT_TRUE(instr.length == 2);
@@ -723,7 +739,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(m_data, movups, sizeof(movups));
-		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_MOVUPS);
 		ASSERT_TRUE(instr.length == 3);
@@ -738,7 +754,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(m_data, unpckhps, sizeof(unpckhps));
-		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_UNPCKHPS);
 		ASSERT_TRUE(instr.length == 3);
@@ -753,7 +769,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(m_data, unpcklps, sizeof(unpcklps));
-		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_UNPCKLPS);
 		ASSERT_TRUE(instr.length == 3);
@@ -768,7 +784,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(m_data, movControlReg, sizeof(movControlReg));
-		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_MOV);
 		ASSERT_TRUE(instr.length == 3);
@@ -783,7 +799,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(m_data, punpcklbwSse, sizeof(punpcklbwSse));
-		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_PUNPCKLBW);
 		ASSERT_TRUE(instr.length == 4);
@@ -798,7 +814,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	{
 		X86Instruction instr;
 		SetOpcodeBytes(m_data, movqMmx, sizeof(movqMmx));
-		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
+		bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_MOVQ);
 		ASSERT_TRUE(instr.length == sizeof(movqMmx));
@@ -3308,7 +3324,7 @@ static bool FpuInstr(const X86Instruction* const instr, const ud_t* const ud_obj
 }
 
 
-TEST_P(AsmTest, Disassemble16)
+TEST_P(AsmFileTest, Disassemble16)
 {
 	FILE* file;
 	X86Instruction instr;
@@ -3339,7 +3355,7 @@ TEST_P(AsmTest, Disassemble16)
 
 	// Notify ud86 that we're using a fetch callback
 	ud_init(&ud_obj);
-	ud_set_user_opaque_data(&ud_obj, this);
+	ud_set_user_opaque_data(&ud_obj, static_cast<AsmTest*>(this));
 	ud_set_input_hook(&ud_obj, AsmTest::FetchForUd86);
 
 	// Disassemble the data
@@ -3370,7 +3386,7 @@ TEST_P(AsmTest, Disassemble16)
 		}
 
 		BEGIN_PERF_CTR(salsasm)
-		result = Disassemble16((uint16_t)(fileLen - len), AsmTest::Fetch, this, &instr);
+		result = Disassemble16((uint16_t)(fileLen - len), AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
 		END_PERF_CTR(salsasm)
 
 		// Watch out for stray flags
@@ -3438,5 +3454,5 @@ static const char* const g_primaryFile = "test_primary.bin";
 static const char* const g_secondaryFile = "test_secondary.bin";
 static const char* const g_bochsBiosFile = "BIOS-bochs-latest.bin";
 
-INSTANTIATE_TEST_CASE_P(DisassembleTest, AsmTest,
+INSTANTIATE_TEST_CASE_P(DisassembleTest, AsmFileTest,
 	Values(g_primaryFile, g_secondaryFile, g_bochsBiosFile));
