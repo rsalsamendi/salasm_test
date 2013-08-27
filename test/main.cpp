@@ -64,9 +64,11 @@ static void PlatformInitWorkingDir()
 	char* ptr;
 	GetModuleFileNameA(NULL, path, MAX_PATH);
 	ptr = strrchr(path, '\\');
-	if (ptr)
+	if ((ptr != NULL) && (strchr(ptr, '\\') != NULL))
+	{
 		*ptr = '\0';
-	SetCurrentDirectoryA(path);
+		SetCurrentDirectoryA(path);
+	}
 	free(path);
 #endif
 }
@@ -87,9 +89,9 @@ protected:
 	const char* m_fileName;
 
 	// Objects declared here can be used by all tests in the test case for Foo.
-	size_t GetOpcodeLength(OpcodeData* data) const;
-	size_t GetOpcodeBytes(OpcodeData* data, uint8_t* const opcode, const size_t len);
-	void SetOpcodeBytes(OpcodeData* data, const uint8_t* const opcode, const size_t len);
+	size_t GetOpcodeLength(OpcodeData& data) const;
+	size_t GetOpcodeBytes(OpcodeData& data, uint8_t* const opcode, const size_t len);
+	void SetOpcodeBytes(OpcodeData& data, const uint8_t* const opcode, const size_t len);
 
 	static bool Fetch(void* ctxt, size_t len, uint8_t* result);
 	static int FetchForUd86(struct ud* u);
@@ -133,33 +135,33 @@ public:
 };
 
 
-size_t AsmTest::GetOpcodeLength(OpcodeData* data) const
+size_t AsmTest::GetOpcodeLength(OpcodeData& data) const
 {
-	return data->opcodeLen;
+	return data.opcodeLen;
 }
 
 
-size_t AsmTest::GetOpcodeBytes(OpcodeData* data, uint8_t* const opcode, const size_t len)
+size_t AsmTest::GetOpcodeBytes(OpcodeData& data, uint8_t* const opcode, const size_t len)
 {
-	const size_t bytesToCopy = len > data->opcodeLen ? data->opcodeLen : len;
-	memcpy(opcode, &data->opcodeBytes[data->opcodeIndex], bytesToCopy);
-	data->opcodeIndex += bytesToCopy;
-	data->opcodeLen -= len;
+	const size_t bytesToCopy = len > data.opcodeLen ? data.opcodeLen : len;
+	memcpy(opcode, &data.opcodeBytes[data.opcodeIndex], bytesToCopy);
+	data.opcodeIndex += bytesToCopy;
+	data.opcodeLen -= len;
 	return bytesToCopy;
 }
 
 
-void AsmTest::SetOpcodeBytes(OpcodeData* data, const uint8_t* const opcode, const size_t len)
+void AsmTest::SetOpcodeBytes(OpcodeData& data, const uint8_t* const opcode, const size_t len)
 {
-	if (data->opcodeBytes)
+	if (data.opcodeBytes)
 	{
-		free(data->opcodeBytes);
-		data->opcodeBytes = NULL;
+		free(data.opcodeBytes);
+		data.opcodeBytes = NULL;
 	}
-	data->opcodeBytes = (uint8_t*)malloc(len);
-	memcpy(data->opcodeBytes, opcode, len);
-	data->opcodeLen = len;
-	data->opcodeIndex = 0;
+	data.opcodeBytes = (uint8_t*)malloc(len);
+	memcpy(data.opcodeBytes, opcode, len);
+	data.opcodeLen = len;
+	data.opcodeIndex = 0;
 }
 
 
@@ -190,12 +192,12 @@ bool AsmTest::Fetch(void* ctxt, size_t len, uint8_t* result)
 	size_t opcodeLen;
 
 	// Ensure there are enough bytes available
-	opcodeLen = asmTest->GetOpcodeLength(&asmTest->m_data);
+	opcodeLen = asmTest->GetOpcodeLength(asmTest->m_data);
 	if (opcodeLen < len)
 		return false;
 
 	// Fetch the opcode
-	asmTest->GetOpcodeBytes(&asmTest->m_data, result, len);
+	asmTest->GetOpcodeBytes(asmTest->m_data, result, len);
 
 	return true;
 }
@@ -208,12 +210,12 @@ int AsmTest::FetchForUd86(struct ud* u)
 	uint8_t result;
 
 	// Ensure there are enough bytes available
-	opcodeLen = asmTest->GetOpcodeLength(&asmTest->m_ud86Data);
+	opcodeLen = asmTest->GetOpcodeLength(asmTest->m_ud86Data);
 	if (opcodeLen < 1)
 		return UD_EOI;
 
 	// Fetch the opcode
-	asmTest->GetOpcodeBytes(&asmTest->m_ud86Data, &result, 1);
+	asmTest->GetOpcodeBytes(asmTest->m_ud86Data, &result, 1);
 
 	return result;
 }
@@ -223,7 +225,7 @@ int AsmTest::FetchForUd86(struct ud* u)
 { \
 	X86Instruction instr; \
 	const size_t opcodeLen = sizeof(bytes); \
-	SetOpcodeBytes(&m_data, bytes, opcodeLen); \
+	SetOpcodeBytes(m_data, bytes, opcodeLen); \
 	bool result = Disassemble ## addrSize ##(0, AsmTest::Fetch, this, &instr); \
 	ASSERT_TRUE(result); \
 	ASSERT_TRUE(instr.op == operation); \
@@ -241,7 +243,7 @@ int AsmTest::FetchForUd86(struct ud* u)
 { \
 	X86Instruction instr; \
 	const size_t opcodeLen = sizeof(bytes); \
-	SetOpcodeBytes(&m_data, bytes, opcodeLen); \
+	SetOpcodeBytes(m_data, bytes, opcodeLen); \
 	bool result = Disassemble ## addrSize ##(0, AsmTest::Fetch, this, &instr); \
 	ASSERT_TRUE(result); \
 	ASSERT_TRUE(instr.op == operation); \
@@ -259,7 +261,7 @@ int AsmTest::FetchForUd86(struct ud* u)
 { \
 	X86Instruction instr; \
 	const size_t opcodeLen = sizeof(bytes); \
-	SetOpcodeBytes(&m_data, bytes, opcodeLen); \
+	SetOpcodeBytes(m_data, bytes, opcodeLen); \
 	bool result = Disassemble ## addrSize ##(0, AsmTest::Fetch, this, &instr); \
 	ASSERT_TRUE(result); \
 	ASSERT_TRUE(instr.op == operation); \
@@ -274,7 +276,7 @@ int AsmTest::FetchForUd86(struct ud* u)
 { \
 	X86Instruction instr; \
 	const size_t opcodeLen = sizeof(bytes); \
-	SetOpcodeBytes(&m_data, bytes, opcodeLen); \
+	SetOpcodeBytes(m_data, bytes, opcodeLen); \
 	bool result = Disassemble ## addrSize ##(0, AsmTest::Fetch, this, &instr); \
 	ASSERT_TRUE(result); \
 	ASSERT_TRUE(instr.op == operation); \
@@ -312,7 +314,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	static const uint8_t das = 0x2f;
 	{
 		X86Instruction instr;
-		SetOpcodeBytes(&m_data, &das, 1);
+		SetOpcodeBytes(m_data, &das, 1);
 		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_DAS);
@@ -322,7 +324,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	static const uint8_t jmpByteImm[] = {0x70, 1};
 	{
 		X86Instruction instr;
-		SetOpcodeBytes(&m_data, jmpByteImm, sizeof(jmpByteImm));
+		SetOpcodeBytes(m_data, jmpByteImm, sizeof(jmpByteImm));
 		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_JO);
@@ -332,7 +334,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	static const uint8_t xchgRbxRax = 0x92;
 	{
 		X86Instruction instr;
-		SetOpcodeBytes(&m_data, &xchgRbxRax, sizeof(xchgRbxRax));
+		SetOpcodeBytes(m_data, &xchgRbxRax, sizeof(xchgRbxRax));
 		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_XCHG);
@@ -342,7 +344,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	static const uint8_t movAxOffset[3] = {0xa2, 1, 0};
 	{
 		X86Instruction instr;
-		SetOpcodeBytes(&m_data, movAxOffset, sizeof(movAxOffset));
+		SetOpcodeBytes(m_data, movAxOffset, sizeof(movAxOffset));
 		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_MOV);
@@ -352,7 +354,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	static const uint8_t movsb = 0xa4;
 	{
 		X86Instruction instr;
-		SetOpcodeBytes(&m_data, &movsb, sizeof(movsb));
+		SetOpcodeBytes(m_data, &movsb, sizeof(movsb));
 		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_MOVSB);
@@ -362,7 +364,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	static const uint8_t movsw = 0xa5;
 	{
 		X86Instruction instr;
-		SetOpcodeBytes(&m_data, &movsw, sizeof(movsw));
+		SetOpcodeBytes(m_data, &movsw, sizeof(movsw));
 		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_MOVSW);
@@ -372,7 +374,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	static const uint8_t pushCs = 0x0e;
 	{
 		X86Instruction instr;
-		SetOpcodeBytes(&m_data, &pushCs, sizeof(pushCs));
+		SetOpcodeBytes(m_data, &pushCs, sizeof(pushCs));
 		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_PUSH);
@@ -383,7 +385,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	static const uint8_t decAx = 0x48;
 	{
 		X86Instruction instr;
-		SetOpcodeBytes(&m_data, &decAx, sizeof(decAx));
+		SetOpcodeBytes(m_data, &decAx, sizeof(decAx));
 		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_DEC);
@@ -394,7 +396,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	static const uint8_t group1Add[] = {0x81, 0xc1, 0xff, 0xff};
 	{
 		X86Instruction instr;
-		SetOpcodeBytes(&m_data, group1Add, sizeof(group1Add));
+		SetOpcodeBytes(m_data, group1Add, sizeof(group1Add));
 		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_ADD);
@@ -408,7 +410,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	static const uint8_t xchgAxCx = 0x91;
 	{
 		X86Instruction instr;
-		SetOpcodeBytes(&m_data, &xchgAxCx, sizeof(xchgAxCx));
+		SetOpcodeBytes(m_data, &xchgAxCx, sizeof(xchgAxCx));
 		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_XCHG);
@@ -422,7 +424,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	static const uint8_t movModRm[2] = {0x88, 0x00};
 	{
 		X86Instruction instr;
-		SetOpcodeBytes(&m_data, movModRm, sizeof(movModRm));
+		SetOpcodeBytes(m_data, movModRm, sizeof(movModRm));
 		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_MOV);
@@ -436,7 +438,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	static const uint8_t pushImmByte[2] = {0x6a, 0x00};
 	{
 		X86Instruction instr;
-		SetOpcodeBytes(&m_data, pushImmByte, sizeof(pushImmByte));
+		SetOpcodeBytes(m_data, pushImmByte, sizeof(pushImmByte));
 		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_PUSH);
@@ -449,7 +451,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	static const uint8_t imul16[] = {0x6b, 0xd9, 0xff};
 	{
 		X86Instruction instr;
-		SetOpcodeBytes(&m_data, imul16, sizeof(imul16));
+		SetOpcodeBytes(m_data, imul16, sizeof(imul16));
 		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_IMUL);
@@ -468,7 +470,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	static const uint8_t testImmByte[] = {0xa8, 0x01};
 	{
 		X86Instruction instr;
-		SetOpcodeBytes(&m_data, testImmByte, sizeof(testImmByte));
+		SetOpcodeBytes(m_data, testImmByte, sizeof(testImmByte));
 		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_TEST);
@@ -480,7 +482,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	static const uint8_t movImmByte[] = {0xb8, 0x01, 0x01};
 	{
 		X86Instruction instr;
-		SetOpcodeBytes(&m_data, movImmByte, sizeof(movImmByte));
+		SetOpcodeBytes(m_data, movImmByte, sizeof(movImmByte));
 		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_MOV);
@@ -495,7 +497,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	static const uint8_t movSeg[] = {0x8e, 0x28};
 	{
 		X86Instruction instr;
-		SetOpcodeBytes(&m_data, movSeg, sizeof(movSeg));
+		SetOpcodeBytes(m_data, movSeg, sizeof(movSeg));
 		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_MOV);
@@ -509,7 +511,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	static const uint8_t lea[] = {0x8d, 0x00};
 	{
 		X86Instruction instr;
-		SetOpcodeBytes(&m_data, lea, sizeof(lea));
+		SetOpcodeBytes(m_data, lea, sizeof(lea));
 		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_LEA);
@@ -525,7 +527,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	static const uint8_t popf = 0x9d;
 	{
 		X86Instruction instr;
-		SetOpcodeBytes(&m_data, &popf, sizeof(popf));
+		SetOpcodeBytes(m_data, &popf, sizeof(popf));
 		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_POPF);
@@ -535,7 +537,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	static const uint8_t stosw = 0xab;
 	{
 		X86Instruction instr;
-		SetOpcodeBytes(&m_data, &stosw, sizeof(stosw));
+		SetOpcodeBytes(m_data, &stosw, sizeof(stosw));
 		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_STOSW);
@@ -545,7 +547,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	static const uint8_t lodsb = 0xac;
 	{
 		X86Instruction instr;
-		SetOpcodeBytes(&m_data, &lodsb, sizeof(lodsb));
+		SetOpcodeBytes(m_data, &lodsb, sizeof(lodsb));
 		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_LODSB);
@@ -555,7 +557,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	static const uint8_t rolCl[] = {0xd2, 0xc0};
 	{
 		X86Instruction instr;
-		SetOpcodeBytes(&m_data, rolCl, sizeof(rolCl));
+		SetOpcodeBytes(m_data, rolCl, sizeof(rolCl));
 		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_ROL);
@@ -567,7 +569,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	static const uint8_t inByte[] = {0xe4, 0xff};
 	{
 		X86Instruction instr;
-		SetOpcodeBytes(&m_data, inByte, sizeof(inByte));
+		SetOpcodeBytes(m_data, inByte, sizeof(inByte));
 		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_IN);
@@ -580,7 +582,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	static const uint8_t faddMem[] = {0xd8, 0x01};
 	{
 		X86Instruction instr;
-		SetOpcodeBytes(&m_data, faddMem, sizeof(faddMem));
+		SetOpcodeBytes(m_data, faddMem, sizeof(faddMem));
 		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_FADD);
@@ -594,7 +596,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	static const uint8_t fldMem32[] = {0xd9, 0x00};
 	{
 		X86Instruction instr;
-		SetOpcodeBytes(&m_data, fldMem32, sizeof(fldMem32));
+		SetOpcodeBytes(m_data, fldMem32, sizeof(fldMem32));
 		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_FLD);
@@ -608,7 +610,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	static const uint8_t fldReg[] = {0xd9, 0xc0};
 	{
 		X86Instruction instr;
-		SetOpcodeBytes(&m_data, fldReg, sizeof(fldReg));
+		SetOpcodeBytes(m_data, fldReg, sizeof(fldReg));
 		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_FLD);
@@ -623,7 +625,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	static const uint8_t fnop[] = {0xd9, 0xd0};
 	{
 		X86Instruction instr;
-		SetOpcodeBytes(&m_data, fnop, sizeof(fnop));
+		SetOpcodeBytes(m_data, fnop, sizeof(fnop));
 		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_FNOP);
@@ -634,7 +636,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	static const uint8_t fiaddMem32[] = {0xda, 0x06, 0xff, 0xff};
 	{
 		X86Instruction instr;
-		SetOpcodeBytes(&m_data, fiaddMem32, sizeof(fiaddMem32));
+		SetOpcodeBytes(m_data, fiaddMem32, sizeof(fiaddMem32));
 		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_FIADD);
@@ -649,7 +651,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	static const uint8_t fild[] = {0xdb, 0x00};
 	{
 		X86Instruction instr;
-		SetOpcodeBytes(&m_data, fild, sizeof(fild));
+		SetOpcodeBytes(m_data, fild, sizeof(fild));
 		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_FILD);
@@ -664,7 +666,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	static const uint8_t fcmovnbe[] = {0xdb, 0xd0};
 	{
 		X86Instruction instr;
-		SetOpcodeBytes(&m_data, fcmovnbe, sizeof(fcmovnbe));
+		SetOpcodeBytes(m_data, fcmovnbe, sizeof(fcmovnbe));
 		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_FCMOVNBE);
@@ -679,7 +681,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	static const uint8_t fnstsw[] = {0xdd, 0x38};
 	{
 		X86Instruction instr;
-		SetOpcodeBytes(&m_data, fnstsw, sizeof(fnstsw));
+		SetOpcodeBytes(m_data, fnstsw, sizeof(fnstsw));
 		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_FNSTSW);
@@ -692,7 +694,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	static const uint8_t fild16[] = {0xdf, 0x00};
 	{
 		X86Instruction instr;
-		SetOpcodeBytes(&m_data, fild16, sizeof(fild16));
+		SetOpcodeBytes(m_data, fild16, sizeof(fild16));
 		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_FILD);
@@ -707,7 +709,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	static const uint8_t fnstswAx[] = {0xdf, 0xe0};
 	{
 		X86Instruction instr;
-		SetOpcodeBytes(&m_data, fnstswAx, sizeof(fnstswAx));
+		SetOpcodeBytes(m_data, fnstswAx, sizeof(fnstswAx));
 		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_FNSTSW);
@@ -720,7 +722,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	static const uint8_t movups[] = {0x0f, 0x10, 0xc0};
 	{
 		X86Instruction instr;
-		SetOpcodeBytes(&m_data, movups, sizeof(movups));
+		SetOpcodeBytes(m_data, movups, sizeof(movups));
 		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_MOVUPS);
@@ -735,7 +737,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	static const uint8_t unpckhps[] = {0x0f, 0x15, 0xc0};
 	{
 		X86Instruction instr;
-		SetOpcodeBytes(&m_data, unpckhps, sizeof(unpckhps));
+		SetOpcodeBytes(m_data, unpckhps, sizeof(unpckhps));
 		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_UNPCKHPS);
@@ -750,7 +752,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	static const uint8_t unpcklps[] = {0x0f, 0x14, 0xc1};
 	{
 		X86Instruction instr;
-		SetOpcodeBytes(&m_data, unpcklps, sizeof(unpcklps));
+		SetOpcodeBytes(m_data, unpcklps, sizeof(unpcklps));
 		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_UNPCKLPS);
@@ -765,7 +767,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	static const uint8_t movControlReg[] = {0x0f, 0x22, 0xc0};
 	{
 		X86Instruction instr;
-		SetOpcodeBytes(&m_data, movControlReg, sizeof(movControlReg));
+		SetOpcodeBytes(m_data, movControlReg, sizeof(movControlReg));
 		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_MOV);
@@ -780,7 +782,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	static const uint8_t punpcklbwSse[] = {0x66, 0x0f, 0x60, 0xc8};
 	{
 		X86Instruction instr;
-		SetOpcodeBytes(&m_data, punpcklbwSse, sizeof(punpcklbwSse));
+		SetOpcodeBytes(m_data, punpcklbwSse, sizeof(punpcklbwSse));
 		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_PUNPCKLBW);
@@ -795,7 +797,7 @@ TEST_P(AsmTest, DisassemblePastBugs)
 	static const uint8_t movqMmx[] = {0x0f, 0x7f, 0x00};
 	{
 		X86Instruction instr;
-		SetOpcodeBytes(&m_data, movqMmx, sizeof(movqMmx));
+		SetOpcodeBytes(m_data, movqMmx, sizeof(movqMmx));
 		bool result = Disassemble16(0, AsmTest::Fetch, this, &instr);
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_MOVQ);
@@ -807,6 +809,271 @@ TEST_P(AsmTest, DisassemblePastBugs)
 		ASSERT_TRUE(instr.operands[0].size == 8);
 		ASSERT_TRUE(instr.operands[1].operandType == X86_MM0);
 		ASSERT_TRUE(instr.operands[1].size == 8);
+	}
+}
+
+
+static bool SkipOperationCheck(X86Operation op1)
+{
+	// Not yet implemented by ud86
+	switch (op1)
+	{
+	case X86_ADX:
+	case X86_AMX:
+	case X86_VBLENDPD:
+	case X86_VBLENDPS:
+	case X86_VBLENDVPD:
+	case X86_VBLENDVPS:
+	case X86_VDPPD:
+	case X86_VDPPS:
+	case X86_VEXTRACTPS:
+	case X86_VINSERTPS:
+	case X86_VMOVNTDQA:
+	case X86_VMPSADBW:
+	case X86_VPACKUDSW:
+	case X86_VBLENDVB:
+	case X86_VPBLENDW:
+	case X86_VPCMPEQQ:
+	case X86_VPEXTRB:
+	case X86_VPEXTRD:
+	case X86_VPEXTRW:
+	case X86_VPHMINPOSUW:
+	case X86_VPINSRB:
+	case X86_VPINSRD:
+	case X86_VPINSRQ:
+	case X86_VPMAXSB:
+	case X86_VPMAXSD:
+	case X86_VMPAXUD:
+	case X86_VPMAXUW:
+	case X86_VPMINSB:
+	case X86_VPMINSD:
+	case X86_VPMINUD:
+	case X86_VPMINUW:
+	case X86_VPMOVSXBD:
+	case X86_VPMOVSXBQ:
+	case X86_VPMOVSXBW:
+	case X86_VPMOVSXWD:
+	case X86_VPMOVSXWQ:
+	case X86_VPMOVSXDQ:
+	case X86_VPMOVZXBD:
+	case X86_VPMOVZXBQ:
+	case X86_VPMOVZXBW:
+	case X86_VPMOVZXWD:
+	case X86_VPMOVZXWQ:
+	case X86_VPMOVZXDQ:
+	case X86_VPMULDQ:
+	case X86_VPMULLD:
+	case X86_VPTEST:
+	case X86_VROUNDPD:
+	case X86_VROUNDPS:
+	case X86_VROUNDSD:
+	case X86_VROUNDSS:
+	case X86_VPCMPESTRI:
+	case X86_VPCMPESTRM:
+	case X86_VPCMPGTQ:
+	case X86_VPCMPISTRI:
+	case X86_VPCMPISTRM:
+	case X86_VAESDEC:
+	case X86_VAESDECLAST:
+	case X86_VAESENC:
+	case X86_VAESENCLAST:
+	case X86_VAESIMC:
+	case X86_VAESKEYGENASSIST:
+	case X86_VPABSB:
+	case X86_VPABSD:
+	case X86_VPABSW:
+	case X86_VPALIGNR:
+	case X86_VPAHADD:
+	case X86_VPHADDW:
+	case X86_VPHADDSW:
+	case X86_VPHSUBD:
+	case X86_VPHSUBW:
+	case X86_VPHSUBSW:
+	case X86_VPMADDUBSW:
+	case X86_VPMULHRSW:
+	case X86_VPSHUFB:
+	case X86_VPSIGNB:
+	case X86_VPSIGND:
+	case X86_VPSIGNW:
+	case X86_VADDSUBPD:
+	case X86_VADDSUBPS:
+	case X86_VHADDPD:
+	case X86_VHADDPS:
+	case X86_VHSUBPD:
+	case X86_VHSUBPS:
+	case X86_VLDDQU:
+	case X86_VMOVDDUP:
+	case X86_VMOVHLPS:
+	case X86_VMOVSHDUP:
+	case X86_VMOVSLDUP:
+	case X86_VADDPD:
+	case X86_VADDSD:
+	case X86_VANPD:
+	case X86_VANDNPD:
+	case X86_VCMPPD:
+	case X86_VCMPSD:
+	case X86_VCOMISD:
+	case X86_VCVTDQ2PD:
+	case X86_VCVTDQ2PS:
+	case X86_VCVTPD2DQ:
+	case X86_VCVTPD2PS:
+	case X86_VCVTPS2DQ:
+	case X86_VCVTPS2PD:
+	case X86_VCVTSD2SI:
+	case X86_VCVTSD2SS:
+	case X86_VCVTSI2SD:
+	case X86_VCVTSS2SD:
+	case X86_VCVTTPD2DQ:
+	case X86_VCVTTPS2DQ:
+	case X86_VCVTTSD2SI:
+	case X86_VDIVPD:
+	case X86_VDIVSD:
+	case X86_VMASKMOVDQU:
+	case X86_VMAXPD:
+	case X86_VMAXSD:
+	case X86_VMINPD:
+	case X86_VMINSD:
+	case X86_VMOVAPD:
+	case X86_VMOVD:
+	case X86_VMOVQ:
+	case X86_VMOVDQA:
+	case X86_VMOVDQU:
+	case X86_VMOVHPD:
+	case X86_VMOVLPD:
+	case X86_VMOVMSKPD:
+	case X86_VMOVNTDQ:
+	case X86_VMOVNTPD:
+	case X86_VMOVSD:
+	case X86_VMOVUPD:
+	case X86_VMULPD:
+	case X86_VMULSD:
+	case X86_VORPD:
+	case X86_VPACKSSWB:
+	case X86_VPACKSSDW:
+	case X86_VPACKUSWB:
+	case X86_VPADDB:
+	case X86_VPADDW:
+	case X86_VPADDD:
+	case X86_VPADDQ:
+	case X86_VPADDSB:
+	case X86_VPADDSW:
+	case X86_VPADDUSB:
+	case X86_VPADDUSW:
+	case X86_VPAND:
+	case X86_VPANDN:
+	case X86_VPAVGB:
+	case X86_VPAVGW:
+	case X86_VPCMPEQB:
+	case X86_VPCMPEQW:
+	case X86_VPCMPEQD:
+	case X86_VPCMPGTB:
+	case X86_VPCMPGTW:
+	case X86_VPCMPGTD:
+	case X86_VPEXTSRW:
+	case X86_VPMADDWD:
+	case X86_VPMAXSW:
+	case X86_VPMAXUB:
+	case X86_VPMINSW:
+	case X86_VPMINUB:
+	case X86_VPMOVMSKB:
+	case X86_VPMULHUW:
+	case X86_VPMULHW:
+	case X86_VPMULLW:
+	case X86_VPMULUDQ:
+	case X86_VPOR:
+	case X86_VPSADBW:
+	case X86_VPSHUFD:
+	case X86_VPSHUFHW:
+	case X86_VPSHUFLW:
+	case X86_VPSLLDQ:
+	case X86_VPSLLW:
+	case X86_VPSLLD:
+	case X86_VPSLLQ:
+	case X86_VPSRAW:
+	case X86_VPSRAD:
+	case X86_VPSRLDQ:
+	case X86_VPSRLW:
+	case X86_VPSRLD:
+	case X86_VPSRLQ:
+	case X86_VPSUBB:
+	case X86_VPSUBW:
+	case X86_VPSUBD:
+	case X86_VPSQUBQ:
+	case X86_VPSUBSB:
+	case X86_VPSUBSW:
+	case X86_VPSUBUSB:
+	case X86_VPSUBUSW:
+	case X86_VPUNPCKHBW:
+	case X86_VPUNPCKHWD:
+	case X86_VPUNPCKHDQ:
+	case X86_VPUNPCKHQDQ:
+	case X86_VPUNPCKLBW:
+	case X86_VPUNPCKLWD:
+	case X86_VPUNPCKLDQ:
+	case X86_VPUNCKLQDQ:
+	case X86_VPXOR:
+	case X86_VSHUFPD:
+	case X86_VSQRTPD:
+	case X86_VSQRTSD:
+	case X86_VSUBPD:
+	case X86_VSUBSD:
+	case X86_VUCOMISD:
+	case X86_VUNPCKHPD:
+	case X86_VUNPCKHPS:
+	case X86_VUNPCKLPD:
+	case X86_VUNPCKLPS:
+	case X86_VXORPD:
+	case X86_VADDPS:
+	case X86_VADDSS:
+	case X86_VANDPS:
+	case X86_VANDNPS:
+	case X86_VCMPPS:
+	case X86_VCMPSS:
+	case X86_VCOMISS:
+	case X86_VCVTSI2SS:
+	case X86_VCVTSS2SI:
+	case X86_VCVTTSS2SI:
+	case X86_VDIVPS:
+	case X86_VLDMXCSR:
+	case X86_VMAXPS:
+	case X86_VMAXSS:
+	case X86_VMINPS:
+	case X86_VMINSS:
+	case X86_VMOVAPS:
+	case X86_VMOVHPS:
+	case X86_VMOVLHPS:
+	case X86_VMOVLPS:
+	case X86_VMOVMSKPS:
+	case X86_VMOVNTPS:
+	case X86_VMOVSS:
+	case X86_VMOVUPS:
+	case X86_VMULPS:
+	case X86_VMULSS:
+	case X86_VORPS:
+	case X86_VRCPPS:
+	case X86_VRCPSS:
+	case X86_VRSQRTPS:
+	case X86_VRSQRTSS:
+	case X86_VSQRTPS:
+	case X86_VSQRTSS:
+	case X86_VSTMXCSR:
+	case X86_VSUBPS:
+	case X86_VSUBSS:
+	case X86_VUCOMISS:
+	case X86_VXORPS:
+	case X86_VBROADCAST:
+	case X86_VEXTRACTF128:
+	case X86_VINSERTF128:
+	case X86_VPERMILPD:
+	case X86_VPERMILPS:
+	case X86_VPERM2F128:
+	case X86_VTESTPD:
+	case X86_VTESTPS:
+	case X86_XABORT:
+	case X86_XBEGIN:
+		return true;
+	default:
+		return false;
 	}
 }
 
@@ -1041,7 +1308,7 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_CDQ:
 		return (op2 == UD_Icdq);
 	case X86_CQO:
-		return false;
+		return (op2 == UD_Icqo);
 	case X86_DAA:
 		return (op2 == UD_Idaa);
 	case X86_DAS:
@@ -1067,7 +1334,7 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_ENTER:
 		return (op2 == UD_Ienter);
 	case X86_EXTRACTPS:
-		return false;
+		return (op2 == UD_Iextractps);
 	case X86_F2XM1:
 		return (op2 == UD_If2xm1);
 	case X86_FABS:
@@ -2442,6 +2709,10 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 		return (op2 == UD_Ixsave);
 	case X86_XSETBV:
 		return (op2 == UD_Ixsetbv);
+	case X86_XABORT:
+		return false;
+	case X86_XBEGIN:
+		return false;
 	default:
 		return false;
 	}
@@ -3060,8 +3331,8 @@ TEST_P(AsmTest, Disassemble16)
 	// Allocate space and read the whole thing
 	bytes = (uint8_t*)malloc(fileLen);
 	ASSERT_TRUE(fread(bytes, fileLen, 1, file) != fileLen);
-	SetOpcodeBytes(&m_data, bytes, fileLen);
-	SetOpcodeBytes(&m_ud86Data, bytes, fileLen);
+	SetOpcodeBytes(m_data, bytes, fileLen);
+	SetOpcodeBytes(m_ud86Data, bytes, fileLen);
 
 	// Notify ud86 that we're in 16bit mode
 	ud_set_mode(&ud_obj, 16);
@@ -3079,13 +3350,28 @@ TEST_P(AsmTest, Disassemble16)
 		bool result;
 		uint8_t operandCount;
 
-		printf("%.4x\n", (uint16_t)(fileLen - len));
+		// NOTE: There are potentially differing number of bytes fetched before
+		// the determination is made that an encoding is invalid
+		// Deal with that case here to keep disassembling in sync
+		if (ud_obj.pc != (fileLen - len))
+		{
+			// If one is behind, catch it up
+			uint8_t bytes;
+			while (ud_obj.pc < (fileLen - len))
+			{
+				GetOpcodeBytes(m_ud86Data, &bytes, 1);
+				ud_obj.pc++;
+			}
+			while ((fileLen - len) < ud_obj.pc)
+			{
+				GetOpcodeBytes(m_data, &bytes, 1);
+				len--;
+			}
+		}
 
 		BEGIN_PERF_CTR(salsasm)
 		result = Disassemble16((uint16_t)(fileLen - len), AsmTest::Fetch, this, &instr);
 		END_PERF_CTR(salsasm)
-
-		ASSERT_TRUE((uint16_t)ud_obj.pc == (uint16_t)instr.rip);
 
 		// Watch out for stray flags
 		ASSERT_FALSE(instr.flags & X86_FLAG_INSUFFICIENT_LENGTH);
@@ -3098,17 +3384,19 @@ TEST_P(AsmTest, Disassemble16)
 		bytes = ud_disassemble(&ud_obj);
 		END_PERF_CTR(udis);
 
-		// Ensure we both agree on how many bytes the instr is
-		ASSERT_TRUE(bytes == instr.length);
+		len -= instr.length;
+		if (SkipOperationCheck(instr.op))
+			continue;
 
 		// Verify that the instructions match mnemonics
 		result = CompareOperation(instr.op, ud_obj.mnemonic);
 		ASSERT_TRUE(result);
 
-		len -= instr.length;
-
 		if (instr.op == X86_INVALID)
 			continue;
+
+		// Ensure we both agree on how many bytes the instr is
+		ASSERT_TRUE(bytes == instr.length);
 
 		// We treat operands differently...
 		if (SkipOperandsCheck(instr.op))
