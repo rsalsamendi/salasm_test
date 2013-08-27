@@ -148,6 +148,8 @@ public:
 		// Code here will be called immediately after each test (right
 		// before the destructor).
 	}
+
+	virtual void TestDisassemble(uint8_t bits);
 };
 
 
@@ -3324,7 +3326,7 @@ static bool FpuInstr(const X86Instruction* const instr, const ud_t* const ud_obj
 }
 
 
-TEST_P(AsmFileTest, Disassemble16)
+void AsmFileTest::TestDisassemble(uint8_t bits)
 {
 	FILE* file;
 	X86Instruction instr;
@@ -3350,13 +3352,13 @@ TEST_P(AsmFileTest, Disassemble16)
 	SetOpcodeBytes(m_data, bytes, fileLen);
 	SetOpcodeBytes(m_ud86Data, bytes, fileLen);
 
-	// Notify ud86 that we're in 16bit mode
-	ud_set_mode(&ud_obj, 16);
-
 	// Notify ud86 that we're using a fetch callback
 	ud_init(&ud_obj);
 	ud_set_user_opaque_data(&ud_obj, static_cast<AsmTest*>(this));
 	ud_set_input_hook(&ud_obj, AsmTest::FetchForUd86);
+
+	// Notify ud86 which addr/operand mode to begin in
+	ud_set_mode(&ud_obj, bits);
 
 	// Disassemble the data
 	len = fileLen;
@@ -3385,9 +3387,24 @@ TEST_P(AsmFileTest, Disassemble16)
 			}
 		}
 
-		BEGIN_PERF_CTR(salsasm)
-		result = Disassemble16((uint16_t)(fileLen - len), AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
-		END_PERF_CTR(salsasm)
+		if (bits == 16)
+		{
+			BEGIN_PERF_CTR(salsasm)
+			result = Disassemble16((uint16_t)(fileLen - len), AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
+			END_PERF_CTR(salsasm)
+		}
+		else if (bits == 32)
+		{
+			BEGIN_PERF_CTR(salsasm)
+			result = Disassemble32((uint32_t)(fileLen - len), AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
+			END_PERF_CTR(salsasm)
+		}
+		else if (bits == 64)
+		{
+			BEGIN_PERF_CTR(salsasm)
+			result = Disassemble64((uint32_t)(fileLen - len), AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
+			END_PERF_CTR(salsasm)
+		}
 
 		// Watch out for stray flags
 		ASSERT_FALSE(instr.flags & X86_FLAG_INSUFFICIENT_LENGTH);
@@ -3449,6 +3466,21 @@ TEST_P(AsmFileTest, Disassemble16)
 	PRINT_PERF_CTR(salsasm);
 	PRINT_PERF_CTR(udis);
 }
+
+TEST_P(AsmFileTest, Disassemble16)
+{
+	TestDisassemble(16);
+}
+
+// TEST_P(AsmFileTest, Disassemble32)
+// {
+// 	TestDisassemble(32);
+// }
+
+// TEST_P(AsmFileTest, Disassemble64)
+// {
+// 	TestDisassemble(64);
+// }
 
 static const char* const g_primaryFile = "test_primary.bin";
 static const char* const g_secondaryFile = "test_secondary.bin";
