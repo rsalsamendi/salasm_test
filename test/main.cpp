@@ -831,11 +831,25 @@ TEST_F(AsmStandaloneTest, DisassemblePastBugs)
 }
 
 
-static bool SkipOperationCheck(X86Operation op1)
+static bool SkipOperationCheck(X86Operation op1, enum ud_mnemonic_code op2)
 {
-	// Not yet implemented by ud86
+	switch (op2)
+	{
+	// Not yet implemented
+	case UD_Igetsec:
+	case UD_Ipabsb:
+		return true;
+	default:
+		break;
+	}
+
 	switch (op1)
 	{
+	// Oracle and I don't agree on Group16 NOPs, but neither do Intel and AMD
+	case X86_NOP:
+		break;
+	// Not yet implemented by ud86
+	case X86_MOVMSKPS:
 	case X86_ADX:
 	case X86_AMX:
 	case X86_VBLENDPD:
@@ -3019,6 +3033,7 @@ bool SkipOperandsCheck(X86Operation op)
 {
 	switch (op)
 	{
+	case X86_NOP:
 	case X86_MOVSB:
 	case X86_MOVSW:
 	case X86_MOVSD:
@@ -3137,6 +3152,24 @@ bool SkipOperandsSizeCheck(const X86Instruction* const instr, size_t operand)
 	case X86_SCASD:
 	case X86_SCASQ:
 		return true;
+	case X86_MOV:
+		// Loading a segment from memory doesn't do what the docs say.
+		// When this differs from an oracle (except the hw), it's NAB!
+		// (reads/writes 4 bytes when only writing 2 on real hw)
+		if (instr->operands[operand].operandType != X86_MEM)
+			break;
+		switch (instr->operands[((~operand) & 1)].operandType)
+		{
+		case X86_ES:
+		case X86_DS:
+		case X86_SS:
+		case X86_CS:
+		case X86_FS:
+		case X86_GS:
+			return true;
+		default:
+			break;
+		}
 	default: break;
 	}
 
@@ -3195,7 +3228,10 @@ static bool CompareOperand(const X86Operand* const operand1, const struct ud_ope
 		if (!CompareRegisters(operand1->components[1], operand2->index))
 			return false;
 		if (operand1->scale != operand2->scale)
-			return false;
+		{
+			if ((1 << operand1->scale) != operand2->scale)
+				return false;
+		}
 		// if (!CompareImmediates(operand1, operand2, don't know how many bytes of displacement?))
 		// 	return false;
 		break;
@@ -3418,7 +3454,7 @@ void AsmFileTest::TestDisassemble(uint8_t bits)
 		END_PERF_CTR(udis);
 
 		len -= instr.length;
-		if (SkipOperationCheck(instr.op))
+		if (SkipOperationCheck(instr.op, ud_obj.mnemonic))
 			continue;
 
 		// Verify that the instructions match mnemonics
@@ -3467,15 +3503,15 @@ void AsmFileTest::TestDisassemble(uint8_t bits)
 	PRINT_PERF_CTR(udis);
 }
 
-TEST_P(AsmFileTest, Disassemble16)
-{
-	TestDisassemble(16);
-}
-
-// TEST_P(AsmFileTest, Disassemble32)
+// TEST_P(AsmFileTest, Disassemble16)
 // {
-// 	TestDisassemble(32);
+// 	TestDisassemble(16);
 // }
+
+TEST_P(AsmFileTest, Disassemble32)
+{
+	TestDisassemble(32);
+}
 
 // TEST_P(AsmFileTest, Disassemble64)
 // {
