@@ -847,7 +847,7 @@ static bool SkipOperationCheck(X86Operation op1, enum ud_mnemonic_code op2)
 	{
 	// Oracle and I don't agree on Group16 NOPs, but neither do Intel and AMD
 	case X86_NOP:
-		break;
+		return true;
 	// Not yet implemented by ud86
 	case X86_MOVMSKPS:
 	case X86_ADX:
@@ -1105,8 +1105,10 @@ static bool SkipOperationCheck(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_XBEGIN:
 		return true;
 	default:
-		return false;
+		break;
 	}
+
+	return false;
 }
 
 
@@ -3300,6 +3302,7 @@ static bool FpuInstr(const X86Instruction* const instr, const ud_t* const ud_obj
 	case X86_FIMUL:
 	case X86_FMULP:
 	case X86_FCOM:
+	case X86_FCOM2:
 	case X86_FICOM:
 	case X86_FCOMP:
 	case X86_FICOMP:
@@ -3333,7 +3336,7 @@ static bool FpuInstr(const X86Instruction* const instr, const ud_t* const ud_obj
 		&& (instr->op != X86_FUCOM) && (instr->op != X86_FADDP)
 		&& (instr->op != X86_FMULP) && (instr->op != X86_FSUBRP)
 		&& (instr->op != X86_FSUBP) && (instr->op != X86_FDIVP)
-		&& (instr->op != X86_FDIVRP))
+		&& (instr->op != X86_FDIVRP) && (instr->op != X86_FCOM2))
 	{
 		if (!CompareOperand(&instr->operands[0], operand))
 			return false;
@@ -3353,7 +3356,8 @@ static bool FpuInstr(const X86Instruction* const instr, const ud_t* const ud_obj
 		}
 		else
 		{
-			if (!CompareOperand(&instr->operands[1], operand))
+			if ((!CompareOperand(&instr->operands[1], operand))
+				&& (!CompareOperand(&instr->operands[0], operand)))
 				return false;
 		}
 	}
@@ -3503,10 +3507,10 @@ void AsmFileTest::TestDisassemble(uint8_t bits)
 	PRINT_PERF_CTR(udis);
 }
 
-// TEST_P(AsmFileTest, Disassemble16)
-// {
-// 	TestDisassemble(16);
-// }
+TEST_P(AsmFileTest, Disassemble16)
+{
+	TestDisassemble(16);
+}
 
 TEST_P(AsmFileTest, Disassemble32)
 {
@@ -3523,4 +3527,4 @@ static const char* const g_secondaryFile = "test_secondary.bin";
 static const char* const g_bochsBiosFile = "BIOS-bochs-latest.bin";
 
 INSTANTIATE_TEST_CASE_P(DisassembleTest, AsmFileTest,
-	Values(g_primaryFile, g_secondaryFile, g_bochsBiosFile));
+	Values(g_primaryFile,g_secondaryFile,g_bochsBiosFile));
