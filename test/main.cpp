@@ -22,6 +22,8 @@
 #ifdef WIN32
 #include <conio.h>
 #include <Windows.h>
+#else /* Linux */
+#include <time.h>
 #endif /* WIN32 */
 
 #include "src/gtest-all.cc"
@@ -50,17 +52,29 @@ using ::testing::Values;
 #define PRINT_PERF_CTR(name) \
 	printf(# name ": %llu us\n", time ## name / (name ## Freq.QuadPart / 1000000));
 #else /* Linux */
-#define INIT_PERF_CTR(name)
-#define BEGIN_PERF_CTR(name)
-#define END_PERF_CTR(name)
-#define PRINT_PERF_CTR(name)
+#define INIT_PERF_CTR(name) \
+	uint64_t time ## name = 0; \
+	timespec begin ## name ## ts; \
+	timespec end ## name ## ts;
+
+#define BEGIN_PERF_CTR(name) \
+	memset(&begin ## name ## ts, 0, sizeof(timespec)); \
+	clock_gettime(CLOCK_REALTIME, &begin ## name ## ts); \
+	memset(&end ## name ## ts, 0, sizeof(timespec));
+
+#define END_PERF_CTR(name) \
+ 	clock_gettime(CLOCK_REALTIME, &end ## name ## ts); \
+ 	time ## name += ((uint64_t)end ## name ## ts.tv_nsec - (uint64_t)begin ## name ## ts.tv_nsec) + (((uint64_t)end ## name ## ts.tv_sec * 1000000000) - ((uint64_t)begin ## name ## ts.tv_sec * 1000000000));
+
+#define PRINT_PERF_CTR(name) \
+	printf(# name ": %llu us\n", time ## name / 1000);
 #endif /* WIN32 */
 
 
 static void PlatformInitWorkingDir()
 {
-	char* path = (char*)malloc(MAX_PATH);
 #ifdef WIN32
+	char* path = (char*)malloc(MAX_PATH);
 	char* ptr;
 	GetModuleFileNameA(NULL, path, MAX_PATH);
 	ptr = strrchr(path, '\\');
@@ -244,7 +258,7 @@ int AsmTest::FetchForUd86(struct ud* u)
 	X86Instruction instr; \
 	const size_t opcodeLen = sizeof(bytes); \
 	SetOpcodeBytes(m_data, bytes, opcodeLen); \
-	bool result = Disassemble ## addrSize ##(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr); \
+	bool result = Disassemble ## addrSize(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr); \
 	ASSERT_TRUE(result); \
 	ASSERT_TRUE(instr.op == operation); \
 	ASSERT_TRUE(instr.operandCount == 2); \
@@ -262,7 +276,7 @@ int AsmTest::FetchForUd86(struct ud* u)
 	X86Instruction instr; \
 	const size_t opcodeLen = sizeof(bytes); \
 	SetOpcodeBytes(m_data, bytes, opcodeLen); \
-	bool result = Disassemble ## addrSize ##(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr); \
+	bool result = Disassemble ## addrSize(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr); \
 	ASSERT_TRUE(result); \
 	ASSERT_TRUE(instr.op == operation); \
 	ASSERT_TRUE(instr.operandCount == 2); \
@@ -280,7 +294,7 @@ int AsmTest::FetchForUd86(struct ud* u)
 	X86Instruction instr; \
 	const size_t opcodeLen = sizeof(bytes); \
 	SetOpcodeBytes(m_data, bytes, opcodeLen); \
-	bool result = Disassemble ## addrSize ##(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr); \
+	bool result = Disassemble ## addrSize(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr); \
 	ASSERT_TRUE(result); \
 	ASSERT_TRUE(instr.op == operation); \
 	ASSERT_TRUE(instr.operandCount == 2); \
@@ -295,7 +309,7 @@ int AsmTest::FetchForUd86(struct ud* u)
 	X86Instruction instr; \
 	const size_t opcodeLen = sizeof(bytes); \
 	SetOpcodeBytes(m_data, bytes, opcodeLen); \
-	bool result = Disassemble ## addrSize ##(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr); \
+	bool result = Disassemble ## addrSize(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr); \
 	ASSERT_TRUE(result); \
 	ASSERT_TRUE(instr.op == operation); \
 	ASSERT_TRUE(instr.operandCount == 2); \
@@ -3197,6 +3211,8 @@ bool SkipOperandsSizeCheck(const X86Instruction* const instr, size_t operand)
 	case X86_DR6:
 	case X86_DR7:
 		return true;
+	default:
+		break;
 	}
 	return false;
 }
