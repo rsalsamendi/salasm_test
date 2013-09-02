@@ -3407,6 +3407,7 @@ void AsmFileTest::TestDisassemble(uint8_t bits)
 	ASSERT_TRUE(fread(bytes, fileLen, 1, file) != fileLen);
 	SetOpcodeBytes(m_data, bytes, fileLen);
 	SetOpcodeBytes(m_ud86Data, bytes, fileLen);
+	free(bytes);
 
 	// Notify ud86 that we're using a fetch callback
 	ud_init(&ud_obj);
