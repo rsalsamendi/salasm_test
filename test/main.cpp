@@ -3546,6 +3546,19 @@ static const char* const g_bochsBiosFile = "BIOS-bochs-latest.bin";
 INSTANTIATE_TEST_CASE_P(DisassembleTest, AsmFileTest,
 	Values(g_primaryFile,g_secondaryFile,g_bochsBiosFile));
 
+#ifndef WIN32
+char* strlwr(char* const s)
+{
+	size_t len = strlen(s);
+	size_t i;
+
+	for (i = 0; i < len; i++)
+		s[i] = tolower(s[i]);
+
+	return s;
+}
+#endif /* WIN32 */
+
 #define TEST_MNEMONIC(name) \
 TEST(MnemonicTest, name) \
 { \
