@@ -26,13 +26,11 @@
     <CustomBuild Include="test_secondary.asm">
       <Filter>Source Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="BIOS-bochs-latest" />
   </ItemGroup>
   <ItemGroup>
     <None Include="test.inc">
       <Filter>Header Files</Filter>
-    </None>
-    <None Include="BIOS-bochs-latest">
-      <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
 </Project>
