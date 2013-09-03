@@ -3247,7 +3247,7 @@ static bool CompareOperand(const X86Operand* const operand1, const struct ud_ope
 			return false;
 		if (operand1->scale != operand2->scale)
 		{
-			if ((1 << operand1->scale) != operand2->scale)
+			if ((operand1->scale != 1) || (operand2->scale != 0))
 				return false;
 		}
 		// if (!CompareImmediates(operand1, operand2, don't know how many bytes of displacement?))
