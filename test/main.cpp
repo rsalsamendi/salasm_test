@@ -844,6 +844,55 @@ TEST_F(AsmStandaloneTest, DisassemblePastBugs)
 	}
 }
 
+#define TEST_INVALID_IN_64BIT_MODE(name, opcode) \
+TEST_F(AsmStandaloneTest, Test_ ## name ## _InvalidIn64BitMode) \
+{ \
+	static const uint8_t opcodeByte[] = {opcode, 0xc0, 0x01}; \
+	X86Instruction instr; \
+	SetOpcodeBytes(m_data, opcodeByte, sizeof(opcodeByte)); \
+	bool result = Disassemble64(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr); \
+	ASSERT_FALSE(result); \
+}
+
+TEST_INVALID_IN_64BIT_MODE(PUSH_ES, 0x06);
+TEST_INVALID_IN_64BIT_MODE(POP_ES, 0x07);
+TEST_INVALID_IN_64BIT_MODE(PUSH_SS, 0x07);
+TEST_INVALID_IN_64BIT_MODE(POP_SS, 0x17);
+TEST_INVALID_IN_64BIT_MODE(PUSH_CS, 0x0e);
+TEST_INVALID_IN_64BIT_MODE(PUSH_DS, 0x1e);
+TEST_INVALID_IN_64BIT_MODE(POP_DS, 0x1f);
+
+TEST_INVALID_IN_64BIT_MODE(DAA, 0x27);
+TEST_INVALID_IN_64BIT_MODE(AAA, 0x37);
+TEST_INVALID_IN_64BIT_MODE(DAS, 0xf7);
+TEST_INVALID_IN_64BIT_MODE(AAS, 0xf7);
+
+TEST_INVALID_IN_64BIT_MODE(PUSHA, 0x60);
+TEST_INVALID_IN_64BIT_MODE(POPA, 0x61);
+TEST_INVALID_IN_64BIT_MODE(BOUND, 0x62);
+
+TEST_INVALID_IN_64BIT_MODE(GROUP1_COL2, 0x82);
+TEST_INVALID_IN_64BIT_MODE(CALLF, 0x9a);
+
+TEST_INVALID_IN_64BIT_MODE(INTO, 0xce);
+
+TEST_INVALID_IN_64BIT_MODE(AAM, 0xd4);
+TEST_INVALID_IN_64BIT_MODE(AAD, 0xd5);
+
+TEST_INVALID_IN_64BIT_MODE(JMPF, 0xea);
+
+#define TEST_INVALID_IN_64BIT_MODE_TWO_BYTE(name, opcode) \
+TEST_F(AsmStandaloneTest, Test_ ## name ## _InvalidIn64BitMode) \
+{ \
+	static const uint8_t opcodeByte[] = {0xf0, opcode, 0xc0, 0x01}; \
+	X86Instruction instr; \
+	SetOpcodeBytes(m_data, opcodeByte, sizeof(opcodeByte)); \
+	bool result = Disassemble64(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr); \
+	ASSERT_FALSE(result); \
+}
+
+TEST_INVALID_IN_64BIT_MODE_TWO_BYTE(SYSENTER, 0x34);
+TEST_INVALID_IN_64BIT_MODE_TWO_BYTE(SYSEXIT, 0x35);
 
 static bool SkipOperationCheck(X86Operation op1, enum ud_mnemonic_code op2)
 {
