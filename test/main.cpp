@@ -894,6 +894,34 @@ TEST_F(AsmStandaloneTest, Test_ ## name ## _InvalidIn64BitMode) \
 TEST_INVALID_IN_64BIT_MODE_TWO_BYTE(SYSENTER, 0x34);
 TEST_INVALID_IN_64BIT_MODE_TWO_BYTE(SYSEXIT, 0x35);
 
+#define TEST_ONLY_VALID_IN_64BIT_MODE_TWO_BYTE(name, opcode) \
+TEST_F(AsmStandaloneTest, Test_ ## name ## _OnlyValidIn64BitMode) \
+{ \
+	static const uint8_t opcodeByte[] = {0x0f, opcode, 0xc0, 0x01}; \
+	X86Instruction instr; \
+	SetOpcodeBytes(m_data, opcodeByte, sizeof(opcodeByte)); \
+	bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr); \
+	ASSERT_FALSE(result); \
+	SetOpcodeBytes(m_data, opcodeByte, sizeof(opcodeByte)); \
+	result = Disassemble32(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr); \
+	ASSERT_FALSE(result); \
+}
+
+TEST_ONLY_VALID_IN_64BIT_MODE_TWO_BYTE(SYSCALL, 0x05);
+TEST_ONLY_VALID_IN_64BIT_MODE_TWO_BYTE(SYSRET, 0x07);
+
+TEST_F(AsmStandaloneTest, Test_SWAPGS_OnlyValidIn64BitMode) \
+{ \
+	static const uint8_t opcodeByte[] = {0x0f, 0x01, 0xc8, 0xf8}; \
+	X86Instruction instr; \
+	SetOpcodeBytes(m_data, opcodeByte, sizeof(opcodeByte)); \
+	bool result = Disassemble16(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr); \
+	ASSERT_FALSE(!result); \
+	SetOpcodeBytes(m_data, opcodeByte, sizeof(opcodeByte)); \
+	result = Disassemble32(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr); \
+	ASSERT_FALSE(!result); \
+}
+
 static bool SkipOperationCheck(X86Operation op1, enum ud_mnemonic_code op2)
 {
 	switch (op2)
@@ -901,6 +929,10 @@ static bool SkipOperationCheck(X86Operation op1, enum ud_mnemonic_code op2)
 	// Not yet implemented
 	case UD_Igetsec:
 	case UD_Ipabsb:
+		return true;
+	// udis86 does not fail these in 16/32bit mode. Probably a bug.
+	case UD_Isyscall:
+	case UD_Isysret:
 		return true;
 	default:
 		break;
@@ -3593,7 +3625,7 @@ static const char* const g_secondaryFile = "test_secondary.bin";
 static const char* const g_bochsBiosFile = "BIOS-bochs-latest.bin";
 
 INSTANTIATE_TEST_CASE_P(DisassembleTest, AsmFileTest,
-	Values(g_primaryFile,g_secondaryFile,g_bochsBiosFile));
+	Values(g_primaryFile, g_secondaryFile, g_bochsBiosFile));
 
 #ifndef WIN32
 char* strlwr(char* const s)
