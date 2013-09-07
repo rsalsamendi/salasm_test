@@ -155,91 +155,81 @@ TestMmxImm palignr
 TestSimdImm palignr
 
 ; Row 1
-; FIXME: Memory
-TestGprSimdImm pextrb, eax
-TestGprSimdImm pextrb, ecx
-TestGprSimdImm pextrb, edx
-TestGprSimdImm pextrb, ebx
-TestGprSimdImm pextrb, esp
-TestGprSimdImm pextrb, ebp
-TestGprSimdImm pextrb, esi
-TestGprSimdImm pextrb, edi
+%macro TestExt 1
+TestModRmMemoryImmRev %1, xmm0, 1
+TestGprSimdImm %1, eax
+TestGprSimdImm %1, ecx
+TestGprSimdImm %1, edx
+TestGprSimdImm %1, ebx
+TestGprSimdImm %1, esp
+TestGprSimdImm %1, ebp
+TestGprSimdImm %1, esi
+TestGprSimdImm %1, edi
+%endmacro ; TestExt
 
-; FIXME: Memory
-TestGprSimdImm pextrw, eax
-TestGprSimdImm pextrw, ecx
-TestGprSimdImm pextrw, edx
-TestGprSimdImm pextrw, ebx
-TestGprSimdImm pextrw, esp
-TestGprSimdImm pextrw, ebp
-TestGprSimdImm pextrw, esi
-TestGprSimdImm pextrw, edi
+TestExt pextrb
+TestExt pextrw
+TestExt pextrd
 
-; FIXME: Memory
-TestGprSimdImm pextrd, eax
-TestGprSimdImm pextrd, ecx
-TestGprSimdImm pextrd, edx
-TestGprSimdImm pextrd, ebx
-TestGprSimdImm pextrd, esp
-TestGprSimdImm pextrd, ebp
-TestGprSimdImm pextrd, esi
-TestGprSimdImm pextrd, edi
-
-; FIXME: Memory
-TestGprSimdImm extractps, eax
-TestGprSimdImm extractps, ecx
-TestGprSimdImm extractps, edx
-TestGprSimdImm extractps, ebx
-TestGprSimdImm extractps, esp
-TestGprSimdImm extractps, ebp
-TestGprSimdImm extractps, esi
-TestGprSimdImm extractps, edi
+TestExt extractps
 
 ; Row 2
-; FIXME: Memory
-TestSimdGprImm pinsrb, eax
-TestSimdGprImm pinsrb, ecx
-TestSimdGprImm pinsrb, edx
-TestSimdGprImm pinsrb, ebx
-TestSimdGprImm pinsrb, esp
-TestSimdGprImm pinsrb, ebp
-TestSimdGprImm pinsrb, esi
-TestSimdGprImm pinsrb, edi
+%macro TestModRmMemoryImmAll 2
+TestModRmMemoryImm %1, xmm0, %2
+TestModRmMemoryImm %1, xmm1, %2
+TestModRmMemoryImm %1, xmm2, %2
+TestModRmMemoryImm %1, xmm3, %2
+TestModRmMemoryImm %1, xmm4, %2
+TestModRmMemoryImm %1, xmm5, %2
+TestModRmMemoryImm %1, xmm6, %2
+TestModRmMemoryImm %1, xmm7, %2
+; TestModRmMemoryImm %1, xmm8, %2
+; TestModRmMemoryImm %1, xmm9, %2
+; TestModRmMemoryImm %1, xmm10, %2
+; TestModRmMemoryImm %1, xmm11, %2
+; TestModRmMemoryImm %1, xmm12, %2
+; TestModRmMemoryImm %1, xmm13, %2
+; TestModRmMemoryImm %1, xmm14, %2
+; TestModRmMemoryImm %1, xmm15, %2
+%endmacro ;TestModRmMemoryImmAll
+
+%macro TestIns 1
+TestModRmMemoryImmAll %1, 0
+TestModRmMemoryImmAll %1, 1
+TestModRmMemoryImmAll %1, 0xff
+TestSimdGprImm %1, eax
+TestSimdGprImm %1, ecx
+TestSimdGprImm %1, edx
+TestSimdGprImm %1, ebx
+TestSimdGprImm %1, esp
+TestSimdGprImm %1, ebp
+TestSimdGprImm %1, esi
+TestSimdGprImm %1, edi
+%endmacro ; TestIns
+
+TestIns pinsrb
 
 ; FIXME: Memory
-TestSimdImm insertps
-TestSimdImm insertps
-TestSimdImm insertps
-TestSimdImm insertps
-TestSimdImm insertps
-TestSimdImm insertps
-TestSimdImm insertps
+TestModRmMemoryImmAll insertps, 0
+TestModRmMemoryImmAll insertps, 1
+TestModRmMemoryImmAll insertps, 0xff
 TestSimdImm insertps
 
-; FIXME: Memory
-TestSimdGprImm pinsrd, eax
-TestSimdGprImm pinsrd, ecx
-TestSimdGprImm pinsrd, edx
-TestSimdGprImm pinsrd, ebx
-TestSimdGprImm pinsrd, esp
-TestSimdGprImm pinsrd, ebp
-TestSimdGprImm pinsrd, esi
-TestSimdGprImm pinsrd, edi
+TestIns pinsrd
 
 ; Row 4
-; FIXME: Memory
-TestSimdImm dpps
-TestSimdImm dppd
-TestSimdImm mpsadbw
-TestSimdImm pclmulqdq
+TestSimdImmThreeOperand dpps
+TestSimdImmThreeOperand dppd
+TestSimdImmThreeOperand mpsadbw
+TestSimdImmThreeOperand pclmulqdq
 
 ; Row 6
-TestSimdImm pcmpestrm
-TestSimdImm pcmpestri
-TestSimdImm pcmpestrm
-TestSimdImm pcmpistri
+TestSimdImmThreeOperand pcmpestrm
+TestSimdImmThreeOperand pcmpestri
+TestSimdImmThreeOperand pcmpestrm
+TestSimdImmThreeOperand pcmpistri
 
 
 ; Row 0xf
-TestSimdImm aeskeygenassist
+TestSimdImmThreeOperand aeskeygenassist
 

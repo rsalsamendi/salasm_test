@@ -676,46 +676,46 @@ TestModRmMemory movntps, xmm7
 	%1 %2, [BX + 0xffff], %3
 %endmacro ; TestModRmMemoryImm
 
-%macro TestModRmMemoryThreeOperandRev 3
+%macro TestModRmMemoryImmRev 3
 	; Test ModRM Mod==0
-	%1 %2, [BX + SI], %3
-	%1 %2, [BX + DI], %3
-	%1 %2, [BP + SI], %3
-	%1 %2, [SI], %3
-	%1 %2, [DI], %3
-	%1 %2, [0xffff], %3
-	%1 %2, [0x0001], %3
-	%1 %2, [BX], %3
+	%1 [BX + SI], %2, %3
+	%1 [BX + DI], %2, %3
+	%1 [BP + SI], %2, %3
+	%1 [SI], %2, %3
+	%1 [DI], %2, %3
+	%1 [0xffff], %2, %3
+	%1 [0x0001], %2, %3
+	%1 [BX], %2, %3
 
 	; Test ModRM Mod==1
-	%1 %2, [BX + SI + 1], %3
-	%1 %2, [BX + SI + 0xff], %3
-	%1 %2, [BX + DI + 1], %3
-	%1 %2, [BX + DI + 0xff], %3
-	%1 %2, [SI + 1], %3
-	%1 %2, [SI + 0xff], %3
-	%1 %2, [DI + 1], %3
-	%1 %2, [DI + 0xff], %3
-	%1 %2, [BP + 1], %3
-	%1 %2, [BP + 0xff], %3
-	%1 %2, [BX + 1], %3
-	%1 %2, [BX + 0xff], %3
+	%1 [BX + SI + 1], %2, %3
+	%1 [BX + SI + 0xff], %2, %3
+	%1 [BX + DI + 1], %2, %3
+	%1 [BX + DI + 0xff], %2, %3
+	%1 [SI + 1], %2, %3
+	%1 [SI + 0xff], %2, %3
+	%1 [DI + 1], %2, %3
+	%1 [DI + 0xff], %2, %3
+	%1 [BP + 1], %2, %3
+	%1 [BP + 0xff], %2, %3
+	%1 [BX + 1], %2, %3
+	%1 [BX + 0xff], %2, %3
 
 	; Test ModRM Mod==2
-	%1 %2, [BX + SI + 0xffff], %3
-	%1 %2, [BX + DI + 0xffff], %3
-	%1 %2, [BP + SI + 0xffff], %3
-	%1 %2, [BP + DI + 0xffff], %3
-	%1 %2, [SI + 0xffff], %3
-	%1 %2, [DI + 0xffff], %3
-	%1 %2, [BP + 0xffff], %3
-	%1 %2, [BX + 0xffff], %3
-%endmacro ; TestModRmMemoryThreeOperandRev
+	%1 [BX + SI + 0xffff], %2, %3
+	%1 [BX + DI + 0xffff], %2, %3
+	%1 [BP + SI + 0xffff], %2, %3
+	%1 [BP + DI + 0xffff], %2, %3
+	%1 [SI + 0xffff], %2, %3
+	%1 [DI + 0xffff], %2, %3
+	%1 [BP + 0xffff], %2, %3
+	%1 [BX + 0xffff], %2, %3
+%endmacro ; TestModRmMemoryImmRev
 
 %macro TestMmxRowImm 2
-TestModRmMemoryThreeOperandRev %1, %2, 0
-TestModRmMemoryThreeOperandRev %1, %2, 1
-TestModRmMemoryThreeOperandRev %1, %2, 0xff
+TestModRmMemoryImm %1, %2, 0
+TestModRmMemoryImm %1, %2, 1
+TestModRmMemoryImm %1, %2, 0xff
 %1 mm0, %2, 0
 %1 mm0, %2, 1
 %1 mm0, %2, 0xff
@@ -754,9 +754,9 @@ TestMmxRowImm %1, mm7
 %endmacro ; TestMmxImm
 
 %macro TestSimdRowImmThreeOperand 2
-TestModRmMemoryThreeOperandRev %1, %2, 0
-TestModRmMemoryThreeOperandRev %1, %2, 1
-TestModRmMemoryThreeOperandRev %1, %2, 0xff
+TestModRmMemoryImm %1, %2, 0
+TestModRmMemoryImm %1, %2, 1
+TestModRmMemoryImm %1, %2, 0xff
 %1 xmm0, %2, 0
 %1 xmm0, %2, 1
 %1 xmm0, %2, 0xff
