@@ -3637,8 +3637,7 @@ static const char* const g_threeByteFile = "test_three_byte.bin";
 static const char* const g_bochsBiosFile = "BIOS-bochs-latest.bin";
 
 INSTANTIATE_TEST_CASE_P(DisassembleTest, AsmFileTest,
-	Values(g_threeByteFile));
-	// Values(g_oneByteFile, g_twoByteFile, g_threeByteFile, g_bochsBiosFile));
+	Values(g_oneByteFile, g_twoByteFile, g_threeByteFile, g_bochsBiosFile));
 
 #ifndef WIN32
 char* strlwr(char* const s)
