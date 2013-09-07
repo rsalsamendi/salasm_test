@@ -944,6 +944,8 @@ static bool SkipOperationCheck(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_NOP:
 		return true;
 	// Not yet implemented by ud86
+	case X86_INSERTQ:
+	case X86_EXTRQ:
 	case X86_MOVMSKPS:
 	case X86_ADX:
 	case X86_AMX:
@@ -1199,6 +1201,11 @@ static bool SkipOperationCheck(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_XABORT:
 	case X86_XBEGIN:
 		return true;
+	case X86_INSERTPS:
+		// AMD supports reg form of RM, Intel does not say it does in opcode table
+		// all other refs in Intel docs say it does. Probably a bug, should be reported to ud86
+		return true;
+
 	default:
 		break;
 	}
@@ -1231,6 +1238,8 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 		return (op2 == UD_Iaesdec);
 	case X86_AESDECLAST:
 		return (op2 == UD_Iaesdeclast);
+	case X86_AESKEYGENASSIST:
+		return (op2 == UD_Iaeskeygenassist);
 	case X86_ADC:
 		return (op2 == UD_Iadc);
 	case X86_ADD:
@@ -2046,6 +2055,8 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 		return (op2 == UD_Ipblendvb);
 	case X86_PBLENDW:
 		return (op2 == UD_Ipblendw);
+	case X86_PCLMULQDQ:
+		return (op2 == UD_Ipclmulqdq);
 	case X86_PCMPEQB:
 		return (op2 == UD_Ipcmpeqb);
 	case X86_PCMPEQD:
@@ -3173,6 +3184,8 @@ bool SkipOperandsCheck(X86Operation op)
 	case X86_CALLF:
 	case X86_MOVSX: // FIXME: Test on real hardware in 16bit mode
 	case X86_MOVZX: // FIXME: Test on real hardware in 16bit mode.
+	case X86_PEXTRB: // Maybe report a bug to ud86. For Mod==c, arg0 should be 32 or 64bit
+	case X86_PINSRB: // Docs disagree with themselves. Opcode table says r8, actual docs say 1 byte from r32
 		return true;
 	default:
 		return false;

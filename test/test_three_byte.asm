@@ -54,7 +54,6 @@ TestSimdRev pabsw
 TestMmxRev pabsd
 TestSimdRev pabsd
 
-
 ; Row 2
 TestSimdRev pmovsxbw
 TestSimdRev pmovsxbd
@@ -141,3 +140,106 @@ TestSimdRev aesenc
 TestSimdRev aesenclast
 TestSimdRev aesdec
 TestSimdRev aesdeclast
+
+; 0f 3a
+
+; Row 0
+TestSimdImmThreeOperand roundps
+TestSimdImmThreeOperand roundpd
+TestSimdImmThreeOperand roundss
+TestSimdImmThreeOperand roundsd
+TestSimdImmThreeOperand blendps
+TestSimdImmThreeOperand blendpd
+TestSimdImmThreeOperand pblendw
+TestMmxImm palignr
+TestSimdImm palignr
+
+; Row 1
+; FIXME: Memory
+TestGprSimdImm pextrb, eax
+TestGprSimdImm pextrb, ecx
+TestGprSimdImm pextrb, edx
+TestGprSimdImm pextrb, ebx
+TestGprSimdImm pextrb, esp
+TestGprSimdImm pextrb, ebp
+TestGprSimdImm pextrb, esi
+TestGprSimdImm pextrb, edi
+
+; FIXME: Memory
+TestGprSimdImm pextrw, eax
+TestGprSimdImm pextrw, ecx
+TestGprSimdImm pextrw, edx
+TestGprSimdImm pextrw, ebx
+TestGprSimdImm pextrw, esp
+TestGprSimdImm pextrw, ebp
+TestGprSimdImm pextrw, esi
+TestGprSimdImm pextrw, edi
+
+; FIXME: Memory
+TestGprSimdImm pextrd, eax
+TestGprSimdImm pextrd, ecx
+TestGprSimdImm pextrd, edx
+TestGprSimdImm pextrd, ebx
+TestGprSimdImm pextrd, esp
+TestGprSimdImm pextrd, ebp
+TestGprSimdImm pextrd, esi
+TestGprSimdImm pextrd, edi
+
+; FIXME: Memory
+TestGprSimdImm extractps, eax
+TestGprSimdImm extractps, ecx
+TestGprSimdImm extractps, edx
+TestGprSimdImm extractps, ebx
+TestGprSimdImm extractps, esp
+TestGprSimdImm extractps, ebp
+TestGprSimdImm extractps, esi
+TestGprSimdImm extractps, edi
+
+; Row 2
+; FIXME: Memory
+TestSimdGprImm pinsrb, eax
+TestSimdGprImm pinsrb, ecx
+TestSimdGprImm pinsrb, edx
+TestSimdGprImm pinsrb, ebx
+TestSimdGprImm pinsrb, esp
+TestSimdGprImm pinsrb, ebp
+TestSimdGprImm pinsrb, esi
+TestSimdGprImm pinsrb, edi
+
+; FIXME: Memory
+TestSimdImm insertps
+TestSimdImm insertps
+TestSimdImm insertps
+TestSimdImm insertps
+TestSimdImm insertps
+TestSimdImm insertps
+TestSimdImm insertps
+TestSimdImm insertps
+
+; FIXME: Memory
+TestSimdGprImm pinsrd, eax
+TestSimdGprImm pinsrd, ecx
+TestSimdGprImm pinsrd, edx
+TestSimdGprImm pinsrd, ebx
+TestSimdGprImm pinsrd, esp
+TestSimdGprImm pinsrd, ebp
+TestSimdGprImm pinsrd, esi
+TestSimdGprImm pinsrd, edi
+
+; Row 4
+; FIXME: Memory
+TestSimdImm dpps
+TestSimdImm dppd
+TestSimdImm mpsadbw
+TestSimdImm pclmulqdq
+
+; Row 6
+TestSimdImm pcmpestrm
+TestSimdImm pcmpestri
+TestSimdImm pcmpestrm
+TestSimdImm pcmpistri
+
+
+; Row 0xf
+TestSimdImm aeskeygenassist
+
