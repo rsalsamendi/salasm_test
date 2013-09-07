@@ -209,7 +209,6 @@ TestSimdGprImm %1, edi
 
 TestIns pinsrb
 
-; FIXME: Memory
 TestModRmMemoryImmAll insertps, 0
 TestModRmMemoryImmAll insertps, 1
 TestModRmMemoryImmAll insertps, 0xff

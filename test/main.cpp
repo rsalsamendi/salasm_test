@@ -944,6 +944,8 @@ static bool SkipOperationCheck(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_NOP:
 		return true;
 	// Not yet implemented by ud86
+	case X86_TZCNT:
+	case X86_LZCNT:
 	case X86_INSERTQ:
 	case X86_EXTRQ:
 	case X86_MOVMSKPS:

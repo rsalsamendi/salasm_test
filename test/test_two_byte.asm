@@ -813,8 +813,8 @@ TEST_ARITHMETIC_RM16_REV movzx, esi
 TEST_ARITHMETIC_RM16_REV movzx, edi
 
 TEST_ARITHMETIC_MODRM16_REV popcnt
-; TEST_ARITHMETIC_MODRM16_REV tzcnt ; FIXME: ud86 doens't know about this yet
-; TEST_ARITHMETIC_MODRM16_REV lzcnt ; FIXME: ud86 doens't know about this yet
+TEST_ARITHMETIC_MODRM16_REV tzcnt
+TEST_ARITHMETIC_MODRM16_REV lzcnt
 
 ; Group 10
 ud1
