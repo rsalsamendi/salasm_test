@@ -1,5 +1,4 @@
 %include "test.inc"
-BITS 16
 
 ; Row 0
 
@@ -56,89 +55,6 @@ prefetch [0xffff]
 prefetchw [0xffff]
 femms
 
-%macro TestModRmMemoryRev 2
-	; Test ModRM Mod==0
-	%1 %2, [BX + SI]
-	%1 %2, [BX + DI]
-	%1 %2, [BP + SI]
-	%1 %2, [SI]
-	%1 %2, [DI]
-	%1 %2, [0xffff]
-	%1 %2, [0x0001]
-	%1 %2, [BX]
-
-	; Test ModRM Mod==1
-	%1 %2, [BX + SI + 1]
-	%1 %2, [BX + SI + 0xff]
-	%1 %2, [BX + DI + 1]
-	%1 %2, [BX + DI + 0xff]
-	%1 %2, [SI + 1]
-	%1 %2, [SI + 0xff]
-	%1 %2, [DI + 1]
-	%1 %2, [DI + 0xff]
-	%1 %2, [BP + 1]
-	%1 %2, [BP + 0xff]
-	%1 %2, [BX + 1]
-	%1 %2, [BX + 0xff]
-
-	; Test ModRM Mod==2
-	%1 %2, [BX + SI + 0xffff]
-	%1 %2, [BX + DI + 0xffff]
-	%1 %2, [BP + SI + 0xffff]
-	%1 %2, [BP + DI + 0xffff]
-	%1 %2, [SI + 0xffff]
-	%1 %2, [DI + 0xffff]
-	%1 %2, [BP + 0xffff]
-	%1 %2, [BX + 0xffff]
-	%1 %2, [BX + 1]
-%endmacro ; TestModRmMemoryRev
-
-%macro TestMmxRow 2
-TestModRmMemory %1, %2
-%1 mm0, %2
-%1 mm1, %2
-%1 mm2, %2
-%1 mm3, %2
-%1 mm4, %2
-%1 mm5, %2
-%1 mm6, %2
-%1 mm7, %2
-%endmacro
-
-%macro TestMmx 1
-TestMmxRow %1, mm0
-TestMmxRow %1, mm1
-TestMmxRow %1, mm2
-TestMmxRow %1, mm3
-TestMmxRow %1, mm4
-TestMmxRow %1, mm5
-TestMmxRow %1, mm6
-TestMmxRow %1, mm7
-%endmacro ; TestMmx
-
-%macro MmxModRmRevRow 2
-TestModRmMemoryRev %1, %2
-%1 mm0, %2
-%1 mm1, %2
-%1 mm2, %2
-%1 mm3, %2
-%1 mm4, %2
-%1 mm5, %2
-%1 mm6, %2
-%1 mm7, %2
-%endmacro ; MmxModRmRevRow
-
-%macro TestMmxRev 1
-MmxModRmRevRow %1, mm0
-MmxModRmRevRow %1, mm1
-MmxModRmRevRow %1, mm2
-MmxModRmRevRow %1, mm3
-MmxModRmRevRow %1, mm4
-MmxModRmRevRow %1, mm5
-MmxModRmRevRow %1, mm6
-MmxModRmRevRow %1, mm7
-%endmacro ; TestMmxRev
-
 ; 3dnow
 TestMmxRev pfcmpge
 TestMmxRev pfcmpgt
@@ -168,42 +84,6 @@ TestMmxRev pfadd ; signed
 TestMmxRev pfacc ; signed
 TestMmxRev pavgusb ; signed
 TestMmxRev pfnacc ; signed
-
-%macro TestModRmMemory 2
-	; Test ModRM Mod==0
-	%1 [BX + SI], %2
-	%1 [BX + DI], %2
-	%1 [BP + SI], %2
-	%1 [SI], %2
-	%1 [DI], %2
-	%1 [0xffff], %2
-	%1 [0x0001], %2
-	%1 [BX], %2
-
-	; Test ModRM Mod==1
-	%1 [BX + SI + 1], %2
-	%1 [BX + SI + 0xff], %2
-	%1 [BX + DI + 1], %2
-	%1 [BX + DI + 0xff], %2
-	%1 [SI + 1], %2
-	%1 [SI + 0xff], %2
-	%1 [DI + 1], %2
-	%1 [DI + 0xff], %2
-	%1 [BP + 1], %2
-	%1 [BP + 0xff], %2
-	%1 [BX + 1], %2
-	%1 [BX + 0xff], %2
-
-	; Test ModRM Mod==2
-	%1 [BX + SI + 0xffff], %2
-	%1 [BX + DI + 0xffff], %2
-	%1 [BP + SI + 0xffff], %2
-	%1 [BP + DI + 0xffff], %2
-	%1 [SI + 0xffff], %2
-	%1 [DI + 0xffff], %2
-	%1 [BP + 0xffff], %2
-	%1 [BX + 0xffff], %2
-%endmacro ; TestModRmMemory
 
 %macro TestModRmMemoryImm 3
 	; Test ModRM Mod==0
@@ -240,84 +120,6 @@ TestMmxRev pfnacc ; signed
 	%1 %2, [BP + 0xffff], %3
 	%1 %2, [BX + 0xffff], %3
 %endmacro ; TestModRmMemoryImm
-
-%macro SimdModRmRow 2
-; TestModRmMemory %1, %2
-%1 %2, xmm0
-%1 %2, xmm1
-%1 %2, xmm2
-%1 %2, xmm3
-%1 %2, xmm4
-%1 %2, xmm5
-%1 %2, xmm6
-%1 %2, xmm7
-; %1 %2, xmm8
-; %1 %2, xmm9
-; %1 %2, xmm10
-; %1 %2, xmm11
-; %1 %2, xmm12
-; %1 %2, xmm13
-; %1 %2, xmm14
-; %1 %2, xmm15
-%endmacro ; SimdModRmRow
-
-%macro SimdModRmRevRow 2
-TestModRmMemoryRev %1, %2
-%1 xmm0, %2
-%1 xmm1, %2
-%1 xmm2, %2
-%1 xmm3, %2
-%1 xmm4, %2
-%1 xmm5, %2
-%1 xmm6, %2
-%1 xmm7, %2
-; %1 xmm8, %2
-; %1 xmm9, %2
-; %1 xmm10, %2
-; %1 xmm11, %2
-; %1 xmm12, %2
-; %1 xmm13, %2
-; %1 xmm14, %2
-; %1 xmm15, %2
-%endmacro ; TestModRmMemoryRev
-
-%macro TestSimd 1
-SimdModRmRow %1, xmm0
-SimdModRmRow %1, xmm1
-SimdModRmRow %1, xmm2
-SimdModRmRow %1, xmm3
-SimdModRmRow %1, xmm4
-SimdModRmRow %1, xmm5
-SimdModRmRow %1, xmm6
-SimdModRmRow %1, xmm7
-; SimdModRmRow %1, xmm8
-; SimdModRmRow %1, xmm9
-; SimdModRmRow %1, xmm10
-; SimdModRmRow %1, xmm11
-; SimdModRmRow %1, xmm12
-; SimdModRmRow %1, xmm13
-; SimdModRmRow %1, xmm14
-; SimdModRmRow %1, xmm15
-%endmacro ; TestSimd
-
-%macro TestSimdRev 1
-SimdModRmRevRow %1, xmm0
-SimdModRmRevRow %1, xmm1
-SimdModRmRevRow %1, xmm2
-SimdModRmRevRow %1, xmm3
-SimdModRmRevRow %1, xmm4
-SimdModRmRevRow %1, xmm5
-SimdModRmRevRow %1, xmm6
-SimdModRmRevRow %1, xmm7
-; SimdModRmRevRow %1, xmm8
-; SimdModRmRevRow %1, xmm9
-; SimdModRmRevRow %1, xmm10
-; SimdModRmRevRow %1, xmm11
-; SimdModRmRevRow %1, xmm12
-; SimdModRmRevRow %1, xmm13
-; SimdModRmRevRow %1, xmm14
-; SimdModRmRevRow %1, xmm15
-%endmacro ; TestSimdRev
 
 ; Row 1
 TestSimd movups

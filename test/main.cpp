@@ -1221,6 +1221,16 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 		return (op2 == UD_Iaam);
 	case X86_AAS:
 		return (op2 == UD_Iaas);
+	case X86_AESIMC:
+		return (op2 == UD_Iaesimc);
+	case X86_AESENC:
+		return (op2 == UD_Iaesenc);
+	case X86_AESENCLAST:
+		return (op2 == UD_Iaesenclast);
+	case X86_AESDEC:
+		return (op2 == UD_Iaesdec);
+	case X86_AESDECLAST:
+		return (op2 == UD_Iaesdeclast);
 	case X86_ADC:
 		return (op2 == UD_Iadc);
 	case X86_ADD:
@@ -3219,6 +3229,7 @@ bool SkipOperandsSizeCheck(const X86Instruction* const instr, size_t operand)
 	case X86_PSHUFHW:
 	case X86_PSHUFLW:
 	case X86_LDDQU:
+	case X86_PTEST:
 		return true;
 	case X86_LEA:
 	case X86_ROL:
@@ -3620,12 +3631,14 @@ TEST_P(AsmFileTest, Disassemble32)
 // 	TestDisassemble(64);
 // }
 
-static const char* const g_primaryFile = "test_primary.bin";
-static const char* const g_secondaryFile = "test_secondary.bin";
+static const char* const g_oneByteFile = "test_one_byte.bin";
+static const char* const g_twoByteFile = "test_two_byte.bin";
+static const char* const g_threeByteFile = "test_three_byte.bin";
 static const char* const g_bochsBiosFile = "BIOS-bochs-latest.bin";
 
 INSTANTIATE_TEST_CASE_P(DisassembleTest, AsmFileTest,
-	Values(g_primaryFile, g_secondaryFile, g_bochsBiosFile));
+	Values(g_threeByteFile));
+	// Values(g_oneByteFile, g_twoByteFile, g_threeByteFile, g_bochsBiosFile));
 
 #ifndef WIN32
 char* strlwr(char* const s)

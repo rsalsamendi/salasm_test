@@ -1,7 +1,5 @@
 %include "test.inc"
 
-BITS 16
-
 ; Primary opcode table
 
 ; Row 0

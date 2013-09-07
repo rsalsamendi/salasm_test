@@ -155,12 +155,12 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="test_primary.asm">
+    <CustomBuild Include="test_one_byte.asm">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)yasm-1.2.0-win64.exe --oformat=bin --objfile=$(OutDir)%(Filename).bin %(FullPath)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)yasm-1.2.0-win64.exe --oformat=bin --objfile=$(OutDir)%(Filename).bin %(FullPath)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)yasm-1.2.0-win64.exe --oformat=bin --objfile=$(OutDir)%(Filename).bin %(FullPath)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)yasm-1.2.0-win64.exe --oformat=bin --objfile=$(OutDir)%(Filename).bin %(FullPath)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)yasm-1.2.0-win64.exe  -DARCH=16 --oformat=bin --objfile=$(OutDir)%(Filename).bin %(FullPath)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)yasm-1.2.0-win64.exe  -DARCH=16 --oformat=bin --objfile=$(OutDir)%(Filename).bin %(FullPath)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)yasm-1.2.0-win64.exe  -DARCH=16 --oformat=bin --objfile=$(OutDir)%(Filename).bin %(FullPath)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)yasm-1.2.0-win64.exe  -DARCH=16 --oformat=bin --objfile=$(OutDir)%(Filename).bin %(FullPath)</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)$(Filename).bin</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)$(Filename).bin</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)$(Filename).bin</Outputs>
@@ -176,12 +176,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="test_secondary.asm">
+    <CustomBuild Include="test_two_byte.asm">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)yasm-1.2.0-win64.exe --oformat=bin --objfile=$(OutDir)%(Filename).bin %(FullPath)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)yasm-1.2.0-win64.exe --oformat=bin --objfile=$(OutDir)%(Filename).bin %(FullPath)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)yasm-1.2.0-win64.exe --oformat=bin --objfile=$(OutDir)%(Filename).bin %(FullPath)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)yasm-1.2.0-win64.exe --oformat=bin --objfile=$(OutDir)%(Filename).bin %(FullPath)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)yasm-1.2.0-win64.exe -DARCH=16 --oformat=bin --objfile=$(OutDir)%(Filename).bin %(FullPath)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)yasm-1.2.0-win64.exe -DARCH=16 --oformat=bin --objfile=$(OutDir)%(Filename).bin %(FullPath)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)yasm-1.2.0-win64.exe -DARCH=16 --oformat=bin --objfile=$(OutDir)%(Filename).bin %(FullPath)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)yasm-1.2.0-win64.exe -DARCH=16 --oformat=bin --objfile=$(OutDir)%(Filename).bin %(FullPath)</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)$(Filename).bin</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)$(Filename).bin</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)$(Filename).bin</Outputs>
@@ -204,7 +204,19 @@
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy %(FullPath) $(OutDir)%(Filename).bin</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy %(FullPath) $(OutDir)%(Filename).bin</Message>
     </CustomBuild>
+    <None Include="create_test.py" />
     <None Include="test.inc" />
+    <CustomBuild Include="test_three_byte.asm">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)yasm-1.2.0-win64.exe -DARCH=16 --oformat=bin --objfile=$(OutDir)%(Filename).bin %(FullPath)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)yasm-1.2.0-win64.exe -DARCH=16 --oformat=bin --objfile=$(OutDir)%(Filename).bin %(FullPath)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)yasm-1.2.0-win64.exe -DARCH=16 --oformat=bin --objfile=$(OutDir)%(Filename).bin %(FullPath)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)yasm-1.2.0-win64.exe -DARCH=16 --oformat=bin --objfile=$(OutDir)%(Filename).bin %(FullPath)</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)$(Filename).bin</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)$(Filename).bin</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)$(Filename).bin</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)$(Filename).bin</Outputs>
+    </CustomBuild>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
