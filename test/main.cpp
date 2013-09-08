@@ -884,7 +884,7 @@ TEST_INVALID_IN_64BIT_MODE(JMPF, 0xea);
 #define TEST_INVALID_IN_64BIT_MODE_TWO_BYTE(name, opcode) \
 TEST_F(AsmStandaloneTest, Test_ ## name ## _InvalidIn64BitMode) \
 { \
-	static const uint8_t opcodeByte[] = {0xf0, opcode, 0xc0, 0x01}; \
+	static const uint8_t opcodeByte[] = {0x0f, opcode, 0xc0, 0x01}; \
 	X86Instruction instr; \
 	SetOpcodeBytes(m_data, opcodeByte, sizeof(opcodeByte)); \
 	bool result = Disassemble64(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr); \
