@@ -2877,6 +2877,10 @@ static bool CompareRegisters(X86OperandType operand1, enum ud_type operand2)
 	{
 	case X86_NONE:
 		return (operand2 == UD_NONE);
+	case X86_IP: // Fall through
+	case X86_EIP: // Fall through
+	case X86_RIP:
+		return (operand2 == UD_R_RIP);
 	case X86_AL:
 		return (operand2 == UD_R_AL);
 	case X86_AH:
