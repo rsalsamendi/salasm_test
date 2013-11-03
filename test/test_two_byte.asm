@@ -268,25 +268,6 @@ TestSimdGpr cvtsi2ss
 TestSimdGpr cvtpi2pd
 TestSimdGpr cvtsi2sd
 
-%macro TestMovnt 1
-TestModRmMemory movntps, xmm0
-TestModRmMemory movntps, xmm1
-TestModRmMemory movntps, xmm2
-TestModRmMemory movntps, xmm3
-TestModRmMemory movntps, xmm4
-TestModRmMemory movntps, xmm5
-TestModRmMemory movntps, xmm6
-TestModRmMemory movntps, xmm7
-; TestModRmMemory movntps, xmm8
-; TestModRmMemory movntps, xmm9
-; TestModRmMemory movntps, xmm10
-; TestModRmMemory movntps, xmm11
-; TestModRmMemory movntps, xmm12
-; TestModRmMemory movntps, xmm13
-; TestModRmMemory movntps, xmm14
-; TestModRmMemory movntps, xmm15
-%endmacro ; TestMovnt
-
 TestMovnt movntps
 TestMovnt movntss
 TestMovnt movntpd
