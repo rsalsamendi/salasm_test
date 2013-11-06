@@ -1,6 +1,7 @@
 BITS ARCH
 
 %macro TEST_ARITHMETIC_RM8_MEMORY 2
+%if ARCH <> 64
 	; Test ModRM Mod==0
 	%1 byte [BX + SI], %2
 	%1 byte [BX + DI], %2
@@ -36,6 +37,7 @@ BITS ARCH
 	%1 byte [DI + 0xffff], %2
 	%1 byte [BP + 0xffff], %2
 	%1 byte [BX + 0xffff], %2
+%endif ; ARCH <> 64
 %endmacro ; TEST_ARITHMETIC_RM8_MEMORY
 
 %macro TEST_ARITHMETIC_RM8 2
@@ -52,6 +54,7 @@ BITS ARCH
 %endmacro ; TEST_ARITHMETIC_RM8
 
 %macro TEST_ARITHMETIC_RM8_REV_MEMORY 2
+%if ARCH <> 64
 	; Test ModRM Mod==0
 	%1 %2, byte [BX + SI]
 	%1 %2, byte [BX + DI]
@@ -86,6 +89,7 @@ BITS ARCH
 	%1 %2, byte [DI + 0xffff]
 	%1 %2, byte [BP + 0xffff]
 	%1 %2, byte [BX + 0xffff]
+%endif ; ARCH <> 64
 %endmacro ; TEST_ARITHMETIC_RM8_REV_MEMORY
 
 %macro TEST_ARITHMETIC_RM8_REV 2
@@ -99,9 +103,10 @@ BITS ARCH
 	%1 %2, CH
 	%1 %2, DH
 	%1 %2, BH
-%endmacro ; TEST_ARITHMETIC_RM8
+%endmacro ; TEST_ARITHMETIC_RM8_REV
 
 %macro TEST_ARITHMETIC_RM16_MEMORY 2
+%if ARCH <> 64
 	; Test ModRM Mod==0
 	%1 word [BX + SI], %2
 	%1 word [BX + DI], %2
@@ -136,6 +141,7 @@ BITS ARCH
 	%1 word [DI + 0xffff], %2
 	%1 word [BP + 0xffff], %2
 	%1 word [BX + 0xffff], %2
+%endif ; ARCH <> 64
 %endmacro ; TEST_ARITHMETIC_RM16_MEMORY
 
 %macro TEST_ARITHMETIC_RM16 2
@@ -151,7 +157,8 @@ BITS ARCH
 	%1 DI, %2
 %endmacro ; TEST_ARITHMETIC_RM16
 
-%macro TEST_ARITHMETIC_RM16_REV 2
+%macro TEST_ARITHMETIC_RM16_MEMORY_REV 2
+%if ARCH <> 64
 	; Test ModRM Mod==0
 	%1 %2, word [BX + SI]
 	%1 %2, word [BX + DI]
@@ -186,7 +193,11 @@ BITS ARCH
 	%1 %2, word [DI + 0xffff]
 	%1 %2, word [BP + 0xffff]
 	%1 %2, word [BX + 0xffff]
+%endif ; ARCH <> 64
+%endmacro ; TEST_ARITHMETIC_RM16_MEMORY_REV
 
+%macro TEST_ARITHMETIC_RM16_REV 2
+	TEST_ARITHMETIC_RM16_MEMORY_REV %1, %2
 	; Test ModRM Mod==3
 	%1 %2, AX
 	%1 %2, CX
@@ -196,7 +207,7 @@ BITS ARCH
 	%1 %2, BP
 	%1 %2, SI
 	%1 %2, DI
-%endmacro ; TEST_ARITHMETIC_RM16
+%endmacro ; TEST_ARITHMETIC_RM16_REV
 
 %macro TEST_ARITHMETIC_MODRM8 1
 	TEST_ARITHMETIC_RM8 %1, al
@@ -271,6 +282,33 @@ BITS ARCH
 %1 si
 %1 di
 %endmacro ; TEST_ARITHMETIC_ONE_PARAM16
+
+%macro TEST_ARITHMETIC_ONE_PARAM32 1
+%if ARCH <> 64
+%1 eax
+%1 ecx
+%1 edx
+%1 ebx
+%1 esp
+%1 ebp
+%1 esi
+%1 edi
+%endif ; ARCH <> 64
+%endmacro ; TEST_ARITHMETIC_ONE_PARAM32
+
+%macro TEST_ARITHMETIC_ONE_PARAM64 1
+%if ARCH == 64
+%1 rax
+%1 rcx
+%1 rdx
+%1 rbx
+%1 rsp
+%1 rbp
+%1 rsi
+%1 rdi
+%endif ; ARCH <> 64
+%endmacro ; TEST_ARITHMETIC_ONE_PARAM64
+
 
 %macro TEST_ARITHMETIC_ONE_OPERAND 2
 %1 %2
@@ -572,14 +610,16 @@ SimdModRmRow %1, xmm4
 SimdModRmRow %1, xmm5
 SimdModRmRow %1, xmm6
 SimdModRmRow %1, xmm7
-; SimdModRmRow %1, xmm8
-; SimdModRmRow %1, xmm9
-; SimdModRmRow %1, xmm10
-; SimdModRmRow %1, xmm11
-; SimdModRmRow %1, xmm12
-; SimdModRmRow %1, xmm13
-; SimdModRmRow %1, xmm14
-; SimdModRmRow %1, xmm15
+%if ARCH == 64
+SimdModRmRow %1, xmm8
+SimdModRmRow %1, xmm9
+SimdModRmRow %1, xmm10
+SimdModRmRow %1, xmm11
+SimdModRmRow %1, xmm12
+SimdModRmRow %1, xmm13
+SimdModRmRow %1, xmm14
+SimdModRmRow %1, xmm15
+%endif ; ARCH == 64
 %endmacro ; TestSimd
 
 %macro SimdModRmRevRow 2
@@ -592,14 +632,16 @@ TestModRmMemoryRev %1, %2
 %1 xmm5, %2
 %1 xmm6, %2
 %1 xmm7, %2
-; %1 xmm8, %2
-; %1 xmm9, %2
-; %1 xmm10, %2
-; %1 xmm11, %2
-; %1 xmm12, %2
-; %1 xmm13, %2
-; %1 xmm14, %2
-; %1 xmm15, %2
+%if ARCH == 64
+%1 xmm8, %2
+%1 xmm9, %2
+%1 xmm10, %2
+%1 xmm11, %2
+%1 xmm12, %2
+%1 xmm13, %2
+%1 xmm14, %2
+%1 xmm15, %2
+%endif ; ARCH == 64
 %endmacro ; TestModRmMemoryRev
 
 %macro TestSimdRev 1
@@ -611,14 +653,16 @@ SimdModRmRevRow %1, xmm4
 SimdModRmRevRow %1, xmm5
 SimdModRmRevRow %1, xmm6
 SimdModRmRevRow %1, xmm7
-; SimdModRmRevRow %1, xmm8
-; SimdModRmRevRow %1, xmm9
-; SimdModRmRevRow %1, xmm10
-; SimdModRmRevRow %1, xmm11
-; SimdModRmRevRow %1, xmm12
-; SimdModRmRevRow %1, xmm13
-; SimdModRmRevRow %1, xmm14
-; SimdModRmRevRow %1, xmm15
+%if ARCH == 64
+SimdModRmRevRow %1, xmm8
+SimdModRmRevRow %1, xmm9
+SimdModRmRevRow %1, xmm10
+SimdModRmRevRow %1, xmm11
+SimdModRmRevRow %1, xmm12
+SimdModRmRevRow %1, xmm13
+SimdModRmRevRow %1, xmm14
+SimdModRmRevRow %1, xmm15
+%endif ; ARCH == 64
 %endmacro ; TestSimdRev
 
 %macro TestMovnt 1
@@ -630,14 +674,16 @@ TestModRmMemory movntps, xmm4
 TestModRmMemory movntps, xmm5
 TestModRmMemory movntps, xmm6
 TestModRmMemory movntps, xmm7
-; TestModRmMemory movntps, xmm8
-; TestModRmMemory movntps, xmm9
-; TestModRmMemory movntps, xmm10
-; TestModRmMemory movntps, xmm11
-; TestModRmMemory movntps, xmm12
-; TestModRmMemory movntps, xmm13
-; TestModRmMemory movntps, xmm14
-; TestModRmMemory movntps, xmm15
+%if ARCH == 64
+TestModRmMemory movntps, xmm8
+TestModRmMemory movntps, xmm9
+TestModRmMemory movntps, xmm10
+TestModRmMemory movntps, xmm11
+TestModRmMemory movntps, xmm12
+TestModRmMemory movntps, xmm13
+TestModRmMemory movntps, xmm14
+TestModRmMemory movntps, xmm15
+%endif ; ARCH == 64
 %endmacro ; TestMovnt
 
 %macro TestModRmMemoryImm 3
@@ -781,6 +827,32 @@ TestModRmMemoryImm %1, %2, 0xff
 %1 xmm7, %2, 0
 %1 xmm7, %2, 1
 %1 xmm7, %2, 0xff
+%if ARCH == 64
+%1 xmm8, %2, 0
+%1 xmm8, %2, 1
+%1 xmm8, %2, 0xff
+%1 xmm9, %2, 0
+%1 xmm9, %2, 1
+%1 xmm9, %2, 0xff
+%1 xmm10, %2, 0
+%1 xmm10, %2, 1
+%1 xmm10, %2, 0xff
+%1 xmm11, %2, 0
+%1 xmm11, %2, 1
+%1 xmm11, %2, 0xff
+%1 xmm12, %2, 0
+%1 xmm12, %2, 1
+%1 xmm12, %2, 0xff
+%1 xmm13, %2, 0
+%1 xmm13, %2, 1
+%1 xmm13, %2, 0xff
+%1 xmm14, %2, 0
+%1 xmm14, %2, 1
+%1 xmm14, %2, 0xff
+%1 xmm15, %2, 0
+%1 xmm15, %2, 1
+%1 xmm15, %2, 0xff
+%endif ; ARCH == 64
 %endmacro ; TestSimdRowImmThreeOperand
 
 %macro TestSimdImmThreeOperand 1
@@ -800,6 +872,26 @@ TestSimdRowImmThreeOperand %1, xmm6
 TestSimdRowImmThreeOperand %1, xmm6
 TestSimdRowImmThreeOperand %1, xmm7
 TestSimdRowImmThreeOperand %1, xmm7
+%if ARCH == 64
+TestSimdRowImmThreeOperand %1, xmm8
+TestSimdRowImmThreeOperand %1, xmm8
+TestSimdRowImmThreeOperand %1, xmm9
+TestSimdRowImmThreeOperand %1, xmm9
+TestSimdRowImmThreeOperand %1, xmm10
+TestSimdRowImmThreeOperand %1, xmm10
+TestSimdRowImmThreeOperand %1, xmm11
+TestSimdRowImmThreeOperand %1, xmm11
+TestSimdRowImmThreeOperand %1, xmm12
+TestSimdRowImmThreeOperand %1, xmm12
+TestSimdRowImmThreeOperand %1, xmm13
+TestSimdRowImmThreeOperand %1, xmm13
+TestSimdRowImmThreeOperand %1, xmm14
+TestSimdRowImmThreeOperand %1, xmm14
+TestSimdRowImmThreeOperand %1, xmm15
+TestSimdRowImmThreeOperand %1, xmm15
+TestSimdRowImmThreeOperand %1, xmm16
+TestSimdRowImmThreeOperand %1, xmm16
+%endif ; ARCH == 64
 %endmacro ; TestSimdImmThreeOperand
 
 %macro TestMmxGprImm 2
@@ -854,6 +946,32 @@ TestSimdRowImmThreeOperand %1, xmm7
 %1 xmm7, %2, 0
 %1 xmm7, %2, 1
 %1 xmm7, %2, 0xff
+%if ARCH == 64
+%1 xmm8, %2, 0
+%1 xmm8, %2, 1
+%1 xmm8, %2, 0xff
+%1 xmm9, %2, 0
+%1 xmm9, %2, 1
+%1 xmm9, %2, 0xff
+%1 xmm10, %2, 0
+%1 xmm10, %2, 1
+%1 xmm10, %2, 0xff
+%1 xmm11, %2, 0
+%1 xmm11, %2, 1
+%1 xmm11, %2, 0xff
+%1 xmm12, %2, 0
+%1 xmm12, %2, 1
+%1 xmm12, %2, 0xff
+%1 xmm13, %2, 0
+%1 xmm13, %2, 1
+%1 xmm13, %2, 0xff
+%1 xmm14, %2, 0
+%1 xmm14, %2, 1
+%1 xmm14, %2, 0xff
+%1 xmm15, %2, 0
+%1 xmm15, %2, 1
+%1 xmm15, %2, 0xff
+%endif ; ARCH == 64
 %endmacro ; TestSimdGprImm
 
 %macro TestGprMmxImm 2
@@ -908,6 +1026,32 @@ TestSimdRowImmThreeOperand %1, xmm7
 %1 %2, xmm7, 0
 %1 %2, xmm7, 1
 %1 %2, xmm7, 0xff
+%if ARCH == 64
+%1 %2, xmm8, 0
+%1 %2, xmm8, 1
+%1 %2, xmm8, 0xff
+%1 %2, xmm9, 0
+%1 %2, xmm9, 1
+%1 %2, xmm9, 0xff
+%1 %2, xmm10, 0
+%1 %2, xmm10, 1
+%1 %2, xmm10, 0xff
+%1 %2, xmm11, 0
+%1 %2, xmm11, 1
+%1 %2, xmm11, 0xff
+%1 %2, xmm12, 0
+%1 %2, xmm12, 1
+%1 %2, xmm12, 0xff
+%1 %2, xmm13, 0
+%1 %2, xmm13, 1
+%1 %2, xmm13, 0xff
+%1 %2, xmm14, 0
+%1 %2, xmm14, 1
+%1 %2, xmm14, 0xff
+%1 %2, xmm15, 0
+%1 %2, xmm15, 1
+%1 %2, xmm15, 0xff
+%endif ; ARCH == 64
 %endmacro ; TestGprSimdImm
 
 %macro TestSimdRowImm 2
@@ -938,6 +1082,32 @@ TestModRmMemoryImm %1, %2, 0xff
 %1 xmm7, %2, 0
 %1 xmm7, %2, 1
 %1 xmm7, %2, 0xff
+%if ARCH == 64
+%1 xmm8, %2, 0
+%1 xmm8, %2, 1
+%1 xmm8, %2, 0xff
+%1 xmm9, %2, 0
+%1 xmm9, %2, 1
+%1 xmm9, %2, 0xff
+%1 xmm10, %2, 0
+%1 xmm10, %2, 1
+%1 xmm10, %2, 0xff
+%1 xmm11, %2, 0
+%1 xmm11, %2, 1
+%1 xmm11, %2, 0xff
+%1 xmm12, %2, 0
+%1 xmm12, %2, 1
+%1 xmm12, %2, 0xff
+%1 xmm13, %2, 0
+%1 xmm13, %2, 1
+%1 xmm13, %2, 0xff
+%1 xmm14, %2, 0
+%1 xmm14, %2, 1
+%1 xmm14, %2, 0xff
+%1 xmm15, %2, 0
+%1 xmm15, %2, 1
+%1 xmm15, %2, 0xff
+%endif ; ARCH == 64
 %endmacro ; TestSimdRowImm
 
 %macro TestSimdImm 1
@@ -957,6 +1127,24 @@ TestSimdRowImm %1, xmm6
 TestSimdRowImm %1, xmm6
 TestSimdRowImm %1, xmm7
 TestSimdRowImm %1, xmm7
+%if ARCH == 64
+TestSimdRowImm %1, xmm8
+TestSimdRowImm %1, xmm8
+TestSimdRowImm %1, xmm9
+TestSimdRowImm %1, xmm9
+TestSimdRowImm %1, xmm10
+TestSimdRowImm %1, xmm10
+TestSimdRowImm %1, xmm11
+TestSimdRowImm %1, xmm11
+TestSimdRowImm %1, xmm12
+TestSimdRowImm %1, xmm12
+TestSimdRowImm %1, xmm13
+TestSimdRowImm %1, xmm13
+TestSimdRowImm %1, xmm14
+TestSimdRowImm %1, xmm14
+TestSimdRowImm %1, xmm15
+TestSimdRowImm %1, xmm15
+%endif ; ARCH == 64
 %endmacro ; TestSimdImm
 
 %macro TestSimdMmxRow 2
@@ -980,14 +1168,16 @@ TestSimdMmxRow %1, xmm4
 TestSimdMmxRow %1, xmm5
 TestSimdMmxRow %1, xmm6
 TestSimdMmxRow %1, xmm7
-; TestSimdMmxRow %1, xmm8
-; TestSimdMmxRow %1, xmm9
-; TestSimdMmxRow %1, xmm10
-; TestSimdMmxRow %1, xmm11
-; TestSimdMmxRow %1, xmm12
-; TestSimdMmxRow %1, xmm13
-; TestSimdMmxRow %1, xmm14
-; TestSimdMmxRow %1, xmm15
+%if ARCH == 64
+TestSimdMmxRow %1, xmm8
+TestSimdMmxRow %1, xmm9
+TestSimdMmxRow %1, xmm10
+TestSimdMmxRow %1, xmm11
+TestSimdMmxRow %1, xmm12
+TestSimdMmxRow %1, xmm13
+TestSimdMmxRow %1, xmm14
+TestSimdMmxRow %1, xmm15
+%endif ; ARCH == 64
 %endmacro ; TestSimdMmx
 
 %macro TestMmxSimdRow 2
@@ -1000,14 +1190,16 @@ TestModRmMemoryRev %1, %2
 %1 %2, xmm5
 %1 %2, xmm6
 %1 %2, xmm7
-; %1, xmm8, %2
-; %1, xmm9, %2
-; %1, xmm10, %2
-; %1, xmm11, %2
-; %1, xmm12, %2
-; %1, xmm13, %2
-; %1, xmm14, %2
-; %1, xmm15, %2
+%if ARCH == 64
+%1, xmm8, %2
+%1, xmm9, %2
+%1, xmm10, %2
+%1, xmm11, %2
+%1, xmm12, %2
+%1, xmm13, %2
+%1, xmm14, %2
+%1, xmm15, %2
+%endif ; ARCH == 64
 %endmacro ; TestMmxSimdRow
 
 %macro TestMmxSimd 1

@@ -4,44 +4,85 @@
 
 ; Row 0
 TEST_ARITHMETIC16 add
-push es
-pop es
+
+; push es
+db 0x06
+
+; pop es
+db 0x07
+
 TEST_ARITHMETIC16 or
-push cs
+
+; push cs
+db 0x0e
 
 ; Row 1
 TEST_ARITHMETIC16 adc
-push ss
-pop ss
+
+; push ss
+db 0x16
+
+; pop ss
+db 0x17
+
 TEST_ARITHMETIC16 sbb
-push ds
-pop ds
+
+; push ds
+db 0x1e
+
+; pop ds
+db 0x1f
 
 ; Row 2
 TEST_ARITHMETIC16 and
-daa
+
+; daa
+db 0x27
+
 TEST_ARITHMETIC16 sub
-das
+
+; das
+db 0x2f
 
 ; Row 3
 TEST_ARITHMETIC16 xor
-aaa
+
+; aaa
+db 0x37
+
 TEST_ARITHMETIC16 cmp
-aas
+
+; aas
+db 0x3f
 
 ; Row 4
 TEST_ARITHMETIC_ONE_PARAM16 inc
+TEST_ARITHMETIC_ONE_PARAM32 inc
+TEST_ARITHMETIC_ONE_PARAM64 inc
 TEST_ARITHMETIC_ONE_PARAM16 dec
+TEST_ARITHMETIC_ONE_PARAM32 dec
+TEST_ARITHMETIC_ONE_PARAM64 dec
 
 ; Row 5
 TEST_ARITHMETIC_ONE_PARAM16 push
+TEST_ARITHMETIC_ONE_PARAM32 push
+TEST_ARITHMETIC_ONE_PARAM64 push
 TEST_ARITHMETIC_ONE_PARAM16 pop
+TEST_ARITHMETIC_ONE_PARAM32 pop
+TEST_ARITHMETIC_ONE_PARAM64 pop
 
 ; Row6
-pusha
-popa
+; pusha
+db 0x60
+
+; popa
+db 0x61
 
 ; TODO More thorough bound
+; bound ax, [0]
+db 0x62, 0x00
+
+%if ARCH <> 64
 bound ax, [1]
 bound cx, [1]
 bound dx, [1]
@@ -50,8 +91,11 @@ bound sp, [1]
 bound bp, [1]
 bound si, [1]
 bound di, [1]
+%endif
 
+%if ARCH <> 64
 TEST_ARITHMETIC_MODRM16 arpl
+%endif
 
 push 0
 push 1
@@ -175,53 +219,15 @@ TEST_ARITHMETIC_RM16 mov, ss
 TEST_ARITHMETIC_RM16 mov, fs
 TEST_ARITHMETIC_RM16 mov, gs
 
-; TODO: lea will be invalid for gpr
-; Test ModRM Mod==0
-%macro TEST_LEA16 1
-lea %1, word [BX + SI]
-lea %1, word [BX + DI]
-lea %1, word [BP + SI]
-lea %1, word [BP + DI]
-lea %1, word [SI]
-lea %1, word [DI]
-lea %1, word [0xffff]
-lea %1, word [0x0001]
-lea %1, word [BX]
-
-; Test ModRM Mod==1
-lea %1, word [BX + SI + 1]
-lea %1, word [BX + SI + 0xff]
-lea %1, word [BX + DI + 1]
-lea %1, word [BX + DI + 0xff]
-lea %1, word [SI + 1]
-lea %1, word [SI + 0xff]
-lea %1, word [DI + 1]
-lea %1, word [DI + 0xff]
-lea %1, word [BP + 1]
-lea %1, word [BP + 0xff]
-lea %1, word [BX + 1]
-lea %1, word [BX + 0xff]
-
-; Test ModRM Mod==2
-lea %1, word [BX + SI + 0xffff]
-lea %1, word [BX + DI + 0xffff]
-lea %1, word [BP + SI + 0xffff]
-lea %1, word [BP + DI + 0xffff]
-lea %1, word [SI + 0xffff]
-lea %1, word [DI + 0xffff]
-lea %1, word [BP + 0xffff]
-lea %1, word [BX + 0xffff]
-%endmacro ; TEST_LEA16
-
-TEST_LEA16 ax
-TEST_LEA16 cx
-TEST_LEA16 dx
-TEST_LEA16 bx
-TEST_LEA16 sp
-TEST_LEA16 bp
-TEST_LEA16 si
-TEST_LEA16 di
-
+TEST_ARITHMETIC_RM16_MEMORY_REV lea, ax
+TEST_ARITHMETIC_RM16_MEMORY_REV lea, cx
+TEST_ARITHMETIC_RM16_MEMORY_REV lea, dx
+TEST_ARITHMETIC_RM16_MEMORY_REV lea, bx
+TEST_ARITHMETIC_RM16_MEMORY_REV lea, sp
+TEST_ARITHMETIC_RM16_MEMORY_REV lea, bp
+TEST_ARITHMETIC_RM16_MEMORY_REV lea, si
+TEST_ARITHMETIC_RM16_MEMORY_REV lea, di
+ 
 TEST_ARITHMETIC_RM16 mov, es
 TEST_ARITHMETIC_RM16 mov, ds
 TEST_ARITHMETIC_RM16 mov, cs
@@ -341,8 +347,10 @@ Group2Row bp, 2
 Group2Row si, 2
 Group2Row di, 2
 
+%if ARCH <> 64
 aam 0x1
 aad 0x1
+%endif
 
 xlat
 xlatb
@@ -354,7 +362,7 @@ retn
 ; lds [0xffff]
 
 ; Group11 eb, ib, ev, iz
-; mov al, 2
+mov al, 2
 db 0xc6, 0xc0, 0x02
 
 ; mov cl, 2
@@ -396,14 +404,17 @@ retf
 int3
 int 2
 
+%if ARCH <> 64
 into
+%endif
 
 iret
 
 ; Row 0xd
-
+; 
 ; 0xd8
 %macro FpuMemoryOperand 2
+%if ARCH <> 64
 	; Test ModRM Mod==0
 	%1 %2 [BX + SI]
 	%1 %2 [BX + DI]
@@ -438,6 +449,7 @@ iret
 	%1 %2 [DI + 0xffff]
 	%1 %2 [BP + 0xffff]
 	%1 %2 [BX + 0xffff]
+%endif
 %endmacro ; TEST_ARITHMETIC_RM16
 
 %macro FpuCol 2

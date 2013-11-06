@@ -27,13 +27,15 @@
     <CustomBuild Include="test_two_byte.asm">
       <Filter>Source Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="test_three_byte.asm">
+      <Filter>Source Files</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <None Include="test.inc">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="create_test.py" />
-    <None Include="test_three_byte.asm">
+    <None Include="create_test.bat">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

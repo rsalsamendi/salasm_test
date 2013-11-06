@@ -157,14 +157,14 @@
   <ItemGroup>
     <CustomBuild Include="test_one_byte.asm">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)yasm-1.2.0-win64.exe  -DARCH=16 --oformat=bin --objfile=$(OutDir)%(Filename).bin %(FullPath)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)yasm-1.2.0-win64.exe  -DARCH=16 --oformat=bin --objfile=$(OutDir)%(Filename).bin %(FullPath)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)yasm-1.2.0-win64.exe  -DARCH=16 --oformat=bin --objfile=$(OutDir)%(Filename).bin %(FullPath)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)yasm-1.2.0-win64.exe  -DARCH=16 --oformat=bin --objfile=$(OutDir)%(Filename).bin %(FullPath)</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)$(Filename).bin</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)$(Filename).bin</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)$(Filename).bin</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)$(Filename).bin</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)create_test.bat $(ProjectDir)yasm-1.2.0-win64.exe  $(OutDir)%(Filename)  %(FullPath)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)create_test.bat $(ProjectDir)yasm-1.2.0-win64.exe  $(OutDir)%(Filename)  %(FullPath)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)create_test.bat $(ProjectDir)yasm-1.2.0-win64.exe  $(OutDir)%(Filename)  %(FullPath)</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)create_test.bat $(ProjectDir)yasm-1.2.0-win64.exe  $(OutDir)%(Filename)  %(FullPath)</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)$(Filename)-16.bin;$(OutDir)$(Filename)-32.bin;$(OutDir)$(Filename)-64.bin</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)$(Filename)-16.bin;$(OutDir)$(Filename)-32.bin;$(OutDir)$(Filename)-64.bin</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)$(Filename)-16.bin;$(OutDir)$(Filename)-32.bin;$(OutDir)$(Filename)-64.bin</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)$(Filename)-16.bin;$(OutDir)$(Filename)-32.bin;$(OutDir)$(Filename)-64.bin</Outputs>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -204,7 +204,7 @@
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy %(FullPath) $(OutDir)%(Filename).bin</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy %(FullPath) $(OutDir)%(Filename).bin</Message>
     </CustomBuild>
-    <None Include="create_test.py" />
+    <None Include="create_test.bat" />
     <None Include="test.inc" />
     <CustomBuild Include="test_three_byte.asm">
       <FileType>Document</FileType>
