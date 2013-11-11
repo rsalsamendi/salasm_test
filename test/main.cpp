@@ -924,6 +924,10 @@ TEST_F(AsmStandaloneTest, Test_SWAPGS_OnlyValidIn64BitMode) \
 
 static bool SkipOperationCheck(X86Operation op1, enum ud_mnemonic_code op2)
 {
+	// udis has buggy prefix handling so 40 41 decodes to inc
+	if ((op1 == X86_INVALID) && (op2 == UD_Iinc))
+		return true;
+
 	switch (op2)
 	{
 	// Not yet implemented
@@ -3162,6 +3166,7 @@ bool SkipOperandsCheck(X86Operation op)
 	case X86_MOVSW:
 	case X86_MOVSD:
 	case X86_MOVSQ:
+	case X86_MOVSXD:
 	case X86_CMPSB:
 	case X86_CMPSW:
 	case X86_CMPSD:
@@ -3203,7 +3208,9 @@ bool SkipOperandsSizeCheck(const X86Instruction* const instr, size_t operand)
 {
 	switch (instr->op)
 	{
+	case X86_JRCXZ:
 	case X86_MOVLPD:
+	case X86_MOVSXD:
 	case X86_BOUND:
 	case X86_PREFETCH:
 	case X86_PREFETCHW:
@@ -3574,9 +3581,6 @@ void AsmFileTest::TestDisassemble(uint8_t bits)
 			END_PERF_CTR(salsasm)
 		}
 
-		// Watch out for stray flags
-		ASSERT_FALSE(instr.flags & X86_FLAG_INSUFFICIENT_LENGTH);
-
 		// Watch out for going too far.
 		ASSERT_TRUE(instr.length <= len);
 
@@ -3595,6 +3599,15 @@ void AsmFileTest::TestDisassemble(uint8_t bits)
 
 		if (instr.op == X86_INVALID)
 			continue;
+
+		// Watch out for stray flags
+		ASSERT_FALSE(instr.flags.insufficientLength);
+
+// 		{
+// 			char buf[512];
+// 			GetInstructionString(buf, sizeof(buf), "%a %b %i %o", &instr);
+// 			printf("%s\n", buf);
+// 		}
 
 		// Ensure we both agree on how many bytes the instr is
 		ASSERT_TRUE(bytes == instr.length);
