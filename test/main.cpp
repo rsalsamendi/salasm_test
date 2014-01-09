@@ -253,7 +253,7 @@ int AsmTest::FetchForUd86(struct ud* u)
 }
 
 
-#define TEST_ARITHMETIC_RM(operation, bytes, addrSize, operandSize, dest, component0, comonent1) \
+#define TEST_ARITHMETIC_RM(operation, bytes, addrSize, operandSize, dest, component0, component1) \
 { \
 	X86Instruction instr; \
 	const size_t opcodeLen = sizeof(bytes); \
@@ -881,6 +881,9 @@ TEST_INVALID_IN_64BIT_MODE(AAD, 0xd5);
 
 TEST_INVALID_IN_64BIT_MODE(JMPF, 0xea);
 
+// Undocumented
+TEST_INVALID_IN_64BIT_MODE(SALC, 0xd6);
+
 #define TEST_INVALID_IN_64BIT_MODE_TWO_BYTE(name, opcode) \
 TEST_F(AsmStandaloneTest, Test_ ## name ## _InvalidIn64BitMode) \
 { \
@@ -924,8 +927,9 @@ TEST_F(AsmStandaloneTest, Test_SWAPGS_OnlyValidIn64BitMode) \
 
 static bool SkipOperationCheck(X86Operation op1, enum ud_mnemonic_code op2)
 {
-	// udis has buggy prefix handling so 40 41 decodes to inc
-	if ((op1 == X86_INVALID) && (op2 == UD_Iinc))
+	if ((op1 == X86_POPF) && (op2 == UD_Iinvalid))
+		return true;
+	if ((op1 == X86_OUTSD) && (op2 == UD_Iinvalid))
 		return true;
 
 	switch (op2)
@@ -937,6 +941,11 @@ static bool SkipOperationCheck(X86Operation op1, enum ud_mnemonic_code op2)
 	// udis86 does not fail these in 16/32bit mode. Probably a bug.
 	case UD_Isyscall:
 	case UD_Isysret:
+		return true;
+	case UD_Ilock:
+		return true;
+	case UD_Irep:
+	case UD_Irepne:
 		return true;
 	default:
 		break;
@@ -1211,7 +1220,6 @@ static bool SkipOperationCheck(X86Operation op1, enum ud_mnemonic_code op2)
 		// AMD supports reg form of RM, Intel does not say it does in opcode table
 		// all other refs in Intel docs say it does. Probably a bug, should be reported to ud86
 		return true;
-
 	default:
 		break;
 	}
@@ -2925,24 +2933,32 @@ static bool CompareRegisters(X86OperandType operand1, enum ud_type operand2)
 		return (operand2 == UD_R_EBX);
 	case X86_RBX:
 		return (operand2 == UD_R_RBX);
+	case X86_SIL:
+		return (operand2 == UD_R_SIL);
 	case X86_SI:
 		return (operand2 == UD_R_SI);
 	case X86_ESI:
 		return (operand2 == UD_R_ESI);
 	case X86_RSI:
 		return (operand2 == UD_R_RSI);
+	case X86_DIL:
+		return (operand2 == UD_R_DIL);
 	case X86_DI:
 		return (operand2 == UD_R_DI);
 	case X86_EDI:
 		return (operand2 == UD_R_EDI);
 	case X86_RDI:
 		return (operand2 == UD_R_RDI);
+	case X86_SPL:
+		return (operand2 == UD_R_SPL);
 	case X86_SP:
 		return (operand2 == UD_R_SP);
 	case X86_ESP:
 		return (operand2 == UD_R_ESP);
 	case X86_RSP:
 		return (operand2 == UD_R_RSP);
+	case X86_BPL:
+		return (operand2 == UD_R_BPL);
 	case X86_BP:
 		return (operand2 == UD_R_BP);
 	case X86_EBP:
@@ -3197,6 +3213,7 @@ bool SkipOperandsCheck(X86Operation op)
 	case X86_MOVZX: // FIXME: Test on real hardware in 16bit mode.
 	case X86_PEXTRB: // Maybe report a bug to ud86. For Mod==c, arg0 should be 32 or 64bit
 	case X86_PINSRB: // Docs disagree with themselves. Opcode table says r8, actual docs say 1 byte from r32
+	case X86_PINSRW: // ud86 is buggy, says 64bit reg instead of 32bit
 		return true;
 	default:
 		return false;
@@ -3360,7 +3377,11 @@ static bool CompareOperand(const X86Operand* const operand1, const struct ud_ope
 		if (operand2->type != UD_OP_MEM)
 			return false;
 		if (!CompareRegisters(operand1->components[0], operand2->base))
+		{
+			if ((operand1->components[0] == X86_RIP) && (operand2->base == UD_NONE))
+				return true;
 			return false;
+		}
 		if (!CompareRegisters(operand1->components[1], operand2->index))
 			return false;
 		if (operand1->scale != operand2->scale)
@@ -3593,6 +3614,24 @@ void AsmFileTest::TestDisassemble(uint8_t bits)
 		if (SkipOperationCheck(instr.op, ud_obj.mnemonic))
 			continue;
 
+		// Don't bother comparing if there are multiple rex prefixes, udis can't handle it at all.
+		if (instr.length > 2)
+		{
+			bool ignore = false;
+			for (int32_t i = 0; i < instr.length - 2; i++)
+			{
+				if (((instr.bytes[i] & 0xf0) == 0x40)
+					&& ((instr.bytes[i + 1] & 0xf0) == 0x40))
+				{
+					ignore = true;
+					break;
+				}
+			}
+
+			if (ignore)
+				continue;
+		}
+
 		// Verify that the instructions match mnemonics
 		result = CompareOperation(instr.op, ud_obj.mnemonic);
 		ASSERT_TRUE(result);
@@ -3626,7 +3665,7 @@ void AsmFileTest::TestDisassemble(uint8_t bits)
 			if (operand == NULL)
 				break;
 			operandCount++;
-		};
+		}
 
 		ASSERT_TRUE(operandCount == instr.operandCount);
 
@@ -3658,10 +3697,10 @@ TEST_P(AsmFileTest, Disassemble32)
 	TestDisassemble(32);
 }
 
-// TEST_P(AsmFileTest, Disassemble64)
-// {
-// 	TestDisassemble(64);
-// }
+TEST_P(AsmFileTest, Disassemble64)
+{
+	TestDisassemble(64);
+}
 
 static const char* const g_oneByteFile = "test_one_byte.bin";
 static const char* const g_twoByteFile = "test_two_byte.bin";
