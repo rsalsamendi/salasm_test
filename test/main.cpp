@@ -3343,6 +3343,8 @@ bool SkipOperandsSizeCheck(const X86Instruction* const instr, size_t operand)
 		default:
 			break;
 		}
+	case X86_UCOMISD:
+		return true;
 	default: break;
 	}
 
