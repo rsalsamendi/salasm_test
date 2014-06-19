@@ -3716,13 +3716,25 @@ TEST_P(AsmFileTest, Disassemble64)
 	TestDisassemble(64);
 }
 
-static const char* const g_oneByteFile = "test_one_byte.bin";
-static const char* const g_twoByteFile = "test_two_byte.bin";
-static const char* const g_threeByteFile = "test_three_byte.bin";
+static const char* const g_oneByteFile16 = "test_one_byte16.bin";
+static const char* const g_twoByteFile16 = "test_two_byte16.bin";
+static const char* const g_threeByteFile16 = "test_three_byte16.bin";
+
+static const char* const g_oneByteFile32 = "test_one_byte32.bin";
+static const char* const g_twoByteFile32 = "test_two_byte32.bin";
+static const char* const g_threeByteFile32 = "test_three_byte32.bin";
+
+static const char* const g_oneByteFile64 = "test_one_byte64.bin";
+static const char* const g_twoByteFile64 = "test_two_byte64.bin";
+static const char* const g_threeByteFile64 = "test_three_byte64.bin";
+
 static const char* const g_bochsBiosFile = "BIOS-bochs-latest.bin";
 
 INSTANTIATE_TEST_CASE_P(DisassembleTest, AsmFileTest,
-	Values(g_oneByteFile, g_twoByteFile, g_threeByteFile, g_bochsBiosFile));
+	Values(g_oneByteFile16, g_twoByteFile16, g_threeByteFile16,
+		g_oneByteFile32, g_twoByteFile32, g_threeByteFile32,
+		g_oneByteFile64, g_twoByteFile64, g_threeByteFile64,
+		g_bochsBiosFile));
 
 #ifndef WIN32
 char* strlwr(char* const s)
