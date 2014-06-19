@@ -3317,6 +3317,13 @@ bool SkipOperandsSizeCheck(const X86Instruction* const instr, size_t operand)
 	case X86_SCASD:
 	case X86_SCASQ:
 		return true;
+	case X86_MOVSS:
+	case X86_MOVHLPS:
+	case X86_MOVLHPS:
+	case X86_CVTPS2PI:
+		if (operand == 1)
+			return true;
+		break;
 	case X86_MOV:
 		// Loading a segment from memory doesn't do what the docs say.
 		// When this differs from an oracle (except the hw), it's NAB!
