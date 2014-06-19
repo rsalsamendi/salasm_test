@@ -67,7 +67,7 @@ using ::testing::Values;
  	time ## name += ((uint64_t)end ## name ## ts.tv_nsec - (uint64_t)begin ## name ## ts.tv_nsec) + (((uint64_t)end ## name ## ts.tv_sec * 1000000000) - ((uint64_t)begin ## name ## ts.tv_sec * 1000000000));
 
 #define PRINT_PERF_CTR(name) \
-	printf(# name ": %llu us\n", time ## name / 1000);
+	printf(# name ": %llu us\n", (long long unsigned int)time ## name / 1000);
 #endif /* WIN32 */
 
 
@@ -436,7 +436,7 @@ TEST_F(AsmStandaloneTest, DisassemblePastBugs)
 		ASSERT_TRUE(instr.operands[0].operandType == X86_CX);
 		ASSERT_TRUE(instr.operands[0].size == 2);
 		ASSERT_TRUE(instr.operands[1].operandType == X86_IMMEDIATE);
-		ASSERT_TRUE(instr.operands[1].immediate == 0xffffffffffffffff);
+		ASSERT_TRUE(instr.operands[1].immediate == (int64_t)0xffffffffffffffff);
 	}
 
 	static const uint8_t xchgAxCx = 0x91;
@@ -3632,7 +3632,7 @@ void AsmFileTest::TestDisassemble(uint8_t bits)
 		if (instr.length > 2)
 		{
 			bool ignore = false;
-			for (int32_t i = 0; i < instr.length - 2; i++)
+			for (int32_t i = 0; i < (int32_t)instr.length - 2; i++)
 			{
 				if (((instr.bytes[i] & 0xf0) == 0x40)
 					&& ((instr.bytes[i + 1] & 0xf0) == 0x40))
