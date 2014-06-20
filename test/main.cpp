@@ -3322,6 +3322,7 @@ bool SkipOperandsSizeCheck(const X86Instruction* const instr, size_t operand)
 	case X86_MOVLHPS:
 	case X86_CVTPS2PI:
 	case X86_CVTTSD2SI:
+	case X86_MOVMSKPD:
 		if (operand == 1)
 			return true;
 		break;
