@@ -3316,7 +3316,16 @@ bool SkipOperandsSizeCheck(const X86Instruction* const instr, size_t operand)
 	case X86_SCASW:
 	case X86_SCASD:
 	case X86_SCASQ:
+	case X86_MINSS:
+	case X86_MINSD:
+	case X86_DIVSS:
+	case X86_DIVSD:
 		return true;
+	case X86_PSRLW:
+	case X86_PSRAW:
+	case X86_PSLLW:
+		if (operand == 0)
+			return true;
 	case X86_MOVSS:
 	case X86_MOVHLPS:
 	case X86_MOVLHPS:
