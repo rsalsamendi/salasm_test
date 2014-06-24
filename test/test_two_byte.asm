@@ -189,7 +189,11 @@ mov cr0, %1
 mov cr2, %1
 mov cr3, %1
 mov cr4, %1
-; mov cr8, %1
+
+%if ARCH == 64
+mov cr8, %1
+%endif
+
 mov dr0, %1
 mov dr1, %1
 mov dr2, %1
@@ -215,6 +219,7 @@ mov %1, dr7
 %endmacro ; TestSpecialRegRev
 
 ; Row 2
+%if ARCH <> 64
 TestSpecialReg eax
 TestSpecialReg ecx
 TestSpecialReg edx
@@ -232,6 +237,25 @@ TestSpecialRegRev esp
 TestSpecialRegRev ebp
 TestSpecialRegRev esi
 TestSpecialRegRev edi
+%else
+TestSpecialReg rax
+TestSpecialReg rcx
+TestSpecialReg rdx
+TestSpecialReg rbx
+TestSpecialReg rsp
+TestSpecialReg rbp
+TestSpecialReg rsi
+TestSpecialReg rdi
+
+TestSpecialRegRev rax
+TestSpecialRegRev rcx
+TestSpecialRegRev rdx
+TestSpecialRegRev rbx
+TestSpecialRegRev rsp
+TestSpecialRegRev rbp
+TestSpecialRegRev rsi
+TestSpecialRegRev rdi
+%endif
 
 TestSimd movaps
 TestSimdRev movaps
@@ -319,8 +343,11 @@ wrmsr
 rdtsc
 rdmsr
 rdpmc
+
+%if ARCH <> 64
 sysenter
 sysexit
+%endif
 
 ; Row 4
 TEST_ARITHMETIC_MODRM16_REV cmovo
@@ -939,7 +966,10 @@ TestSimdImm shufps
 TestSimdImm shufpd
 
 cmpxchg8b [0xffff]
-cmpxchg16b
+
+%if ARCH == 64
+cmpxchg16b [0xffff]
+%endif
 
 bswap eax
 bswap ecx

@@ -15,22 +15,22 @@ libsalsasm:
 	cd ../libsalsasm && $(MAKE) && cd ../test
 	cp ../libsalsasm/libsalsasm.so .
 
-%16.bin: %.asm
-	$(AS) -DARCH=16 -o $*16.bin $*.asm
+%16.bin: %.asm test.inc
+	$(AS) -w -DARCH=16 -o $*16.bin $*.asm
 
-%32.bin: %.asm
-	$(AS) -DARCH=32 -o $*32.bin $*.asm
+%32.bin: %.asm test.inc
+	$(AS) -w -DARCH=32 -o $*32.bin $*.asm
 
-%64: %.asm
-	$(AS) -DARCH=64 -o $*64.bin $*.asm
+%64.bin: %.asm test.inc
+	$(AS) -w -DARCH=64 -o $*64.bin $*.asm
 
-%.bin: BIOS-bochs-latest
+BIOS-bochs-latest.bin: BIOS-bochs-latest
 	cp BIOS-bochs-latest BIOS-bochs-latest.bin
 
 %.o: %.cpp
 	$(CC) $(CFLAGS) -c $*.cpp $(INCLUDE)
 
-test: libsalsasm udis86 test_one_byte16.bin test_two_byte16.bin test_three_byte16.bin test_one_byte32.bin test_two_byte32.bin test_three_byte32.bin test_one_byte64.bin test_two_byte64.bin test_three_byte64.bin BIOS-bochs-latest.bin
+test: libsalsasm udis86 test_one_byte16.bin test_two_byte16.bin test_three_byte16.bin test_one_byte32.bin test_two_byte32.bin test_three_byte32.bin test_one_byte64.bin BIOS-bochs-latest.bin
 
 test: $(OBJECTS)
 	$(CC) -o $@ $(LDFLAGS) $(LIBPATH) $(OBJECTS) $(LIBS)

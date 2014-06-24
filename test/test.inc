@@ -889,8 +889,6 @@ TestSimdRowImmThreeOperand %1, xmm14
 TestSimdRowImmThreeOperand %1, xmm14
 TestSimdRowImmThreeOperand %1, xmm15
 TestSimdRowImmThreeOperand %1, xmm15
-TestSimdRowImmThreeOperand %1, xmm16
-TestSimdRowImmThreeOperand %1, xmm16
 %endif ; ARCH == 64
 %endmacro ; TestSimdImmThreeOperand
 
@@ -1191,14 +1189,14 @@ TestModRmMemoryRev %1, %2
 %1 %2, xmm6
 %1 %2, xmm7
 %if ARCH == 64
-%1, xmm8, %2
-%1, xmm9, %2
-%1, xmm10, %2
-%1, xmm11, %2
-%1, xmm12, %2
-%1, xmm13, %2
-%1, xmm14, %2
-%1, xmm15, %2
+%1 %2, xmm8
+%1 %2, xmm9
+%1 %2, xmm10
+%1 %2, xmm11
+%1 %2, xmm12
+%1 %2, xmm13
+%1 %2, xmm14
+%1 %2, xmm15
 %endif ; ARCH == 64
 %endmacro ; TestMmxSimdRow
 
