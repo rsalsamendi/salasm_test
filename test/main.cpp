@@ -574,6 +574,9 @@ TEST_F(AsmStandaloneTest, DisassemblePastBugs)
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_STOSW);
 		ASSERT_TRUE(instr.length == 1);
+		ASSERT_TRUE(instr.operands[0].operandType == X86_MEM);
+		ASSERT_TRUE(instr.operands[0].components[0] == X86_DI);
+		ASSERT_TRUE(instr.operands[1].operandType == X86_AX);
 	}
 
 	static const uint8_t lodsb = 0xac;
@@ -584,6 +587,9 @@ TEST_F(AsmStandaloneTest, DisassemblePastBugs)
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_LODSB);
 		ASSERT_TRUE(instr.length == 1);
+		ASSERT_TRUE(instr.operands[0].operandType == X86_AL);
+		ASSERT_TRUE(instr.operands[1].operandType == X86_MEM);
+		ASSERT_TRUE(instr.operands[1].components[0] == X86_SI);
 	}
 
 	static const uint8_t rolCl[] = {0xd2, 0xc0};
@@ -946,6 +952,8 @@ static bool SkipOperationCheck(X86Operation op1, enum ud_mnemonic_code op2)
 	if ((op1 == X86_OUTSD) && (op2 == UD_Iinvalid))
 		return true;
 	if ((op1 == X86_INVALID) && (op2 == UD_Ipunpckhwd))
+		return true;
+	if ((op1 == X86_INSD) && (op2 == UD_Iinvalid))
 		return true;
 
 	switch (op2)
