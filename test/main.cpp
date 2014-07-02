@@ -592,6 +592,20 @@ TEST_F(AsmStandaloneTest, DisassemblePastBugs)
 		ASSERT_TRUE(instr.operands[1].components[0] == X86_SI);
 	}
 
+	static const uint8_t repMovsd[] = {0xf3, 0xa5};
+	{
+		X86Instruction instr;
+		SetOpcodeBytes(m_data, repMovsd, sizeof(repMovsd));
+		bool result = Disassemble32(0, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
+		ASSERT_TRUE(result);
+		ASSERT_TRUE(instr.op == X86_MOVSD);
+		ASSERT_TRUE(instr.length == 2);
+		ASSERT_TRUE(instr.operands[0].operandType == X86_MEM);
+		ASSERT_TRUE(instr.operands[0].components[0] == X86_EDI);
+		ASSERT_TRUE(instr.operands[1].operandType == X86_MEM);
+		ASSERT_TRUE(instr.operands[1].components[0] == X86_ESI);
+	}
+
 	static const uint8_t rolCl[] = {0xd2, 0xc0};
 	{
 		X86Instruction instr;
