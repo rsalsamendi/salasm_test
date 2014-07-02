@@ -3217,10 +3217,14 @@ static bool CompareRegisters(X86OperandType operand1, enum ud_type operand2)
 }
 
 
-bool SkipOperandsCheck(X86Operation op)
+bool SkipOperandsCheck(const X86Instruction* const instr)
 {
-	switch (op)
+	switch (instr->op)
 	{
+	case X86_JMPN:
+		if (instr->operands[0].size == 8)
+			return true;
+		return false;
 	case X86_NOP:
 	case X86_MOVSB:
 	case X86_MOVSW:
@@ -3762,7 +3766,7 @@ void AsmFileTest::TestDisassemble(uint8_t bits)
 		ASSERT_TRUE(bytes == instr.length);
 
 		// We treat operands differently...
-		if (SkipOperandsCheck(instr.op))
+		if (SkipOperandsCheck(&instr))
 			continue;
 
 		if (FpuInstr(&instr, &ud_obj))
