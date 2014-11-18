@@ -3825,9 +3825,6 @@ void AsmFileTest::TestDisassemble(uint8_t bits)
 			const struct ud_operand* const operand = ud_insn_opr(&ud_obj, (unsigned int)i);
 			ASSERT_TRUE(operand != NULL);
 
-			if (!SkipOperandsSizeCheck(&instr, i))
-				ASSERT_TRUE(instr.operands[i].size == (operand->size >> 3));
-
 			if (operand->type == UD_OP_JIMM)
 			{
 				const uint64_t tempRip = (instr.rip + instr.length);
@@ -3846,9 +3843,13 @@ void AsmFileTest::TestDisassemble(uint8_t bits)
 				}
 				dest &= ((1ull << bits) - 1);
 				ASSERT_EQ(instr.operands[i].immediate, dest);
+				ASSERT_EQ(instr.operands[i].size, (bits >> 3));
 			}
 			else
 			{
+				if (!SkipOperandsSizeCheck(&instr, i))
+					ASSERT_TRUE(instr.operands[i].size == (operand->size >> 3));
+
 				const bool result = CompareOperand(&instr.operands[i], operand);
 				ASSERT_TRUE(result);
 			}
