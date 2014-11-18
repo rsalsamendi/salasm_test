@@ -871,10 +871,23 @@ TEST_F(AsmStandaloneTest, DisassemblePastBugs)
 		ASSERT_TRUE(result);
 		ASSERT_TRUE(instr.op == X86_MOV);
 		ASSERT_TRUE(instr.length == sizeof(movCr0));
+		ASSERT_TRUE(instr.operandCount == 2);
 		ASSERT_TRUE(instr.operands[0].operandType == X86_CR0);
 		ASSERT_TRUE(instr.operands[0].size == 4);
 		ASSERT_TRUE(instr.operands[1].operandType == X86_EAX);
 		ASSERT_TRUE(instr.operands[1].size == 4);
+	}
+
+	static const uint8_t jmpn[] = {0xeb, 0x02};
+	{
+		X86Instruction instr;
+		SetOpcodeBytes(m_data, jmpn, sizeof(jmpn));
+		bool result = Disassemble32(0xf1afb, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
+		ASSERT_TRUE(result);
+		ASSERT_TRUE(instr.op == X86_JMPN);
+		ASSERT_TRUE(instr.length == 2);
+		ASSERT_TRUE(instr.operandCount == 1);
+		ASSERT_TRUE(instr.operands[0].immediate == 0xf1aff);
 	}
 }
 
