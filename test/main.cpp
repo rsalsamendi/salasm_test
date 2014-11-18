@@ -969,6 +969,26 @@ static bool SkipOperationCheck(X86Operation op1, enum ud_mnemonic_code op2)
 		return true;
 	if ((op1 == X86_INSD) && (op2 == UD_Iinvalid))
 		return true;
+	if ((op1 == X86_VMCALL) && (op2 == UD_Iinvalid))
+		return true;
+	if ((op1 == X86_VMLAUNCH) && (op2 == UD_Iinvalid))
+		return true;
+	if ((op1 == X86_VMRESUME) && (op2 == UD_Iinvalid))
+		return true;
+	if ((op1 == X86_VMXOFF) && (op2 == UD_Iinvalid))
+		return true;
+	if ((op1 == X86_VMPTRLD) && (op2 == UD_Iinvalid))
+		return true;
+	if ((op1 == X86_VMCLEAR) && (op2 == UD_Iinvalid))
+		return true;
+	if ((op1 == X86_VMPTRST) && (op2 == UD_Iinvalid))
+		return true;
+	if ((op1 == X86_VMXON) && (op2 == UD_Iinvalid))
+		return true;
+	if ((op1 == X86_INVEPT) && (op2 == UD_Iinvalid))
+		return true;
+	if ((op1 == X86_RDSEED) && (op2 == UD_Iinvalid))
+		return true;
 
 	switch (op2)
 	{
@@ -2411,6 +2431,8 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 		return (op2 == UD_Irdmsr);
 	case X86_RDPMC:
 		return (op2 == UD_Irdpmc);
+	case X86_RDRAND:
+		return (op2 == UD_Irdrand);
 	case X86_RDTSC:
 		return (op2 == UD_Irdtsc);
 	case X86_RDTSCP:
@@ -3262,6 +3284,7 @@ bool SkipOperandsCheck(const X86Instruction* const instr)
 	case X86_PEXTRB: // Maybe report a bug to ud86. For Mod==c, arg0 should be 32 or 64bit
 	case X86_PINSRB: // Docs disagree with themselves. Opcode table says r8, actual docs say 1 byte from r32
 	case X86_PINSRW: // ud86 is buggy, says 64bit reg instead of 32bit
+	case X86_RDRAND: // ud86 is buggy, says 32bit instead of 16bit
 		return true;
 	default:
 		return false;
@@ -4451,6 +4474,8 @@ TEST_MNEMONIC(RCPSS);
 TEST_MNEMONIC(RCR);
 TEST_MNEMONIC(RDMSR);
 TEST_MNEMONIC(RDPMC);
+TEST_MNEMONIC(RDRAND);
+TEST_MNEMONIC(RDSEED);
 TEST_MNEMONIC(RDTSC);
 TEST_MNEMONIC(RDTSCP);
 TEST_MNEMONIC(RETF);
@@ -4805,7 +4830,6 @@ TEST_MNEMONIC(VTESTPD);
 TEST_MNEMONIC(VTESTPS);
 TEST_MNEMONIC(VERR);
 TEST_MNEMONIC(VERW);
-TEST_MNEMONIC(VMCALL);
 TEST_MNEMONIC(VMCLEAR);
 TEST_MNEMONIC(VMLAUNCH);
 TEST_MNEMONIC(VMPTRLD);

@@ -228,6 +228,10 @@ TestSimdImmThreeOperand pcmpestri
 TestSimdImmThreeOperand pcmpestrm
 TestSimdImmThreeOperand pcmpistri
 
+; Row 8
+invept eax, [0xff88]
+invvpid ecx, [0xf90]
+invpcid edx, [0x990]
 
 ; Row 0xf
 TestSimdImmThreeOperand aeskeygenassist

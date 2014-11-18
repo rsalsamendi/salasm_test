@@ -21,11 +21,20 @@ MemAndReg16 verw
 ; Group 7
 sgdt [0xffff]
 sidt [0xffff]
+vmcall
+vmlaunch
+vmresume
+vmxoff
 monitor
 mwait
+clac
+stac
 lgdt [0xffff]
 xgetbv
 xsetbv
+vmfunc
+xend
+xtest
 lidt [0xffff]
 vmrun
 vmmcall
@@ -40,6 +49,16 @@ MemAndReg16 lmsw
 invlpg byte [0xffff]
 swapgs
 rdtscp
+
+; Group 9
+cmpxchg8b [0xfff80]
+cmpxchg16b
+vmptrld [0xff000]
+vmptrst [0x7f000]
+vmclear [0xf7000]
+vmxon [0x3f000]
+rdrand eax
+rdseed
 
 TEST_ARITHMETIC_MODRM16_REV lar
 TEST_ARITHMETIC_MODRM16_REV lsl
