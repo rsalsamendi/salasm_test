@@ -3815,8 +3815,30 @@ void AsmFileTest::TestDisassemble(uint8_t bits)
 			if (!SkipOperandsSizeCheck(&instr, i))
 				ASSERT_TRUE(instr.operands[i].size == (operand->size >> 3));
 
-			bool result = CompareOperand(&instr.operands[i], operand);
-			ASSERT_TRUE(result);
+			if (operand->type == UD_OP_JIMM)
+			{
+				const uint64_t tempRip = (instr.rip + instr.length);
+				uint64_t dest;
+				switch (operand->size)
+				{
+				case 8:
+					dest = (tempRip + operand->lval.sbyte);
+					break;
+				case 16:
+					dest = (tempRip + operand->lval.sword);
+					break;
+				case 32:
+					dest = (tempRip + operand->lval.sdword);
+					break;
+				}
+				dest &= ((1ull << bits) - 1);
+				ASSERT_EQ(instr.operands[i].immediate, dest);
+			}
+			else
+			{
+				const bool result = CompareOperand(&instr.operands[i], operand);
+				ASSERT_TRUE(result);
+			}
 		}
 	}
 
