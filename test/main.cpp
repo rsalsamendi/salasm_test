@@ -889,6 +889,17 @@ TEST_F(AsmStandaloneTest, DisassemblePastBugs)
 		ASSERT_TRUE(instr.operandCount == 1);
 		ASSERT_TRUE(instr.operands[0].immediate == 0xf1aff);
 	}
+
+	static const uint8_t pause[] = {0xf3, 0x90};
+	{
+		X86Instruction instr;
+		SetOpcodeBytes(m_data, pause, sizeof(pause));
+		bool result = Disassemble32(0xdbfc3a92, AsmTest::Fetch, static_cast<AsmTest*>(this), &instr);
+		ASSERT_TRUE(result);
+		ASSERT_TRUE(instr.op == X86_PAUSE);
+		ASSERT_TRUE(instr.length == 2);
+		ASSERT_TRUE(instr.operandCount == 0);
+	}
 }
 
 #define TEST_INVALID_IN_64BIT_MODE(name, opcode) \
