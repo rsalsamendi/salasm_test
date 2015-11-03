@@ -3741,6 +3741,8 @@ void AsmFileTest::TestDisassemble(uint8_t bits)
 			END_PERF_CTR(salsasm)
 		}
 
+		ASSERT_TRUE((!result) || (instr.op != X86_INVALID));
+
 		// Watch out for going too far.
 		ASSERT_TRUE(instr.length <= len);
 
