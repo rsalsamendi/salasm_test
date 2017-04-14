@@ -14,7 +14,7 @@ $$(libudis86_TEMP_OUTPUT):
 $$(libudis86_BINARY): $$(libudis86_TEMP_OUTPUT) $$(libudis86_CONFIG_DIR)
  
 libudis86_TEMP_CLEAN:
-	cd $(libudis86_DIR)udis86
+	cd $$(libudis86_DIR)udis86
 	$$(MAKE) -C $$(libudis86_DIR)udis86 clean
 
 libudis86_CLEAN: libudis86_TEMP_CLEAN
