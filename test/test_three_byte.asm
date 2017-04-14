@@ -229,9 +229,15 @@ TestSimdImmThreeOperand pcmpestrm
 TestSimdImmThreeOperand pcmpistri
 
 ; Row 8
+%if ARCH <> 64
 invept eax, [0xff88]
 invvpid ecx, [0xf90]
 invpcid edx, [0x990]
+%else
+invept rax, [0xff88]
+invvpid rcx, [0xf90]
+invpcid rdx, [0x990]
+%endif
 
 ; Row 0xf
 TestSimdImmThreeOperand aeskeygenassist

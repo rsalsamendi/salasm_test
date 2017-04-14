@@ -1,6 +1,9 @@
 [submodule "libsalsasm"]
 	path = libsalsasm
-	url = https://github.com/rsalsamendi/libsalsasm.git
+	url = git@github.com:rsalsamendi/libsalsasm.git
 [submodule "udis86"]
-	path = udis86
+	path = 3rdparty/udis86
 	url = https://github.com/vmt/udis86.git
+[submodule "3rdparty/build"]
+	path = 3rdparty/build
+	url = git@github.com:rsalsamendi/build.git

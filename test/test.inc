@@ -315,6 +315,7 @@ BITS ARCH
 %endmacro ; TEST_ARITHMETIC_ONE_OPERAND
 
 %macro TEST_ARITHMETIC_RM32_MEMORY 2
+%if ARCH <> 64
 	; Test ModRM Mod==0
 	%1 dword [BX + SI], %2
 	%1 dword [BX + DI], %2
@@ -349,9 +350,11 @@ BITS ARCH
 	%1 dword [DI + 0xffff], %2
 	%1 dword [BP + 0xffff], %2
 	%1 dword [BX + 0xffff], %2
+%endif
 %endmacro ; TEST_ARITHMETIC_RM32_MEMORY
 
 %macro TEST_ARITHMETIC_RM64_MEMORY 2
+%if ARCH <> 64
 	; Test ModRM Mod==0
 	%1 qword [BX + SI], %2
 	%1 qword [BX + DI], %2
@@ -386,9 +389,11 @@ BITS ARCH
 	%1 qword [DI + 0xffff], %2
 	%1 qword [BP + 0xffff], %2
 	%1 qword [BX + 0xffff], %2
+%endif
 %endmacro ; TEST_ARITHMETIC_RM64_MEMORY
 
 %macro TEST_ARITHMETIC_RM128_MEMORY 2
+%if ARCH <> 64
 	; Test ModRM Mod==0
 	%1 oword [BX + SI], %2
 	%1 oword [BX + DI], %2
@@ -423,9 +428,11 @@ BITS ARCH
 	%1 oword [DI + 0xffff], %2
 	%1 oword [BP + 0xffff], %2
 	%1 oword [BX + 0xffff], %2
+%endif
 %endmacro ; TEST_ARITHMETIC_RM128_MEMORY
 
 %macro TEST_ARITHMETIC_RM128_MEMORY_REV 2
+%if ARCH <> 64
 	; Test ModRM Mod==0
 	%1 %2, oword [BX + SI]
 	%1 %2, oword [BX + DI]
@@ -460,9 +467,11 @@ BITS ARCH
 	%1 %2, oword [DI + 0xffff]
 	%1 %2, oword [BP + 0xffff]
 	%1 %2, oword [BX + 0xffff]
+%endif
 %endmacro ; TEST_ARITHMETIC_RM128_MEMORY_REV
 
 %macro TestModRmMemory 2
+%if ARCH <> 64
 	; Test ModRM Mod==0
 	%1 [BX + SI], %2
 	%1 [BX + DI], %2
@@ -496,6 +505,7 @@ BITS ARCH
 	%1 [DI + 0xffff], %2
 	%1 [BP + 0xffff], %2
 	%1 [BX + 0xffff], %2
+%endif
 %endmacro ; TestModRmMemory
 
 %macro TestMmxRow 2
@@ -522,6 +532,7 @@ TestMmxRow %1, mm7
 %endmacro ; TestMmx
 
 %macro TestModRmMemoryRev 2
+%if ARCH <> 64
 	; Test ModRM Mod==0
 	%1 %2, [BX + SI]
 	%1 %2, [BX + DI]
@@ -556,6 +567,7 @@ TestMmxRow %1, mm7
 	%1 %2, [BP + 0xffff]
 	%1 %2, [BX + 0xffff]
 	%1 %2, [BX + 1]
+%endif
 %endmacro ; TestModRmMemoryRev
 
 %macro MmxModRmRevRow 2
@@ -687,6 +699,7 @@ TestModRmMemory movntps, xmm15
 %endmacro ; TestMovnt
 
 %macro TestModRmMemoryImm 3
+%if ARCH <> 64
 	; Test ModRM Mod==0
 	%1 %2, [BX + SI], %3
 	%1 %2, [BX + DI], %3
@@ -720,9 +733,11 @@ TestModRmMemory movntps, xmm15
 	%1 %2, [DI + 0xffff], %3
 	%1 %2, [BP + 0xffff], %3
 	%1 %2, [BX + 0xffff], %3
+%endif
 %endmacro ; TestModRmMemoryImm
 
 %macro TestModRmMemoryImmRev 3
+%if ARCH <> 64
 	; Test ModRM Mod==0
 	%1 [BX + SI], %2, %3
 	%1 [BX + DI], %2, %3
@@ -756,6 +771,7 @@ TestModRmMemory movntps, xmm15
 	%1 [DI + 0xffff], %2, %3
 	%1 [BP + 0xffff], %2, %3
 	%1 [BX + 0xffff], %2, %3
+%endif
 %endmacro ; TestModRmMemoryImmRev
 
 %macro TestMmxRowImm 2

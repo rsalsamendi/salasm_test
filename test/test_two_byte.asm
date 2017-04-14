@@ -52,13 +52,15 @@ rdtscp
 
 ; Group 9
 cmpxchg8b [0xfff80]
-cmpxchg16b
+%if ARCH == 64
+cmpxchg16b [0xfff80]
+%endif
 vmptrld [0xff000]
 vmptrst [0x7f000]
 vmclear [0xf7000]
 vmxon [0x3f000]
 rdrand eax
-rdseed
+rdseed eax
 
 TEST_ARITHMETIC_MODRM16_REV lar
 TEST_ARITHMETIC_MODRM16_REV lsl
@@ -227,7 +229,9 @@ mov %1, cr0
 mov %1, cr2
 mov %1, cr3
 mov %1, cr4
-; mov %1, cr8
+%if ARCH == 64
+mov %1, cr8
+%endif
 mov %1, dr0
 mov %1, dr1
 mov %1, dr2
@@ -699,6 +703,7 @@ cpuid
 TEST_ARITHMETIC_MODRM16 bt
 
 %macro TestModRmMemoryThreeOperand 3
+%if ARCH <> 64
 	; Test ModRM Mod==0
 	%1 [BX + SI], %2, %3
 	%1 [BX + DI], %2, %3
@@ -732,6 +737,7 @@ TEST_ARITHMETIC_MODRM16 bt
 	%1 [DI + 0xffff], %2, %3
 	%1 [BP + 0xffff], %2, %3
 	%1 [BX + 0xffff], %2, %3
+%endif
 %endmacro ; TestModRmMemoryThreeOperand
 
 %macro TestShiftDoubleRow 2
@@ -848,6 +854,7 @@ ud1
 
 ; Group 8
 %macro TestBits 2
+%if ARCH <> 64
 	; Test ModRM Mod==0
 	 %1 word [BX + SI], %2
 	%1 word [BX + DI], %2
@@ -892,6 +899,7 @@ ud1
 	%1 sp, %2
 	%1 si, %2
 	%1 di, %2
+%endif
 %endmacro ; TestBits
 
 TestBits bt, 0

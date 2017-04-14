@@ -1045,6 +1045,10 @@ static bool SkipOperationCheck(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_NOP:
 		return true;
 	// Not yet implemented by ud86
+	case X86_CLAC:
+	case X86_STAC:
+	case X86_XEND:
+	case X86_XTEST:
 	case X86_TZCNT:
 	case X86_LZCNT:
 	case X86_INSERTQ:
@@ -3699,7 +3703,7 @@ void AsmFileTest::TestDisassemble(uint8_t bits)
 	len = fileLen;
 	while (len)
 	{
-		unsigned int bytes;
+		unsigned int disasmBytes;
 		bool result;
 		uint8_t operandCount;
 
@@ -3709,19 +3713,20 @@ void AsmFileTest::TestDisassemble(uint8_t bits)
 		if (ud_obj.pc != (fileLen - len))
 		{
 			// If one is behind, catch it up
-			uint8_t bytes;
+			uint8_t fetchBytes;
 			while (ud_obj.pc < (fileLen - len))
 			{
-				GetOpcodeBytes(m_ud86Data, &bytes, 1);
+				GetOpcodeBytes(m_ud86Data, &fetchBytes, 1);
 				ud_obj.pc++;
 			}
 			while ((fileLen - len) < ud_obj.pc)
 			{
-				GetOpcodeBytes(m_data, &bytes, 1);
+				GetOpcodeBytes(m_data, &fetchBytes, 1);
 				len--;
 			}
 		}
 
+		result = false;
 		if (bits == 16)
 		{
 			BEGIN_PERF_CTR(salsasm)
@@ -3748,14 +3753,15 @@ void AsmFileTest::TestDisassemble(uint8_t bits)
 
 		// Now try the oracle
 		BEGIN_PERF_CTR(udis)
-		bytes = ud_disassemble(&ud_obj);
+		disasmBytes = ud_disassemble(&ud_obj);
 		END_PERF_CTR(udis);
 
 		len -= instr.length;
 		if (SkipOperationCheck(instr.op, ud_obj.mnemonic))
 			continue;
 
-		// Don't bother comparing if there are multiple/invalid rex prefixes, udis can't handle it at all.
+		// Don't bother comparing if there are multiple/invalid
+		// rex prefixes, udis can't handle it at all.
 		if ((bits == 64) && (instr.length >= 2))
 		{
 			bool ignore = false;
@@ -3812,7 +3818,7 @@ void AsmFileTest::TestDisassemble(uint8_t bits)
 // 		}
 
 		// Ensure we both agree on how many bytes the instr is
-		ASSERT_TRUE(bytes == instr.length);
+		ASSERT_TRUE(disasmBytes == instr.length);
 
 		// We treat operands differently...
 		if (SkipOperandsCheck(&instr))
@@ -3855,7 +3861,7 @@ void AsmFileTest::TestDisassemble(uint8_t bits)
 					break;
 				}
 				dest &= ((1ull << bits) - 1);
-				ASSERT_EQ(instr.operands[i].immediate, dest);
+				ASSERT_EQ((uint64_t)instr.operands[i].immediate, dest);
 				ASSERT_EQ(instr.operands[i].size, (bits >> 3));
 			}
 			else
@@ -3863,7 +3869,7 @@ void AsmFileTest::TestDisassemble(uint8_t bits)
 				if (!SkipOperandsSizeCheck(&instr, i))
 					ASSERT_TRUE(instr.operands[i].size == (operand->size >> 3));
 
-				const bool result = CompareOperand(&instr.operands[i], operand);
+				result = CompareOperand(&instr.operands[i], operand);
 				ASSERT_TRUE(result);
 			}
 		}
