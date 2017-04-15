@@ -5,7 +5,7 @@ define libudis86_BINARY_RULES
 $$(libudis86_CONFIG_DIR):
 	mkdir -p $$(libudis86_CONFIG_DIR)
 
-$$(libudis86_TEMP_OUTPUT):
+$$(libudis86_TEMP_OUTPUT): $$(libudis86_CONFIG_DIR)
 	cd $$(libudis86_DIR)udis86 && ./autogen.sh && ./configure --enable-static
 	$$(MAKE) -C $$(libudis86_DIR)/udis86 clean
 	$$(MAKE) -C $$(libudis86_DIR)/udis86 CFLAGS=-fPIC
