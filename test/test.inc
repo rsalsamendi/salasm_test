@@ -678,23 +678,23 @@ SimdModRmRevRow %1, xmm15
 %endmacro ; TestSimdRev
 
 %macro TestMovnt 1
-TestModRmMemory movntps, xmm0
-TestModRmMemory movntps, xmm1
-TestModRmMemory movntps, xmm2
-TestModRmMemory movntps, xmm3
-TestModRmMemory movntps, xmm4
-TestModRmMemory movntps, xmm5
-TestModRmMemory movntps, xmm6
-TestModRmMemory movntps, xmm7
 %if ARCH == 64
-TestModRmMemory movntps, xmm8
-TestModRmMemory movntps, xmm9
-TestModRmMemory movntps, xmm10
-TestModRmMemory movntps, xmm11
-TestModRmMemory movntps, xmm12
-TestModRmMemory movntps, xmm13
-TestModRmMemory movntps, xmm14
-TestModRmMemory movntps, xmm15
+TestModRmMemory %1, xmm0
+TestModRmMemory %1, xmm1
+TestModRmMemory %1, xmm2
+TestModRmMemory %1, xmm3
+TestModRmMemory %1, xmm4
+TestModRmMemory %1, xmm5
+TestModRmMemory %1, xmm6
+TestModRmMemory %1, xmm7
+TestModRmMemory %1, xmm8
+TestModRmMemory %1, xmm9
+TestModRmMemory %1, xmm10
+TestModRmMemory %1, xmm11
+TestModRmMemory %1, xmm12
+TestModRmMemory %1, xmm13
+TestModRmMemory %1, xmm14
+TestModRmMemory %1, xmm15
 %endif ; ARCH == 64
 %endmacro ; TestMovnt
 

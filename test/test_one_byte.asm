@@ -280,10 +280,16 @@ db 0xa8, 0xff, 0xff
 
 stosb
 stosw
+stosd
+stosq
 lodsb
 lodsw
+lodsd
+lodsq
 scasb
 scasw
+scasd
+scasq
 
 ; Row 0xb
 mov al, 0xff

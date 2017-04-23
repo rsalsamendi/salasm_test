@@ -1,5 +1,5 @@
 salsasm_test_HEADERS :=
-salsasm_test_SOURCES := main.cpp
+salsasm_test_SOURCES := main.cpp print.cpp
 
 AS := yasm
 

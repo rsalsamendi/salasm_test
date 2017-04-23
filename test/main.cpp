@@ -1045,6 +1045,7 @@ static bool SkipOperationCheck(X86Operation op1, enum ud_mnemonic_code op2)
 	case X86_NOP:
 		return true;
 	// Not yet implemented by ud86
+	case X86_SWAPGS:
 	case X86_CLAC:
 	case X86_STAC:
 	case X86_XEND:
@@ -3341,6 +3342,7 @@ bool SkipOperandsSizeCheck(const X86Instruction* const instr, size_t operand)
 	case X86_LES:
 	case X86_LDS:
 	case X86_CMPXCHG8B:
+	case X86_CMPXCHG16B:
 	case X86_MOVLPS: // Possibly report to ud86, these are zero size
 	case X86_MOVHPS:
 	case X86_MOVNTPS:
@@ -3847,6 +3849,11 @@ void AsmFileTest::TestDisassemble(uint8_t bits)
 			if (operand->type == UD_OP_JIMM)
 			{
 				const uint64_t tempRip = (instr.rip + instr.length);
+				static const uint64_t masks[] =
+				{
+					0, 0xff, 0xffff, 0, 0xffffffff,
+					0, 0, 0, 0xffffffffffffffff
+				};
 				uint64_t dest;
 				switch (operand->size)
 				{
@@ -3860,7 +3867,7 @@ void AsmFileTest::TestDisassemble(uint8_t bits)
 					dest = (tempRip + operand->lval.sdword);
 					break;
 				}
-				dest &= ((1ull << bits) - 1);
+				dest &= masks[bits >> 3];
 				ASSERT_EQ((uint64_t)instr.operands[i].immediate, dest);
 				ASSERT_EQ(instr.operands[i].size, (bits >> 3));
 			}
@@ -3911,7 +3918,7 @@ static const char* const g_bochsBiosFile = "BIOS-bochs-latest.bin";
 INSTANTIATE_TEST_CASE_P(DisassembleTest, AsmFileTest,
 	Values(g_oneByteFile16, g_twoByteFile16, g_threeByteFile16,
 		g_oneByteFile32, g_twoByteFile32, g_threeByteFile32,
-		g_oneByteFile64, /* g_twoByteFile64, g_threeByteFile64, */
+		g_oneByteFile64, g_twoByteFile64, g_threeByteFile64,
 		g_bochsBiosFile));
 
 #ifndef WIN32
@@ -3939,6 +3946,7 @@ TEST(MnemonicTest, name) \
 	instr.op = X86_ ## name; \
 	GetInstructionString(instrStr, sizeof(instrStr), "%i", &instr); \
 	result = strcmp(mnemonic, instrStr); \
+	free(mnemonic); \
 	ASSERT_EQ(result, 0); \
 } \
 
@@ -4934,6 +4942,7 @@ TEST_MNEMONIC(XTEST);
 	instr.operandCount = 1; \
 	GetInstructionString(instrStr, sizeof(instrStr), "%o", &instr); \
 	result = strcmp(operandTypeName, instrStr); \
+	free(operandTypeName); \
 	ASSERT_EQ(result, 0); \
 } \
 
@@ -4951,6 +4960,7 @@ TEST_MNEMONIC(XTEST);
 	instr.operandCount = 1; \
 	GetInstructionString(instrStr, sizeof(instrStr), "%o", &instr); \
 	result = strcmp(operandTypeName, instrStr); \
+	free(operandTypeName); \
 	ASSERT_EQ(result, 0); \
 } \
 
