@@ -96,6 +96,9 @@ void AsmPrintTest::TestOperands(size_t maxLen)
 	m_instr.operands[1].size = 8;
 	GetInstructionString(instrStr, maxLen, "%o", &m_instr);
 
+	m_instr.operands[0].size = 3;
+	GetInstructionString(instrStr, maxLen, "%o", &m_instr);
+
 	m_instr.operands[0].operandType = X86_MEM;
 	m_instr.operands[1].operandType = X86_MEM;
 	m_instr.operands[1].components[1] = X86_IMMEDIATE;
