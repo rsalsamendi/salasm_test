@@ -287,6 +287,7 @@ TestSimd movapd
 TestSimdRev movapd
 
 TestSimdMmx cvtpi2ps
+TestSimdMmx cvtpi2pd
 
 %macro TestSimdGprRowRev 2
 TestModRmMemoryRev %1, %2
@@ -301,18 +302,17 @@ TestModRmMemoryRev %1, %2
 %endmacro ; TestSimdGprRow
 
 %macro TestSimdGpr 1
-TestSimdGprRowRev movd, xmm0
-TestSimdGprRowRev movd, xmm1
-TestSimdGprRowRev movd, xmm2
-TestSimdGprRowRev movd, xmm3
-TestSimdGprRowRev movd, xmm4
-TestSimdGprRowRev movd, xmm5
-TestSimdGprRowRev movd, xmm6
-TestSimdGprRowRev movd, xmm7
+TestSimdGprRowRev %1, xmm0
+TestSimdGprRowRev %1, xmm1
+TestSimdGprRowRev %1, xmm2
+TestSimdGprRowRev %1, xmm3
+TestSimdGprRowRev %1, xmm4
+TestSimdGprRowRev %1, xmm5
+TestSimdGprRowRev %1, xmm6
+TestSimdGprRowRev %1, xmm7
 %endmacro ; TestSimdGpr
 
 TestSimdGpr cvtsi2ss
-TestSimdGpr cvtpi2pd
 TestSimdGpr cvtsi2sd
 
 TestMovnt movntps

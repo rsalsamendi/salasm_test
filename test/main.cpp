@@ -2972,6 +2972,10 @@ static bool CompareOperation(X86Operation op1, enum ud_mnemonic_code op2)
 		return false;
 	case X86_XBEGIN:
 		return false;
+	case X86_MOVNTSS:
+	case X86_MOVNTSD:
+		// AMD SSE4A
+		return (op2 == UD_Imovntps);
 	default:
 		return false;
 	}
@@ -3314,6 +3318,8 @@ bool SkipOperandsCheck(const X86Instruction* const instr)
 	case X86_PINSRB: // Docs disagree with themselves. Opcode table says r8, actual docs say 1 byte from r32
 	case X86_PINSRW: // ud86 is buggy, says 64bit reg instead of 32bit
 	case X86_RDRAND: // ud86 is buggy, says 32bit instead of 16bit
+	case X86_MOVNTSS: // ud86 doesn't support.
+	case X86_MOVNTSD: // ud86 doesn't support
 		return true;
 	default:
 		return false;
@@ -3446,6 +3452,12 @@ bool SkipOperandsSizeCheck(const X86Instruction* const instr, size_t operand)
 		if (operand == 1)
 			return true;
 		break;
+	case X86_MOVNTDQA:
+		return true;
+	case X86_MOVNTPD:
+		if (operand == 0)
+			return true;
+		break;
 	case X86_MOV:
 		// Loading a segment from memory doesn't do what the docs say.
 		// When this differs from an oracle (except the hw), it's NAB!
@@ -3464,6 +3476,7 @@ bool SkipOperandsSizeCheck(const X86Instruction* const instr, size_t operand)
 		default:
 			break;
 		}
+		break;
 	case X86_UCOMISD:
 		return true;
 	default: break;
@@ -3874,7 +3887,9 @@ void AsmFileTest::TestDisassemble(uint8_t bits)
 			else
 			{
 				if (!SkipOperandsSizeCheck(&instr, i))
-					ASSERT_TRUE(instr.operands[i].size == (operand->size >> 3));
+				{
+					ASSERT_EQ(instr.operands[i].size, (operand->size >> 3));
+				}
 
 				result = CompareOperand(&instr.operands[i], operand);
 				ASSERT_TRUE(result);

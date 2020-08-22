@@ -505,7 +505,108 @@ BITS ARCH
 	%1 [DI + 0xffff], %2
 	%1 [BP + 0xffff], %2
 	%1 [BX + 0xffff], %2
-%endif
+%endif ; ARCH <> 64
+%if ARCH <> 16
+	; Test ModRM Mod==0
+	%1 [EAX], %2
+	%1 [ECX], %2
+	%1 [EDX], %2
+	%1 [EBX], %2
+
+	; SIB
+	%1 [0xffffffff], %2
+
+	%1 [ESI], %2
+	%1 [EDI], %2
+
+	; Test ModRM Mod==1
+	%1 [EAX+0xff], %2
+	%1 [ECX+0xff], %2
+	%1 [EDX+0xff], %2
+	%1 [EBX+0xff], %2
+
+	; SIB
+	%1 [EBP+0xff], %2
+
+	%1 [ESI+0xff], %2
+	%1 [EDI+0xff], %2
+
+	; Test ModRM Mod==2
+	%1 [EAX+0xffffffff], %2
+	%1 [ECX+0xffffffff], %2
+	%1 [EDX+0xffffffff], %2
+	%1 [EBX+0xffffffff], %2
+
+	; SIB
+	%1 [EBP+0xffffffff], %2
+
+	%1 [ESI+0xffffffff], %2
+	%1 [EDI+0xffffffff], %2
+%endif ; ARCH <> 16
+%if ARCH == 64
+	; Test ModRM Mod==0
+	%1 [RAX], %2
+	%1 [RCX], %2
+	%1 [RDX], %2
+	%1 [RBX], %2
+
+	; SIB
+	%1 [RIP+0xffffffff], %2
+
+	%1 [RSI], %2
+	%1 [RDI], %2
+
+	%1 [R8], %2
+	%1 [R9], %2
+	%1 [R10], %2
+	%1 [R11], %2
+	%1 [R12], %2
+	%1 [R13], %2
+	%1 [R14], %2
+	%1 [R15], %2
+
+	; Test ModRM Mod==1
+	%1 [RAX+0xff], %2
+	%1 [RCX+0xff], %2
+	%1 [RDX+0xff], %2
+	%1 [RBX+0xff], %2
+
+	; SIB
+	%1 [RBP+0xff], %2
+
+	%1 [RSI+0xff], %2
+	%1 [RDI+0xff], %2
+
+	%1 [R8+0xff], %2
+	%1 [R9+0xff], %2
+	%1 [R10+0xff], %2
+	%1 [R11+0xff], %2
+	%1 [R12+0xff], %2
+	%1 [R13+0xff], %2
+	%1 [R14+0xff], %2
+	%1 [R15+0xff], %2
+
+	; Test ModRM Mod==2
+	%1 [RAX+0xffffffff], %2
+	%1 [RCX+0xffffffff], %2
+	%1 [RDX+0xffffffff], %2
+	%1 [RBX+0xffffffff], %2
+
+	; SIB
+	%1 [RBP+0xffffffff], %2
+
+	%1 [RSI+0xffffffff], %2
+	%1 [RDI+0xffffffff], %2
+
+	%1 [R8+0xffffffff], %2
+	%1 [R9+0xffffffff], %2
+	%1 [R10+0xffffffff], %2
+	%1 [R11+0xffffffff], %2
+	%1 [R12+0xffffffff], %2
+	%1 [R13+0xffffffff], %2
+	%1 [R14+0xffffffff], %2
+	%1 [R15+0xffffffff], %2
+%endif ; ARCH == 64
 %endmacro ; TestModRmMemory
 
 %macro TestMmxRow 2
@@ -603,14 +704,16 @@ MmxModRmRevRow %1, mm7
 %1 %2, xmm5
 %1 %2, xmm6
 %1 %2, xmm7
-; %1 %2, xmm8
-; %1 %2, xmm9
-; %1 %2, xmm10
-; %1 %2, xmm11
-; %1 %2, xmm12
-; %1 %2, xmm13
-; %1 %2, xmm14
-; %1 %2, xmm15
+%if ARCH == 64
+%1 %2, xmm8
+%1 %2, xmm9
+%1 %2, xmm10
+%1 %2, xmm11
+%1 %2, xmm12
+%1 %2, xmm13
+%1 %2, xmm14
+%1 %2, xmm15
+%endif
 %endmacro ; SimdModRmRow
 
 %macro TestSimd 1

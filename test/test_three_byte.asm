@@ -63,7 +63,26 @@ TestSimdRev pmovsxwq
 TestSimdRev pmovsxdq
 TestSimdRev pmuldq
 TestSimdRev pcmpeqq
-TestMovnt movntdqa
+
+TestModRmMemoryRev movntdqa, xmm0
+TestModRmMemoryRev movntdqa, xmm1
+TestModRmMemoryRev movntdqa, xmm2
+TestModRmMemoryRev movntdqa, xmm3
+TestModRmMemoryRev movntdqa, xmm4
+TestModRmMemoryRev movntdqa, xmm5
+TestModRmMemoryRev movntdqa, xmm6
+TestModRmMemoryRev movntdqa, xmm7
+%if ARCH==64
+TestModRmMemoryRev movntdqa, xmm8
+TestModRmMemoryRev movntdqa, xmm9
+TestModRmMemoryRev movntdqa, xmm10
+TestModRmMemoryRev movntdqa, xmm11
+TestModRmMemoryRev movntdqa, xmm12
+TestModRmMemoryRev movntdqa, xmm13
+TestModRmMemoryRev movntdqa, xmm14
+TestModRmMemoryRev movntdqa, xmm15
+%endif
+
 TestSimdRev packusdw
 
 ; Row 3
